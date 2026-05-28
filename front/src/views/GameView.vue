@@ -50,7 +50,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue';
 
-import { onBeforeRouteLeave, useRoute } from 'vue-router';
+import { useRoute } from 'vue-router';
 
 import { GameStatusEnum, type Game, type GamePublicState, type PlayerPrivateState, type Player, type GameAction, type GameSettings, createDeepProxy } from 'back-common';
 import { useLocalStore } from '../services/localStore';
@@ -62,7 +62,6 @@ import GameClient from '../services/gameClient';
 import type { GameFrontService } from 'front-common';
 import { getGameSerivce } from '../services/gameServiceSelector';
 import { useOruga } from '@oruga-ui/oruga-next';
-import { wsService } from '../services/wsService';
 
 const oruga = useOruga();
 
