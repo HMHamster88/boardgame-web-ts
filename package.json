@@ -1,0 +1,22 @@
+{
+  "name": "boardgame-web-ts",
+  "version": "1.0.0",
+  "description": "Web based boardgame engine",
+  "homepage": "https://github.com/HMHamster88/boardgame-web-ts#readme",
+  "bugs": {
+    "url": "https://github.com/HMHamster88/boardgame-web-ts/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/HMHamster88/boardgame-web-ts.git"
+  },
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "install-all": "npm install --prefix ./common/back-common && npm install --prefix ./common/front-common && npm install --prefix ./back && npm install --prefix ./front && npm install --prefix ./games/catan/catan-back && npm install --prefix ./games/catan/catan-front",
+    "build-all": "npm run build --prefix ./common/back-common && npm run build --prefix ./common/front-common && npm run build --prefix ./games/catan/catan-back && npm run build --prefix ./games/catan/catan-front && npm run build --prefix ./front && npm run build:bundle --prefix ./back",
+    "start": "npm run start --prefix ./back"
+  }
+}

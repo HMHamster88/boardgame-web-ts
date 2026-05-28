@@ -1,74 +1,71 @@
-import { WebSocketServer, WebSocket } from 'ws'
-import { IncomingMessage, Server } from 'node:http'
+import { WebSocketServer, WebSocket } from 'ws';
+import { IncomingMessage, Server } from 'node:http';
 import {
     AllGamesResponse,
     ConnectToGameMessage,
     CreateGameRequest,
     DeleteGameRequest,
     Game,
-    GameBackModule,
     GameStatusEnum,
     GameType,
     GetAllGamesRequest,
     handleMessage,
-    HandshakeRequest,
     HandshakeResponse,
     MesasgeHandlers,
     removeElement,
     TypedMessage,
     UpdateUserRequest,
     User
-} from 'back-common'
-import { db } from './db/db'
-import { v4 as uuidv4 } from 'uuid'
-import { getAllGameServices, loadServices } from './gameServiceSelector'
-import { GameSession } from './gameSession'
+} from 'back-common';
+import { db } from './db/db';
+import { v4 as uuidv4 } from 'uuid';
+import { getAllGameServices, loadServices } from './gameServiceSelector';
+import { GameSession } from './gameSession';
 
+const connections: WsConnection[] = [];
 
-const connections: WsConnection[] = []
-
-const gameSessions = new Map<string, GameSession>()
+const gameSessions = new Map<string, GameSession>();
 
 function getGameSession(gameId: string): GameSession {
-    let session = gameSessions.get(gameId)
+    let session = gameSessions.get(gameId);
     if (session) {
-        return session
+        return session;
     }
-    const game = db.getGame(gameId)!
-    session = new GameSession(game)
-    gameSessions.set(gameId, session)
-    return session
+    const game = db.getGame(gameId)!;
+    session = new GameSession(game);
+    gameSessions.set(gameId, session);
+    return session;
 }
 
 export class WsConnection {
-    webSocket: WebSocket
-    userId: string
-    user: User | undefined
-    game: Game | undefined
+    webSocket: WebSocket;
+    userId: string;
+    user: User | undefined;
+    game: Game | undefined;
 
     id() {
-        return this.userId
+        return this.userId;
     }
 
     constructor(webSocket: WebSocket, userId: string) {
-        this.webSocket = webSocket
-        this.userId = userId
+        this.webSocket = webSocket;
+        this.userId = userId;
         type messageTypes =
-            GetAllGamesRequest |
-            CreateGameRequest |
-            UpdateUserRequest |
-            ConnectToGameMessage |
-            DeleteGameRequest
+            | GetAllGamesRequest
+            | CreateGameRequest
+            | UpdateUserRequest
+            | ConnectToGameMessage
+            | DeleteGameRequest;
 
         const handlers: MesasgeHandlers<messageTypes> = {
             DeleteGameRequest: async (message: DeleteGameRequest) => {
-                db.deleteGameAll(message.gameId)
+                db.deleteGameAll(message.gameId);
             },
-            GetAllGamesRequest: async (message: GetAllGamesRequest) => {
+            GetAllGamesRequest: async () => {
                 this.send<AllGamesResponse>({
                     type: 'AllGamesResponse',
                     games: db.getAllGames()
-                })
+                });
             },
             CreateGameRequest: async (message: CreateGameRequest) => {
                 const newGame: Game = {
@@ -79,81 +76,86 @@ export class WsConnection {
                     players: [],
                     status: GameStatusEnum.CREATED,
                     created: new Date()
-                }
-                db.addGame(newGame)
+                };
+                db.addGame(newGame);
             },
             UpdateUserRequest: async (message: UpdateUserRequest) => {
-                db.updateUser(message.user)
+                db.updateUser(message.user);
             },
             ConnectToGameMessage: async (message: ConnectToGameMessage) => {
-                this.game = db.getGame(message.gameId)
+                this.game = db.getGame(message.gameId);
                 if (!this.game) {
-                    return
+                    return;
                 }
-                const session = getGameSession(message.gameId)
-                session.addConnection(this)
+                const session = getGameSession(message.gameId);
+                session.addConnection(this);
             }
-        }
+        };
         webSocket.on('message', (messageString: string) => {
             console.log(`Received: ${messageString} from ${this.id()}`);
-            const message = JSON.parse(messageString) as TypedMessage
-            handleMessage(handlers, message)
+            const message = JSON.parse(messageString) as TypedMessage;
+            handleMessage(handlers, message);
         });
     }
 
     async init() {
-        this.user = db.getUser(this.userId)
+        this.user = db.getUser(this.userId);
         if (!this.user) {
             this.user = await db.addUser({
                 id: this.userId,
                 name: 'User-' + this.userId,
                 color: '#FF0000'
-            })
+            });
         }
-        const gameTypes = getAllGameServices().map(service => {
+        const gameTypes = getAllGameServices().map((service) => {
             return {
                 type: service.type,
                 localizedName: service.localizedName
-            } as GameType
-        })
+            } as GameType;
+        });
         this.send<HandshakeResponse>({
             type: 'HandshakeResponse',
             user: this.user!,
             gameTypes: gameTypes
-        })
+        });
     }
 
     sendString(message: string) {
-        this.webSocket.send(message)
+        this.webSocket.send(message);
     }
 
     send<T extends TypedMessage>(message: T) {
-        this.webSocket.send(JSON.stringify(message))
+        this.webSocket.send(JSON.stringify(message));
     }
 }
 
 export async function startWs(server: Server) {
-    db.init()
-    await loadServices()
+    db.init();
+    await loadServices();
 
-    console.log('game services loaded: ' + getAllGameServices().map(service => service.type).join(', '))
+    console.log(
+        'game services loaded: ' +
+            getAllGameServices()
+                .map((service) => service.type)
+                .join(', ')
+    );
 
     const wss = new WebSocketServer({ server });
 
     wss.on('connection', (ws: WebSocket, request: IncomingMessage) => {
         const queryString = request.url?.split('?')[1];
         const params = new URLSearchParams(queryString);
-        const userId = params.get('userId')!
+        const userId = params.get('userId')!;
 
-        const connection = new WsConnection(ws, userId)
-        connection.init()
+        const connection = new WsConnection(ws, userId);
+        connection.init();
 
-        console.log('Clients count: ', wss.clients.size)
+        console.log('Clients count: ', wss.clients.size);
 
         ws.on('close', () => {
-            const connection = connections.find(conn => conn.webSocket == ws)
-            removeElement(connections, connection)
-            console.log('Client disconnected')
+            const connection = connections.find((conn) => conn.webSocket == ws);
+            removeElement(connections, connection);
+            console.log('Client disconnected');
         });
     });
 }

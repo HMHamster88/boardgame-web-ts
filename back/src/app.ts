@@ -29,13 +29,10 @@ const server = app.listen(port, () => {
     console.log(`Static server is running on port ${port}`);
 });
 
-startWs(server)
+startWs(server);
 
-Object.values(os.networkInterfaces()).forEach(interfaces => {
-    interfaces?.forEach(int => {
-        console.log(`http://${int.address}:${port}`)
-    })
+Object.values(os.networkInterfaces()).forEach((interfaces) => {
+    interfaces?.forEach((int) => {
+        console.log(`http://${int.address}:${port}`);
+    });
 });
-
-
-

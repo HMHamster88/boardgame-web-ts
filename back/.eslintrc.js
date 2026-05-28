@@ -26,6 +26,7 @@ module.exports = {
     },
     plugins: ['@typescript-eslint', 'prettier'],
     rules: {
+        "@typescript-eslint/no-non-null-asserted-optional-chain": "off",
         // Prettier-specific rules
         'prettier/prettier': [
             'error',
