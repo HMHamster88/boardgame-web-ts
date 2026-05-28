@@ -1,0 +1,39 @@
+{
+  "name": "boardgame-web-ts-front",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host",
+    "build": "vue-tsc -b && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@chenfengyuan/vue-qrcode": "^2.0.0",
+    "@mdi/font": "^7.4.47",
+    "@oruga-ui/oruga-next": "^0.13.5",
+    "@oruga-ui/theme-oruga": "^0.9.1",
+    "@types/lodash": "^4.17.24",
+    "back-common": "file:../common/back-common",
+    "catan-back": "file:../games/catan/catan-back",
+    "catan-front": "file:../games/catan/catan-front",
+    "front-common": "file:../common/front-common",
+    "lodash": "^4.18.1",
+    "pinia": "^3.0.4",
+    "pinia-plugin-persistedstate": "^4.7.1",
+    "sanitize-filename": "^1.6.4",
+    "uuid": "^14.0.0",
+    "vue": "^3.5.34",
+    "vue-i18n": "^11.4.4",
+    "vue-router": "^5.0.7",
+    "websocket-ts": "^2.3.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.12.3",
+    "@vitejs/plugin-vue": "^6.0.6",
+    "@vue/tsconfig": "^0.9.1",
+    "typescript": "~6.0.2",
+    "vite": "^8.0.12",
+    "vue-tsc": "^3.2.8"
+  }
+}
