@@ -1,5 +1,5 @@
-import { findByCoordsArray, GameStatusEnum, getEdgeNeighborhoodsPositions, getHexEdgesPositions, getHexVerticesPositions, getShuffledArray, getVertexHexesPositions, handleMessage, isOutEdge, randomEnumVal, rangeArray, recordAsArray, recordEntries, removeCopmarableElements, removeElement, Vector2D, type Game, type GameAction, type GameBackService, type GameContext, type GameSettings, type GameState, type MesasgeHandlers } from "boardgame-web-common/back";
-import { CatanBuyItemType, CatanDevelopmentCardType, CatanDiceValue, CatanGamePhase, CatanIntersectionObjectType, CatanResourceType, CatanSpecialCard, CatanTradeType, developmentCardPoints, developmentCardSaves, developmentCardsCount, getBuyItems, initResources, intersectionObjectRoBuyItem, type CatanField, type CatanGameSettings, type CatanHarbour, type CatanIntersection, type CatanPlayerPrivateState, type CatanPlayerPublicState, type CatanPrivateGameState, type CatanPublicGameState, type CatanResources, type CatanRoad, type CatanTerrainHex } from "./types/types";
+import { findByCoordsArray, GameStatusEnum, getEdgeNeighborhoodsPositions, getHexEdgesPositions, getHexNeighborhoodsPositions, getHexVerticesPositions, getShuffledArray, getVertexHexesPositions, handleMessage, isOutEdge, randomEnumVal, rangeArray, recordAsArray, recordEntries, removeCopmarableElements, removeElement, Vector2D, type Game, type GameAction, type GameBackService, type GameContext, type GameSettings, type GameState, type MesasgeHandlers } from "boardgame-web-common/back";
+import { CatanBuyItemType, CatanDevelopmentCardType, CatanDiceValue, CatanGamePhase, CatanIntersectionObjectType, CatanResourceType, CatanSpecialCard, CatanTradeType, developmentCardPoints, developmentCardSaves, developmentCardsCount, getBuyItems, initResources, intersectionObjectRoBuyItem, type CatanField, type CatanFieldGenerationSettings, type CatanGameSettings, type CatanHarbour, type CatanIntersection, type CatanPlayerPrivateState, type CatanPlayerPublicState, type CatanPrivateGameState, type CatanPublicGameState, type CatanResources, type CatanRoad, type CatanTerrainHex } from "./types/types";
 import { CatanGameFieldType } from "./types/catanGameFieldType";
 import { CatanTerrainHexType } from "./types/catanTerrainHexType";
 import _ from "lodash";
@@ -86,18 +86,32 @@ export class CatanGameBackService implements GameBackService {
     gameStaticSettings = CatanStaticSettings
 
     getDefaultSettings(): GameSettings {
+        const fieldGenerationSettings: CatanFieldGenerationSettings = {
+            fieldType: CatanGameFieldType.CLASSIC,
+            spreadHexTypes: true,
+            spreadCircularNumbers: true,
+        }
         const settings: CatanGameSettings = {
             id: '',
-            fieldType: CatanGameFieldType.CLASSIC,
-            field: this.generateField(CatanGameFieldType.CLASSIC),
+            fieldGenerationSettings: fieldGenerationSettings,
+            field: this.generateField(fieldGenerationSettings),
             maxPoints: 10
         }
         return settings
     }
 
-    generateField(fieldType: CatanGameFieldType): CatanField {
-        console.log("fieldType", fieldType)
-        const props = CatanGameFieldType.props[fieldType]
+    getAndRemoveFirstNotInArray<T>(source: T[], findArray: T[], comparator: ((a: T, b: T) => boolean)) {
+        let index = source.findIndex(el => findArray.find((fel: T) => comparator(el, fel)) == undefined)
+        if (index <= 0) {
+            index = 0
+        }
+        const result = source[index]
+        source.splice(index, 1)
+        return result
+    }
+
+    generateField(settings: CatanFieldGenerationSettings): CatanField {
+        const props = CatanGameFieldType.props[settings.fieldType]
         const terrainHexTypes = getShuffledArray(recordAsArray(props.terrainsCount).flatMap(([key, value]) => {
             return rangeArray(value).map(() => key)
         }))
@@ -117,9 +131,16 @@ export class CatanGameBackService implements GameBackService {
             const rowWidth = width - Math.abs(halfHeight - y - 1)
             const shift = y < halfHeight ? y : halfHeight - 1
             for (let x = 0; x < rowWidth; x++) {
-                const hexType = terrainHexTypes.pop()!
-                const circularNumber = hexType == CatanTerrainHexType.DESERT ? 0 : circularNumbers.pop()!
                 const postion = new Vector2D(x - shift, y).multiplied(6)
+                const nPositions = getHexNeighborhoodsPositions(postion)
+                const nebourghouds = findByCoordsArray(nPositions, hexes)
+                const nebourghoudsCircularNumbers = nebourghouds.map(n => n.circularNumber)
+                const nebourghoudsHexTypes = nebourghouds.map(n => n.type)
+
+                const hexType = settings.spreadHexTypes ? this.getAndRemoveFirstNotInArray(terrainHexTypes, nebourghoudsHexTypes, (a, b) => a == b) : terrainHexTypes.pop()!
+                const circularNumber = hexType == CatanTerrainHexType.DESERT ? 0 :
+                    (settings.spreadCircularNumbers ? this.getAndRemoveFirstNotInArray(circularNumbers, nebourghoudsCircularNumbers, (a, b) => a == b) : circularNumbers.pop()!)
+
                 const terrainHex: CatanTerrainHex = {
                     position: postion,
                     type: hexType,
@@ -171,7 +192,7 @@ export class CatanGameBackService implements GameBackService {
         const settings = gameContext.gameSettings as CatanGameSettings
         const isSettingsAction = await handleMessage<CatanGenerateFieldAction>({
             CatanGenerateFieldAction: () => {
-                settings.field = this.generateField(settings.fieldType)
+                settings.field = this.generateField(settings.fieldGenerationSettings)
             }
         }, gameAction)
 

@@ -148,8 +148,14 @@ export interface CatanField {
     robberPos: Vector2DLike
 }
 
+export interface CatanFieldGenerationSettings {
+    fieldType: CatanGameFieldType,
+    spreadHexTypes: boolean,
+    spreadCircularNumbers: boolean
+}
+
 export interface CatanGameSettings extends GameSettings {
-    fieldType: CatanGameFieldType
+    fieldGenerationSettings: CatanFieldGenerationSettings
     field: CatanField
     maxPoints: number
 }

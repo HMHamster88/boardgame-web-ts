@@ -1,9 +1,19 @@
 <template>
     <div>
         <div class="settings-header">
-            <o-button v-on:click="generateGameField">{{ t('generateField') }}</o-button>
-            <label for="type" class="font-semibold">{{ t('fieldType') }}</label>
-            <o-select id="type" v-model="settings.fieldType" :options="fieldTypes" />
+            <o-field :label="t('fieldType')">
+                <o-select id="type" v-model="settings.fieldGenerationSettings.fieldType" :options="fieldTypes" />
+            </o-field>
+            <o-field>
+                <o-switch :label="t('spreadCircularNumbers')"
+                    v-model="settings.fieldGenerationSettings.spreadCircularNumbers" />
+            </o-field>
+            <o-field>
+                <o-switch :label="t('spreadHexTypes')" v-model="settings.fieldGenerationSettings.spreadHexTypes" />
+            </o-field>
+            <o-field>
+                <o-button v-on:click="generateGameField">{{ t('generateField') }}</o-button>
+            </o-field>
         </div>
         <CatanHexGrid :field="settings.field"></CatanHexGrid>
     </div>
@@ -11,7 +21,7 @@
 
 <script setup lang="ts">
 
-import { OButton, OSelect } from '@oruga-ui/oruga-next';
+import { OButton, OSelect, OSwitch, OField } from '@oruga-ui/oruga-next';
 
 import { type PropType } from 'vue';
 import CatanHexGrid from './CatanHexGrid.vue';
@@ -30,7 +40,9 @@ const { t } = useI18n({
                 EXTENDED: 'Extended'
             },
             fieldType: 'Field Type:',
-            generateField: 'Generate Field'
+            generateField: 'Generate Field',
+            spreadHexTypes: 'Spread hex types',
+            spreadCircularNumbers: 'Spread Circular Numbers'
         },
         ru: {
             fieldTypes: {
@@ -38,7 +50,9 @@ const { t } = useI18n({
                 EXTENDED: 'Расширенный'
             },
             fieldType: 'Тип Поля:',
-            generateField: 'Сгенерировать поле'
+            generateField: 'Сгенерировать поле',
+            spreadHexTypes: 'Распределить типы гексов',
+            spreadCircularNumbers: 'Распределить номера'
         }
     }
 })
@@ -74,7 +88,7 @@ const emit = defineEmits<{
 <style>
 .settings-header {
     display: flex;
+    flex-direction: column;
     gap: 0.5rem;
-    align-items: center;
 }
 </style>
