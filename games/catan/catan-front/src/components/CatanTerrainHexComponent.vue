@@ -1,6 +1,6 @@
 <template>
     <g :transform="transform" @click="emit('click', data)">
-        <polygon :points="hexagonString(size)" :fill="`url(#${data.type})`" class="hex">
+        <polygon :points="hexagonString(size)" :fill="`url(#${data.type})`">
         </polygon>
         <polygon :points="hexagonString(size)" v-if="allDiceValue == data.circularNumber && allDiceValue != 0"
             :r="size / 2" class="circle-highlight"></polygon>
@@ -73,11 +73,5 @@ const emit = defineEmits({
 
 .circle-highlight {
     fill: rgba(84, 253, 0, 0.349);
-}
-
-.hex {}
-
-.hex:hover {
-    filter: hue-rotate(45deg);
 }
 </style>

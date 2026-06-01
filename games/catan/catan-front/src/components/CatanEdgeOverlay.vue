@@ -43,8 +43,4 @@ const emit = defineEmits({
     transition: fill 0.1s ease-in-out, color 0.1s ease-in-out;
     cursor: pointer;
 }
-
-.road-highlight:hover {
-    fill: #51ff008b;
-}
 </style>
