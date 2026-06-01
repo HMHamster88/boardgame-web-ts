@@ -91,10 +91,17 @@ export class WsConnection {
                 session.addConnection(this);
             }
         };
-        webSocket.on('message', (messageString: string) => {
+        let actionBlocker = false
+        webSocket.on('message', async (messageString: string) => {
             console.log(`Received: ${messageString} from ${this.id()}`);
-            const message = JSON.parse(messageString) as TypedMessage;
-            handleMessage(handlers, message);
+            if (!actionBlocker) {
+                actionBlocker = true
+                const message = JSON.parse(messageString) as TypedMessage;
+                await handleMessage(handlers, message);
+                actionBlocker = false
+            } else {
+                console.log('Message blocked')
+            }
         });
     }
 

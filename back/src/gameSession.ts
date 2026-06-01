@@ -43,6 +43,7 @@ export class GameSession implements Connection {
     connections: Map<string, WsConnection>;
     dataListeners: DataMessageListener[] = [];
     gameService: GameBackService;
+    actionBlocker: boolean = false
 
     constructor(game: Game) {
         console.log('Game session started', game.id);
@@ -176,7 +177,12 @@ export class GameSession implements Connection {
                 this.gameSync.sendUpdate(`players[${playerIndex}].online`);
             }
         }
-        connection.webSocket.on('message', (messageString: string) => {
+        connection.webSocket.on('message', async (messageString: string) => {
+            if (this.actionBlocker) {
+                console.log('Action blocked')
+                return
+            }
+            this.actionBlocker = true
             this.dataListeners.forEach((listener) => {
                 listener(connection.id(), messageString);
             });
@@ -323,7 +329,7 @@ export class GameSession implements Connection {
                 }
             };
 
-            handleMessage(handlers, message);
+            await handleMessage(handlers, message);
 
             this.gameSync.sendPropChanges(gameChanges);
             this.gameSettingsSync.sendPropChanges(gameSettingsChanges);
@@ -335,6 +341,7 @@ export class GameSession implements Connection {
             if (this.gameSettingsSync.updateSended || gameSettingsChanges.length > 0) {
                 db.updateGameSettings(this.gameSettings);
             }
+            this.actionBlocker = false;
         });
         connection.webSocket.on('close', () => {
             this.connections.delete(connection.id());
