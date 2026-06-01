@@ -278,7 +278,7 @@ export class CatanGameBackService implements GameBackService {
                         const maxPlayerResources = this.maxPlayerResources(player)
 
                         if (allResourcesCount > maxPlayerResources) {
-                            const discardCardsCount = Math.ceil(allResourcesCount / 2)
+                            const discardCardsCount = Math.floor(allResourcesCount / 2)
                             player.discardCardsCount = discardCardsCount
                             anyoneHasResourceExcess = true
                         }
