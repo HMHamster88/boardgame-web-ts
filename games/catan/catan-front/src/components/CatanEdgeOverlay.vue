@@ -7,8 +7,8 @@
 
 <script setup lang="ts">
 import { computed, type PropType } from 'vue';
-import { getEdgeAnge, pointyHexToPixel } from 'back-common';
-import { Vector2D } from 'back-common';
+import { getEdgeAnge, pointyHexToPixel } from 'boardgame-web-common';
+import { Vector2D } from 'boardgame-web-common';
 
 const position = computed(() => {
     return pointyHexToPixel(props.data, props.hexSize).multiplied(1 / 6)

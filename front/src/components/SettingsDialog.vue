@@ -26,7 +26,7 @@ import { computed, ref } from 'vue';
 import { type Settings, useLocalStore } from '../services/localStore'
 import { useI18n } from 'vue-i18n'
 import _ from 'lodash';
-import type { User } from 'back-common';
+import type { User } from 'boardgame-web-common';
 import { wsService } from '../services/wsService';
 
 const showDialog = ref(false)

@@ -16,9 +16,9 @@ import {
     type PeerFilter,
     type ConnectToGameMessage,
     type GameSettings
-} from "back-common";
+} from "boardgame-web-common/back";
 
-import { wsService } from "./wsService";
+import { wsService } from "./wsService.ts";
 import { Websocket, WebsocketEvent } from "websocket-ts";
 
 

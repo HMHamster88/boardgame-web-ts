@@ -1,18 +1,52 @@
-/// <reference types="vitest/config" />
-import vue from '@vitejs/plugin-vue'
-import { playwright } from '@vitest/browser-playwright'
 import { defineConfig } from 'vite'
+import vue from '@vitejs/plugin-vue'
+import federation from "@originjs/vite-plugin-federation";
 
+// https://vite.dev/config/
 export default defineConfig({
-  root: './playground',
-  plugins: [vue()],
-  test: {
-    root: '.',
-    browser: {
-      enabled: true,
-      provider: playwright(),
-      instances: [{ browser: 'chromium' }],
-      headless: true,
-    },
+  plugins: [
+    vue(),
+    federation({
+      name: 'catan',
+      filename: 'remoteEntry.js',
+      exposes: {
+        './front': './src/index.ts',
+      },
+      remoteType: 'commonjs-module',
+      shared: {
+        'vue': {
+          generate: false,
+          requiredVersion: "^3.5.34"
+        },
+        'boardgame-web-common': {
+          generate: false
+        },
+        'catan-back': {
+
+        },
+        lodash: {
+          generate: false
+        },
+        '@oruga-ui/oruga-next': {
+          generate: false
+        }
+      }
+    })
+  ],
+  experimental: {
+    renderBuiltUrl(filename, { type }) {
+      if (type === 'asset' && filename.endsWith('.webp')) {
+        console.log('filename', filename)
+
+        return { runtime: `new URL('${filename.replace(/^assets\//, "")}', import.meta.url).href` };
+      }
+      return { relative: true };
+    }
   },
+  build: {
+    target: 'esnext',
+    minify: false,
+    outDir: '../../../back/public/games-modules/catan/front',
+    emptyOutDir: true,
+  }
 })

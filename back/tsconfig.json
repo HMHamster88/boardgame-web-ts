@@ -1,26 +1,41 @@
 {
+  // Visit https://aka.ms/tsconfig to read more about this file
   "compilerOptions": {
-    "target": "esnext", /* Node.js supports modern ECMAScript features */
-    "module": "nodenext", /* Use CommonJS module system for Node.js */
-    "lib": [
-      "ESNext"
-    ], /* Include ES2018 library definitions */
-    "rootDir": "src", /* Specify the root folder within your source files */
-    "outDir": "dist", /* Specify an output folder for all emitted files */
-    "esModuleInterop": true, /* Emit additional JavaScript to ease support for importing CommonJS modules */
-    "resolveJsonModule": true, /* Enable importing .json files directly */
-    "strict": true, /* Enable all strict type-checking options */
-    "noImplicitAny": true, /* Enable error reporting for expressions and declarations with an implied 'any' type */
-    "strictNullChecks": true, /* When type checking, take into account 'null' and 'undefined' */
-    "strictFunctionTypes": true, /* When assigning functions, check to ensure parameters and the return values are subtype-compatible */
-    "strictBindCallApply": true, /* Check that the arguments for 'bind', 'call', and 'apply' methods match the original function */
-    "noImplicitThis": true, /* Enable error reporting when 'this' is given the type 'any' */
-    "skipLibCheck": true /* Skip type checking all .d.ts files */
-  },
-  "include": [
-    "src/**/*.ts"
-  ], /* Specify the files to include in the compilation */
-  "exclude": [
-    "node_modules"
-  ] /* Specify the files to exclude from the compilation */
+    // File Layout
+    // "rootDir": "./src",
+    // "outDir": "./dist",
+    // Environment Settings
+    // See also https://aka.ms/tsconfig/module
+    "module": "nodenext",
+    "target": "esnext",
+    "noEmit": true,
+    "allowImportingTsExtensions": true,
+    "types": [],
+    // For nodejs:
+    // "lib": ["esnext"],
+    // "types": ["node"],
+    // and npm install -D @types/node
+    // Other Outputs
+    "sourceMap": true,
+    "declaration": true,
+    "declarationMap": true,
+    // Stricter Typechecking Options
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+    // Style Options
+    // "noImplicitReturns": true,
+    // "noImplicitOverride": true,
+    // "noUnusedLocals": true,
+    // "noUnusedParameters": true,
+    // "noFallthroughCasesInSwitch": true,
+    // "noPropertyAccessFromIndexSignature": true,
+    // Recommended Options
+    "strict": true,
+    "jsx": "react-jsx",
+    "verbatimModuleSyntax": true,
+    "isolatedModules": true,
+    "noUncheckedSideEffectImports": true,
+    "moduleDetection": "force",
+    "skipLibCheck": true,
+  }
 }

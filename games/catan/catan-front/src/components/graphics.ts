@@ -21,7 +21,7 @@ import wheatCardImg from '../assets/resource-cards/wheat.webp'
 import woodCardImg from '../assets/resource-cards/wood.webp'
 
 import { CatanTerrainHexType } from "catan-back"
-import { CatanDevelopmentCardType, CatanHarbourType, CatanIntersectionObjectType, CatanResourceType, CatanSpecialCard } from 'catan-back'
+import { CatanDevelopmentCardType, CatanHarbourType, CatanResourceType, CatanSpecialCard } from 'catan-back'
 
 export const portImage = portImg
 export const robberImage = robberImg

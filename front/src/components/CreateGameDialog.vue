@@ -17,7 +17,7 @@
 
 <script setup lang="ts">
 import { ref, watch } from 'vue';
-import { type CreateGameProps } from 'back-common';
+import { type CreateGameProps } from 'boardgame-web-common/back';
 import { useLocalStore, useMemoryLocalStore } from '../services/localStore'
 import { useI18n } from 'vue-i18n';
 import _ from 'lodash';

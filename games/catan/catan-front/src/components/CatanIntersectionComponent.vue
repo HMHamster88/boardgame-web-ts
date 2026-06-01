@@ -14,8 +14,8 @@
 <script setup lang="ts">
 import { computed, type PropType } from 'vue';
 
-import type { Player } from 'back-common';
-import { pointyHexToPixel } from 'back-common';
+import type { Player } from 'boardgame-web-common';
+import { pointyHexToPixel } from 'boardgame-web-common';
 import { CatanIntersectionObjectType, type CatanIntersection, type CatanIntersectionObject } from 'catan-back';
 import Settlement from './Settlement.vue';
 import City from './City.vue';

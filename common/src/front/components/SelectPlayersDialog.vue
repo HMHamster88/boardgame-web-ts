@@ -7,8 +7,7 @@
         </div>
         <div class="flex justify-end gap-2">
             <o-button type="button" :label="$t('cancel')" severity="secondary" @click="close(false)"></o-button>
-            <o-button type="button" :label="$t('ok')" @click="close(true)"
-                :disabled="selectedPlayes.length == 0"></o-button>
+            <o-button type="button" :label="$t('ok')" @click="close(true)" :disabled="!selectedPlayes"></o-button>
         </div>
     </o-dialog>
 </template>
@@ -18,7 +17,7 @@ import { ODialog, OButton, OListbox, type ListboxOptions } from '@oruga-ui/oruga
 
 import { useI18n } from 'vue-i18n';
 import _ from 'lodash';
-import type { Player } from 'back-common';
+import type { Player } from "../../back/dto";
 import { ref } from 'vue';
 
 let localization: any = {

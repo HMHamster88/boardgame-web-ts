@@ -3,7 +3,7 @@ import App from './App.vue'
 
 import { createPinia } from 'pinia'
 import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
-import VueQrcode from '@chenfengyuan/vue-qrcode';
+//import VueQrcode from '@chenfengyuan/vue-qrcode';
 import { createI18n } from 'vue-i18n'
 import router from './router'
 import { localizationMessages } from './localizationMessages';
@@ -52,7 +52,7 @@ const i18n = createI18n({
     }
 })
 
-app.component('vue-qrcode', VueQrcode);
+//app.component('vue-qrcode', VueQrcode);
 app.use(router)
 const pinia = createPinia()
 pinia.use(piniaPluginPersistedstate)

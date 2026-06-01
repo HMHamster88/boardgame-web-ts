@@ -57,7 +57,7 @@
 
 <script setup lang="ts">
 import { computed, ref, useTemplateRef, type PropType } from 'vue';
-import { rangeArray, recordEntries, removeElement } from 'back-common';
+import { rangeArray, recordEntries, removeElement } from 'boardgame-web-common';
 import type { CatanUseDevelopmentCardAction } from 'catan-back';
 import { CatanSpecialCard, initResources, type CatanDevelopmentCardType, type CatanResources, getAllResourcesCount } from 'catan-back';
 import DevelopmentCardDialog from './DevelopmentCardDialog.vue';

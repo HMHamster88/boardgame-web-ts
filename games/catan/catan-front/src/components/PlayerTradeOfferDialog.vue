@@ -41,8 +41,8 @@ import { ODialog, OButton, OIcon } from '@oruga-ui/oruga-next';
 
 import { computed, type PropType } from 'vue'
 import { useI18n } from 'vue-i18n'
-import type { Player } from 'back-common'
-import { filterRecord, partialRecordEntries, recordEntries } from 'back-common'
+import type { Player } from 'boardgame-web-common'
+import { filterRecord, partialRecordEntries, recordEntries } from 'boardgame-web-common'
 import { type CatanPlayerTradeOffer, type CatanResources, type CatanResourceType } from 'catan-back'
 import { resourcesImages } from './graphics'
 

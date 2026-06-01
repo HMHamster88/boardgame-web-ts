@@ -17,8 +17,8 @@ import { computed, type PropType } from 'vue'
 
 
 import { portImage, harbourResourcesImages } from './graphics'
-import { Vector2D } from 'back-common'
-import { getEdgeAnge, pointyHexToPixel } from 'back-common'
+import { Vector2D } from 'boardgame-web-common'
+import { getEdgeAnge, pointyHexToPixel } from 'boardgame-web-common'
 import { CatanHarbourType, type CatanHarbour } from 'catan-back'
 
 const position = computed(() => {

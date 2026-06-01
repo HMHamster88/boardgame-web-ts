@@ -1,4 +1,4 @@
-import {
+import type {
     Connection,
     DataMessageListener,
     Game,
@@ -7,26 +7,30 @@ import {
     GamePublicState,
     GameSettings,
     GameState,
-    GameStatusEnum,
-    getSubObjectChanges,
-    handleMessage,
     JoinGameMessage,
     KickPlayerMessage,
     MesasgeHandlers,
     NotifyGameMessage,
-    ObjectSync,
     PeerFilter,
     PlayerPrivateState,
     PropChange,
-    removeElement,
     StartGameMessage,
     TypedMessage,
     UpdateUserRequest,
+
+} from 'boardgame-web-common/back';
+
+import {
+    GameStatusEnum,
+    getSubObjectChanges,
+    handleMessage,
+    ObjectSync,
+    removeElement,
     watchChagesList
-} from 'back-common';
-import { WsConnection } from './backWs';
-import { getGameSerivce } from './gameServiceSelector';
-import { db } from './db/db';
+} from 'boardgame-web-common/back';
+import { WsConnection } from './backWs.ts';
+import { getGameSerivce } from './gameServiceSelector.ts';
+import { db } from './db/db.ts';
 
 export class GameSession implements Connection {
     game: Game;
@@ -121,11 +125,11 @@ export class GameSession implements Connection {
     }
 
     createPublicStateSync() {
-        this.gamePublicStateSync = new ObjectSync({
+        this.gamePublicStateSync = new ObjectSync<GamePublicState>({
             connection: this,
             id: 'gamePublicState',
             retranslateChanges: true,
-            value: this.gameState?.publicState
+            value: this.gameState?.publicState!
         });
     }
 
@@ -166,8 +170,11 @@ export class GameSession implements Connection {
         }
         const playerIndex = this.game.players.findIndex((pl) => pl.userId == connection.id());
         if (playerIndex >= 0) {
-            this.game.players[playerIndex].online = true;
-            this.gameSync.sendUpdateTypedPath(null, (tp) => tp.players[playerIndex].online);
+            const player = this.game.players[playerIndex]
+            if (player) {
+                player.online = true;
+                this.gameSync.sendUpdate(`players[${playerIndex}].online`);
+            }
         }
         connection.webSocket.on('message', (messageString: string) => {
             this.dataListeners.forEach((listener) => {
@@ -336,8 +343,11 @@ export class GameSession implements Connection {
             );
             console.log('Player index', playerIndex);
             if (playerIndex >= 0) {
-                this.game.players[playerIndex].online = false;
-                this.gameSync.sendUpdateTypedPath(null, (tp) => tp.players[playerIndex].online);
+                const player = this.game.players[playerIndex]
+                if (player) {
+                    player.online = false;
+                    this.gameSync.sendUpdate(`players[${playerIndex}].online`);
+                }
             }
         });
     }

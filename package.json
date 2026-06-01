@@ -15,8 +15,11 @@
   "type": "commonjs",
   "main": "index.js",
   "scripts": {
-    "install-all": "npm install --prefix ./common/back-common && npm install --prefix ./common/front-common && npm install --prefix ./back && npm install --prefix ./front && npm install --prefix ./games/catan/catan-back && npm install --prefix ./games/catan/catan-front",
-    "build-all": "npm run build --prefix ./common/back-common && npm run build --prefix ./common/front-common && npm run build --prefix ./games/catan/catan-back && npm run build --prefix ./games/catan/catan-front && npm run build --prefix ./front && npm run build:bundle --prefix ./back",
+    "install-all": "npm install --prefix ./common --legacy-peer-deps && npm install --prefix ./back --legacy-peer-deps && npm install --prefix ./front --legacy-peer-deps && npm install --prefix ./games/catan/catan-back --legacy-peer-deps && npm install --prefix ./games/catan/catan-front --legacy-peer-deps",
+    "build-all": "npm run build --prefix ./common && npm run build --prefix ./games/catan/catan-back && npm run build --prefix ./games/catan/catan-front && npm run build --prefix ./front && npm run build --prefix ./back",
     "start": "npm run start --prefix ./back"
+  },
+  "dependencies": {
+    "all": "^0.0.0"
   }
 }

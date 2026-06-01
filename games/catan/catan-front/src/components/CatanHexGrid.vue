@@ -60,15 +60,15 @@ import {
     pointyHexToPixel,
     toCoordsArray,
     vectorArrayToString
-} from 'back-common';
+} from 'boardgame-web-common';
 
 import CatanIntersectionComponent from './CatanIntersectionComponent.vue';
 import CatanRoadComponent from './CatanRoadComponent.vue';
 import { terrainImages } from './graphics';
 
-import type { Player } from 'back-common';
-import { distinct, type HexGridData } from 'back-common';
-import { Vector2D } from 'back-common';
+import type { Player } from 'boardgame-web-common';
+import { distinct, type HexGridData } from 'boardgame-web-common';
+import { Vector2D } from 'boardgame-web-common';
 import { robberImage } from './graphics';
 import type { CatanField, CatanHarbour, CatanRoad, CatanTerrainHex } from 'catan-back';
 import CatanEdgeOverlay from './CatanEdgeOverlay.vue';

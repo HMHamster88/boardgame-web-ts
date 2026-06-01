@@ -1,7 +1,7 @@
-import type { GameSettings } from "back-common";
-import type { GamePrivateState, GamePublicState, PlayerPrivateState, PlayerPublicState } from "back-common";
-import { initEnumRecord } from "back-common";
-import type { Vector2DLike } from "back-common";
+import type { GameSettings } from "boardgame-web-common/back";
+import type { GamePrivateState, GamePublicState, PlayerPrivateState, PlayerPublicState } from "boardgame-web-common/back";
+import { initEnumRecord } from "boardgame-web-common/back";
+import type { Vector2DLike } from "boardgame-web-common/back";
 import type { CatanGameFieldType } from "./catanGameFieldType";
 import type { CatanTerrainHexType } from "./catanTerrainHexType";
 

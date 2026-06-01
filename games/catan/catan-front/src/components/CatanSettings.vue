@@ -19,7 +19,7 @@ import { type CatanGameSettings } from 'catan-back';
 import { type CatanGenerateFieldAction } from "catan-back";
 import { CatanGameFieldType } from "catan-back";
 import { useI18n } from 'vue-i18n';
-import type { GameAction } from 'back-common';
+import type { GameAction } from 'boardgame-web-common';
 
 const { t } = useI18n({
     locale: 'en',

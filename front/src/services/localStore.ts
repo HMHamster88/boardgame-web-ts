@@ -1,4 +1,4 @@
-import { ConnectStatus, type Game, type GameType, type User } from 'back-common'
+import { ConnectStatus, type Game, type GameType, type User } from 'boardgame-web-common/back'
 import { defineStore } from 'pinia'
 
 export interface Settings {

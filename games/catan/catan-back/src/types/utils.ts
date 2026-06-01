@@ -1,7 +1,7 @@
-import type { Player } from "back-common";
-import { recordEntries, recordForeach as recordForEach, removeElement } from "back-common";
-import { findByCoordsArray, getEdgeVerticesPositions, getVertexEdgesPositions } from "back-common";
-import { Vector2D, type Vector2DLike } from "back-common";
+import type { Player } from "boardgame-web-common/back";
+import { recordEntries, recordForeach as recordForEach, removeElement } from "boardgame-web-common/back";
+import { findByCoordsArray, getEdgeVerticesPositions, getVertexEdgesPositions } from "boardgame-web-common/back";
+import { Vector2D, type Vector2DLike } from "boardgame-web-common/back";
 import {
     CatanBuyItemType,
     catanHarbourResourceType,

@@ -2,12 +2,12 @@ import { JSONFilePreset } from 'lowdb/node';
 import { Low } from 'lowdb';
 import {
     findAndRemoveElement,
-    Game,
-    GameSettings,
-    GameState,
+    type Game,
+    type GameSettings,
+    type GameState,
     removeElement,
-    User
-} from 'back-common';
+    type User
+} from 'boardgame-web-common/back';
 import path from 'node:path';
 import fs from 'node:fs/promises';
 import _ from 'lodash';

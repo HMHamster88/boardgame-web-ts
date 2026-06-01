@@ -1,29 +1,5 @@
-# vue-components-starter
+# Vue 3 + TypeScript + Vite
 
-A starter for creating a Vue component library.
+This template should help get you started developing with Vue 3 and TypeScript in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
 
-## Development
-
-- Install dependencies:
-
-```bash
-npm install
-```
-
-- Run the playground:
-
-```bash
-npm run playground
-```
-
-- Run the unit tests:
-
-```bash
-npm run test
-```
-
-- Build the library:
-
-```bash
-npm run build
-```
+Learn more about the recommended Project Setup and IDE Support in the [Vue Docs TypeScript Guide](https://vuejs.org/guide/typescript/overview.html#project-setup).

@@ -12,9 +12,9 @@
 
 <script setup lang="ts">
 import { computed, type PropType } from 'vue'
-import type { CatanPlayerTradeOffer } from '../types/types'
+import type { CatanPlayerTradeOffer } from 'catan-back'
 import { useI18n } from 'vue-i18n'
-import type { Player } from '../../../db/player'
+import type { Player } from 'boardgame-web-common'
 
 let localization: any = {
     en: {

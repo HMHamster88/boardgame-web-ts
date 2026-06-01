@@ -25,7 +25,7 @@
 
 <script setup lang="ts">
 
-import { ODialog, OButton, OIcon } from '@oruga-ui/oruga-next';
+import { ODialog, OButton } from '@oruga-ui/oruga-next';
 
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';

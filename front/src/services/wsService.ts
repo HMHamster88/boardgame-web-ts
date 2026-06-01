@@ -11,7 +11,7 @@ import {
     type User,
     type UpdateUserRequest,
     type DeleteGameRequest
-} from "back-common";
+} from "boardgame-web-common/back";
 import { useLocalStore, useMemoryLocalStore } from "./localStore";
 import {
     ArrayQueue,

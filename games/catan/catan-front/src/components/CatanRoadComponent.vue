@@ -10,8 +10,8 @@
 
 <script setup lang="ts">
 import { computed, type PropType } from 'vue';
-import type { Player } from 'back-common';
-import { getEdgeAnge, pointyHexToPixel } from 'back-common';
+import type { Player } from 'boardgame-web-common';
+import { getEdgeAnge, pointyHexToPixel } from 'boardgame-web-common';
 import { type CatanRoad } from 'catan-back';
 
 const color = computed(() => {

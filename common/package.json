@@ -1,10 +1,23 @@
 {
-  "name": "front-common",
+  "name": "boardgame-web-common",
   "type": "module",
   "version": "0.0.0",
+  "description": "A starter for creating a Vue component library.",
+  "author": "Author Name <author.name@mail.com>",
+  "license": "MIT",
+  "homepage": "https://github.com/author/library#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/author/library.git"
+  },
+  "bugs": {
+    "url": "https://github.com/author/library/issues"
+  },
   "exports": {
-    ".": "./dist/index.js",
-    "./package.json": "./package.json"
+    ".": "./dist/back/index.js",
+    "./package.json": "./package.json",
+    "./front": "./dist/front/index.js",
+    "./back": "./dist/back/index.js"
   },
   "files": [
     "dist"
@@ -21,9 +34,6 @@
     "release": "bumpp",
     "prepublishOnly": "pnpm run build"
   },
-  "peerDependencies": {
-    "vue": "^3.0.0"
-  },
   "devDependencies": {
     "@tsdown/css": "^0.22.0",
     "@types/node": "^25.6.2",
@@ -36,16 +46,15 @@
     "vite": "^8.0.11",
     "vitest": "^4.1.5",
     "vitest-browser-vue": "^2.1.0",
-    "vue": "^3.5.34",
     "vue-tsc": "^3.2.8"
   },
   "dependencies": {
-    "@mdi/font": "^7.4.47",
     "@oruga-ui/oruga-next": "^0.13.5",
-    "@oruga-ui/theme-oruga": "^0.9.1",
     "@types/lodash": "^4.17.24",
-    "back-common": "file:../back-common",
+    "eventemitter3": "^5.0.4",
     "lodash": "^4.18.1",
+    "typed-path": "^2.2.3",
+    "vue": "^3.5.34",
     "vue-i18n": "^11.4.4"
   }
 }

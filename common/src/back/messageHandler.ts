@@ -13,8 +13,14 @@ export type MesasgeHandlers<T extends TypedMessage> = {
 export async function handleMessage<T extends TypedMessage>(handlers: MesasgeHandlers<T>, message: TypedMessage): Promise<boolean> {
     const handler = (handlers as any)[message.type]
     if (handler) {
-        await handler(message)
-        return true
+        try {
+            await handler(message)
+            return true
+        } catch (error) {
+            console.error('Handle message error', error)
+            return false
+        }
+
     }
     return false
 }

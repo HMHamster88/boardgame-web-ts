@@ -1,4 +1,5 @@
-import { type GameBackService } from 'back-common'
+
+import type { GameBackService } from 'boardgame-web-common/back'
 import { CatanGameBackService } from './catanBackService'
 export * from './types/types'
 export * from './catanBackService'

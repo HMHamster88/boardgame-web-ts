@@ -9,7 +9,7 @@
 </template>
 
 <script setup lang="ts">
-import { hexagonString } from 'back-common';
+import { hexagonString } from 'boardgame-web-common';
 
 const props = defineProps({
     color: {

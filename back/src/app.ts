@@ -1,7 +1,7 @@
 import express from 'express';
 import { configDotenv } from 'dotenv';
 import history from 'connect-history-api-fallback';
-import { startWs } from './backWs';
+import { startWs } from './backWs.ts';
 import os from 'os';
 
 configDotenv();

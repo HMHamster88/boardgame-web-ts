@@ -52,15 +52,15 @@ import { computed, onMounted, ref, watch } from 'vue';
 
 import { useRoute } from 'vue-router';
 
-import { GameStatusEnum, type Game, type GamePublicState, type PlayerPrivateState, type Player, type GameAction, type GameSettings, createDeepProxy } from 'back-common';
+import { GameStatusEnum, type Game, type GamePublicState, type PlayerPrivateState, type Player, type GameAction, type GameSettings, createDeepProxy } from 'boardgame-web-common/back';
 import { useLocalStore } from '../services/localStore';
 
 import { merge } from 'lodash';
 import { useI18n } from 'vue-i18n';
-import { soundService } from '../services/soundService';
-import GameClient from '../services/gameClient';
-import type { GameFrontService } from 'front-common';
-import { getGameSerivce } from '../services/gameServiceSelector';
+import { soundService } from '../services/soundService.ts';
+import GameClient from '../services/gameClient.ts';
+import type { GameFrontService } from 'boardgame-web-common/front';
+import { getGameService } from '../services/gameFrontServiceSelector.ts';
 import { useOruga } from '@oruga-ui/oruga-next';
 
 const oruga = useOruga();
@@ -256,7 +256,7 @@ onMounted(async () => {
 
     gameClient.gameObjectSync.valueSetter = (value) => {
         game.value = value
-        getGameSerivce(game.value.type).then(loadedGameService => {
+        getGameService(game.value.type).then(loadedGameService => {
             gameService.value = loadedGameService
             merge(messages.value, gameService.value.localization)
         })

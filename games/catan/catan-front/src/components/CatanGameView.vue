@@ -80,10 +80,10 @@ import { default as Dice } from './Dice.vue';
 
 import { computed, ref, useTemplateRef, type PropType } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { SelectPlayersDialog } from 'front-common';
-import { distinct, type Game } from 'back-common';
-import type { GameAction, Player } from 'back-common';
-import { rangeArray, recordEntries, recordValues, removeElement } from 'back-common';
+import { SelectPlayersDialog } from 'boardgame-web-common/front';
+import { distinct, type Game } from 'boardgame-web-common';
+import type { GameAction, Player } from 'boardgame-web-common';
+import { rangeArray, recordEntries, recordValues, removeElement } from 'boardgame-web-common';
 import {
     findByCoords,
     getEdgeNeighborhoodsPositions,
@@ -92,8 +92,8 @@ import {
     getVertexEdgesPositions,
     getVertexNeighborhoodsPositions,
     toCoordsArray
-} from 'back-common';
-import { Vector2D, type Vector2DLike } from 'back-common';
+} from 'boardgame-web-common';
+import { Vector2D, type Vector2DLike } from 'boardgame-web-common';
 import {
     type CatanBuildIntObjectAction,
     type CatanBuildRoadAction,

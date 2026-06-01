@@ -1,26 +1,26 @@
 import { WebSocketServer, WebSocket } from 'ws';
 import { IncomingMessage, Server } from 'node:http';
 import {
-    AllGamesResponse,
-    ConnectToGameMessage,
-    CreateGameRequest,
-    DeleteGameRequest,
-    Game,
     GameStatusEnum,
-    GameType,
-    GetAllGamesRequest,
     handleMessage,
-    HandshakeResponse,
-    MesasgeHandlers,
     removeElement,
-    TypedMessage,
-    UpdateUserRequest,
-    User
-} from 'back-common';
-import { db } from './db/db';
+    type AllGamesResponse,
+    type ConnectToGameMessage,
+    type CreateGameRequest,
+    type DeleteGameRequest,
+    type Game,
+    type GameType,
+    type GetAllGamesRequest,
+    type HandshakeResponse,
+    type MesasgeHandlers,
+    type TypedMessage,
+    type UpdateUserRequest,
+    type User
+} from 'boardgame-web-common/back';
+import { db } from './db/db.ts';
 import { v4 as uuidv4 } from 'uuid';
-import { getAllGameServices, loadServices } from './gameServiceSelector';
-import { GameSession } from './gameSession';
+import { getAllGameServices, loadServices } from './gameServiceSelector.ts';
+import { GameSession } from './gameSession.ts';
 
 const connections: WsConnection[] = [];
 
@@ -135,9 +135,9 @@ export async function startWs(server: Server) {
 
     console.log(
         'game services loaded: ' +
-            getAllGameServices()
-                .map((service) => service.type)
-                .join(', ')
+        getAllGameServices()
+            .map((service) => service.type)
+            .join(', ')
     );
 
     const wss = new WebSocketServer({ server });

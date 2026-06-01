@@ -9,7 +9,7 @@
             <template #trigger>
                 <o-button icon-right="share-variant-outline" />
             </template>
-            <vue-qrcode :value="fullUrl" :options="{ width: 200 }"></vue-qrcode>
+            <qrcode-vue :value="fullUrl" :size="280" style="margin: 0.5rem;"></qrcode-vue>
         </o-dropdown>
         <o-button icon-left="cog" @click="settingsDialog?.open()"></o-button>
     </div>
@@ -21,8 +21,9 @@ import { useRoute } from 'vue-router';
 import { computed, useTemplateRef } from "vue";
 import { useI18n } from 'vue-i18n';
 import { useMemoryLocalStore } from '../services/localStore';
-import { ConnectStatus } from 'back-common';
+import { ConnectStatus } from 'boardgame-web-common/back';
 import SettingsDialog from './SettingsDialog.vue';
+import QrcodeVue from 'qrcode.vue'
 
 const memoryLocalStore = useMemoryLocalStore();
 

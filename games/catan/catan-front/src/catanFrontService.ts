@@ -1,4 +1,4 @@
-import type { GameFrontService } from "front-common";
+import type { GameFrontService } from "boardgame-web-common/front";
 import type { Component } from "vue";
 
 import CatanSettings from "./components/CatanSettings.vue";

@@ -1,5 +1,6 @@
 import type { Component } from "vue"
-import type { GameStaticSettings } from "back-common"
+import type { GameStaticSettings } from "../back/dto"
+
 export * from "./utils/colorUtils"
 export { default as SelectPlayersDialog } from './components/SelectPlayersDialog.vue'
 

@@ -1,5 +1,5 @@
-import type { GameAction } from "back-common"
-import type { Vector2DLike } from "back-common";
+import type { GameAction } from "boardgame-web-common/back"
+import type { Vector2DLike } from "boardgame-web-common/back";
 import type { CatanDevelopmentCardType, CatanIntersectionObjectType, CatanResources, CatanResourceType, CatanTradeDeal } from "./types";
 
 

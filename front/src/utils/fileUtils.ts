@@ -1,4 +1,4 @@
-import type { Game, GameState } from 'back-common'
+import type { Game, GameState } from 'boardgame-web-common/back'
 import sanitize from 'sanitize-filename'
 
 export async function saveTextFile(data: string, filename: string) {

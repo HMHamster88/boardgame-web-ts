@@ -23,7 +23,7 @@ import { onMounted, useTemplateRef } from 'vue'
 import CreateGameDialog from '../components/CreateGameDialog.vue'
 import { useMemoryLocalStore } from '../services/localStore'
 import { useI18n } from 'vue-i18n'
-import type { Game } from 'back-common'
+import type { Game } from 'boardgame-web-common/back'
 import { wsService } from '../services/wsService'
 import { useOruga } from '@oruga-ui/oruga-next'
 

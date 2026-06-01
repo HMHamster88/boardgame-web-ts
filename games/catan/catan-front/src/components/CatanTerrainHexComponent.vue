@@ -12,7 +12,7 @@
 
 <script setup lang="ts">
 import { computed, type PropType } from 'vue'
-import { hexagonString, pointyHexToPixel } from 'back-common'
+import { hexagonString, pointyHexToPixel } from 'boardgame-web-common'
 import type { CatanTerrainHex } from 'catan-back'
 
 const curcularTextClass = computed(() => {

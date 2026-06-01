@@ -6,8 +6,8 @@
 
 <script setup lang="ts">
 import { computed, type PropType } from 'vue';
-import { hexagonString, pointyHexToPixel } from 'back-common';
-import type { Vector2D } from 'back-common';
+import { hexagonString, pointyHexToPixel } from 'boardgame-web-common';
+import type { Vector2D } from 'boardgame-web-common';
 
 const hexSting = computed(() => hexagonString(props.hexSize / 4))
 
