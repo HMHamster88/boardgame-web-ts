@@ -95,6 +95,7 @@ import {
 } from 'boardgame-web-common';
 import { Vector2D, type Vector2DLike } from 'boardgame-web-common';
 import {
+    getAllResourcesCount,
     type CatanBuildIntObjectAction,
     type CatanBuildRoadAction,
     type CatanBuyDevelopmentCardAction,
@@ -145,6 +146,7 @@ const { t } = useI18n({
             },
             endTurn: 'End Turn',
             embark: 'Embark',
+            press: 'Press',
             status: {
                 localPlayer: {
                     EMBARK_FIRST: 'Place first settlement and road',
@@ -180,6 +182,7 @@ const { t } = useI18n({
             },
             endTurn: 'Закончить ход',
             embark: 'Высадисться',
+            press: 'Нажмите',
             status: {
                 localPlayer: {
                     EMBARK_FIRST: 'Поставте первое поселение и дорогу',
@@ -229,9 +232,17 @@ const status = computed(() => {
             return t('build.' + freeBuilding.value as string)
         }
     }
+
     if (phase == CatanGamePhase.DISCARD_CARDS_7) {
-        const playerPart = props.playerPrivateState.discardCardsCount > 0 ? 'localPlayer' : 'notLocalPlayer'
-        return t(`status.${playerPart}.${phase}`, props.playerPrivateState.discardCardsCount)
+        if (props.playerPrivateState.discardCardsCount > 0) {
+            const discardCount = props.playerPrivateState.discardCardsCount - getAllResourcesCount(selectedResorceCards.value)
+            if (discardCount == 0) {
+                return t('press') + ' ' + t('discardCards')
+            }
+            return t(`status.localPlayer.${phase}`, discardCount);
+        } else {
+            return t(`status.notLocalPlayer.${phase}`)
+        }
     }
     const playerPart = isLocalPlayerTurn.value ? 'localPlayer' : 'notLocalPlayer'
     return t(`status.${playerPart}.${phase}`, { player: props.game.players[props.gameState.activePlayerIndex]?.name })
