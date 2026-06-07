@@ -22,7 +22,7 @@
                     </div>
                 </div>
                 <span v-if="openedDevelopmentCards.length" class="cards-delimeter">{{ t('usedDevelopmentCards')
-                    }}</span>
+                }}</span>
                 <div class="flex justify-center">
                     <div v-for="devCard in openedDevelopmentCards" class="resource-card"
                         style="display: flex; flex-direction: column; justify-content: center; align-items: center;">
@@ -44,7 +44,8 @@
         </div>
         <div class="flex justify-center gap-3">
             <div class="flex overflow-auto gap-2 items-center">
-                <span class="no-wrap">{{ allResourcesCount }}:</span>
+                <o-icon icon="sigma"></o-icon>
+                <span class="no-wrap">{{ allResourcesCount }}</span>
                 <div v-for="[resourceType, resourceCount] in recordEntries(resources)" class="flex items-center">
                     <img class="resource-icon" :src="resourcesImages[resourceType]"></img>
                     <span class="m-1">{{ resourceCount }}</span>
@@ -56,6 +57,7 @@
 </template>
 
 <script setup lang="ts">
+import { OIcon } from '@oruga-ui/oruga-next';
 import { computed, ref, useTemplateRef, type PropType } from 'vue';
 import { rangeArray, recordEntries, removeElement } from 'boardgame-web-common';
 import type { CatanUseDevelopmentCardAction } from 'catan-back';
