@@ -272,7 +272,7 @@ export class GameSession implements Connection {
 
                     await this.gameService.performAction(
                         {
-                            game: this.game,
+                            game: gameProxy,
                             gameSync: this.gameSync,
                             gameState: gameStateProxy,
                             gamePublicStateSync: this.gamePublicStateSync,
