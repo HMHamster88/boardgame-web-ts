@@ -196,7 +196,8 @@ export interface CatanPublicGameState extends GamePublicState {
     field: CatanField
     phase: CatanGamePhase
     playersStates: CatanPlayerPublicState[]
-    dices: CatanDices,
+    dices: CatanDices
+    playerThrowedDices: boolean
     playerTradeOffer: CatanPlayerTradeOffer | undefined,
     longestRoad: CatanRoad[]
 }

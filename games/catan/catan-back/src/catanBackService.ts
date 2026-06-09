@@ -39,6 +39,7 @@ export class CatanGameBackService implements GameBackService {
                 redDice: CatanDiceValue.ONE,
                 yellowDice: CatanDiceValue.ONE
             },
+            playerThrowedDices: false,
             playerTradeOffer: undefined,
             longestRoad: []
         }
@@ -291,6 +292,7 @@ export class CatanGameBackService implements GameBackService {
                 dices.yellowDice = _.random(CatanDiceValue.ONE, CatanDiceValue.SIX)
 
                 const allDiceValue = (publicState.dices.redDice as number) + (publicState.dices.yellowDice)
+                publicState.playerThrowedDices = true
 
                 if (allDiceValue == 7) {
                     let anyoneHasResourceExcess = false
@@ -407,6 +409,7 @@ export class CatanGameBackService implements GameBackService {
                     return
                 }
                 publicState.activePlayerIndex = (publicState.activePlayerIndex + 1) % game.players.length
+                publicState.playerThrowedDices = false
                 publicState.phase = CatanGamePhase.THROWING_DICE
             },
             CatanDiscardResourceCards: (action: CatanDiscardResourceCards) => {
@@ -436,8 +439,11 @@ export class CatanGameBackService implements GameBackService {
                         this.addResources(privatePlayerState, resourceRob)
                     }
                 }
-
-                publicState.phase = CatanGamePhase.PLAYER_TURN
+                if (publicState.playerThrowedDices) {
+                    publicState.phase = CatanGamePhase.PLAYER_TURN
+                } else {
+                    publicState.phase = CatanGamePhase.THROWING_DICE
+                }
             },
             CatanTradeAction: (action: CatanTradeAction) => {
                 if (playerId != activePlayerId) {
