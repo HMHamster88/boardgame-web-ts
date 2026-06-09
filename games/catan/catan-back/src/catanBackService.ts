@@ -437,6 +437,9 @@ export class CatanGameBackService implements GameBackService {
                         })
                         this.removeResources(playerToRob, resourceRob)
                         this.addResources(privatePlayerState, resourceRob)
+                        const playerToRobName = game.players.find(p => p.userId == playerToRob.playerId)?.name
+                        gameContext.sendNotify(playerId, 'youRobbed', { playerName: playerToRobName, t_resource: 'resourceType.' + resourceType })
+                        gameContext.sendNotify(playerToRob.playerId, 'playerStoleFromYou', { playerName: activePlayer.name, t_resource: 'resourceType.' + resourceType })
                     }
                 }
                 if (publicState.playerThrowedDices) {

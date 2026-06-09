@@ -237,6 +237,20 @@ function join() {
     gameClient.join();
 }
 
+function translateMessageParams(messageParams: any) {
+    if (messageParams == undefined) {
+        return undefined
+    }
+    const result: any = {}
+    Object.keys(messageParams).forEach((key) => {
+        if (key.startsWith('t_')) {
+            result[key.slice(2)] = t(messageParams[key])
+        } else {
+            result[key] = messageParams[key]
+        }
+    })
+    return result
+}
 
 onMounted(async () => {
 
@@ -248,7 +262,10 @@ onMounted(async () => {
     }
 
     gameClient.NotifyGameMessage = (message) => {
-        oruga.notification.open(t(message.message, message.messageParams));
+        oruga.notification.open({
+            duration: 3000,
+            message: t(message.message, translateMessageParams(message.messageParams))
+        });
         soundService.notification()
     }
 

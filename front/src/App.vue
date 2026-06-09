@@ -1,8 +1,10 @@
 <template>
-  <Header></Header>
-  <main class="mt-2">
-    <RouterView />
-  </main>
+  <div class="app-layout">
+    <Header></Header>
+    <main class="mt-2 scroll-container">
+      <RouterView />
+    </main>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -21,11 +23,6 @@ if (!localStore.user.id) {
 }
 
 i18n.locale.value = localStore.settings.locale
-
-/*emitter.on('toastMessage', (message: ToastMessageOptions) => {
-  console.log('toast message')
-  toast.add(message)
-})*/
 
 wsService.start()
 </script>

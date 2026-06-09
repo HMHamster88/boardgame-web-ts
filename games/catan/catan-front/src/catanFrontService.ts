@@ -14,12 +14,30 @@ export class CatanFrontService implements GameFrontService {
         en: {
             CATAN: 'Catan',
             playerAcceptedDeal: "{player} accepted deal",
-            playersRejectedDeal: "All players rejected deal"
+            playersRejectedDeal: "All players rejected deal",
+            youRobbed: 'You robbed {resource} from player {playerName}',
+            playerStoleFromYou: 'Player {playerName} stole {resource} from you',
+            resourceType: {
+                WOOD: "wood",
+                WOOL: "whool",
+                GRAIN: "grain",
+                CLAY: "clay",
+                ORE: "ore"
+            }
         },
         ru: {
             CATAN: 'Колонизаторы',
             playerAcceptedDeal: "{player} принял сделку",
-            playersRejectedDeal: "Все игроки отклонили сделку"
+            playersRejectedDeal: "Все игроки отклонили сделку",
+            youRobbed: 'Вы украли {resource} у игрока {playerName}',
+            playerStoleFromYou: 'Игрок {playerName} украл у вас {resource}',
+            resourceType: {
+                WOOD: "дерево",
+                WOOL: "шерсть",
+                GRAIN: "зерно",
+                CLAY: "глина",
+                ORE: "руда"
+            }
         }
     }
     gameStaticSettings = {
