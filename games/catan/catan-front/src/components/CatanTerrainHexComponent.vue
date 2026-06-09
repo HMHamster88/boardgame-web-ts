@@ -2,8 +2,8 @@
     <g :transform="transform" @click="emit('click', data)">
         <polygon :points="hexagonString(size)" :fill="`url(#${data.type})`">
         </polygon>
-        <polygon :points="hexagonString(size)" v-if="allDiceValue == data.circularNumber && allDiceValue != 0"
-            :r="size / 2" class="circle-highlight"></polygon>
+        <circle v-if="allDiceValue == data.circularNumber && allDiceValue != 0" :r="size / 3" class="circle-highlight">
+        </circle>
         <text v-if="data.circularNumber" :class="curcularTextClass" :style="circularTextStyle">
             {{ data.circularNumber }}
         </text>
@@ -102,6 +102,6 @@ const emit = defineEmits({
 }
 
 .circle-highlight {
-    fill: rgba(84, 253, 0, 0.349);
+    fill: rgba(84, 253, 0, 0.7);
 }
 </style>
