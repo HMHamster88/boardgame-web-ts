@@ -94,3 +94,7 @@ export interface GameActionMessage extends GameMessage {
     action: GameAction
 }
 
+export interface CrateGameBackupMessage extends GameMessage {
+    type: 'CrateGameBackupMessage'
+}
+

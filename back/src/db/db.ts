@@ -11,6 +11,7 @@ import {
 import path from 'node:path';
 import fs from 'node:fs/promises';
 import _ from 'lodash';
+import { format } from 'date-fns';
 
 const dbDir = './db';
 
@@ -116,6 +117,22 @@ export class DB {
 
     getGameState(id: string) {
         return this.gamesStates?.data.find((state) => state.id == id);
+    }
+
+    async createGameBackup(id: string) {
+        const state = this.gamesStates?.data.find((state) => state.id == id);
+        const game = this.games?.data.find((game) => game.id == id);
+        const gameDir = path.join(dbDir, 'game-backup', id)
+        console.log('Game dir', gameDir)
+        await fs.mkdir(gameDir, { recursive: true });
+        const dateString = format(new Date(), 'yyyy-MM-dd_HH-mm-ss');
+        const stateFileName = path.join(gameDir, `${dateString}-state.json`)
+        const stateBackup = await JSONFilePreset<GameState>(stateFileName, state!);
+        await stateBackup.write()
+        const gameFileName = path.join(gameDir, `${dateString}-game.json`)
+        const gameBackup = await JSONFilePreset<Game>(gameFileName, game!);
+        await gameBackup.write()
+        return stateFileName
     }
 }
 

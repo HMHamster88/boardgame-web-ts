@@ -13,6 +13,7 @@
             <o-field :label="t('soundVolume')">
                 <o-slider :min="0" :max="1" :step="0.01" v-model="settingsCopy.soundsVolume"></o-slider>
             </o-field>
+            <o-button @click="createBackup" v-if="gameId">{{ t('createGameStateBackup') }}</o-button>
         </template>
         <template #footer>
             <o-button :label="$t('cancel')" @click="close(false)" />
@@ -28,6 +29,10 @@ import { useI18n } from 'vue-i18n'
 import _ from 'lodash';
 import type { User } from 'boardgame-web-common';
 import { wsService } from '../services/wsService';
+import { useRoute } from 'vue-router';
+
+const route = useRoute()
+const gameId = computed(() => route.params['id'] as string)
 
 const showDialog = ref(false)
 
@@ -35,18 +40,19 @@ const i18n = useI18n({
     locale: 'en',
     messages: {
         en: {
-
             defaultPlayerName: 'Default Player Name',
             defaultPlayerColor: 'Default Player Color',
             language: 'Language',
-            soundVolume: 'Sound Volume'
+            soundVolume: 'Sound Volume',
+            createGameStateBackup: 'Create Game State Backup'
         },
         ru: {
 
             defaultPlayerName: 'Имя игрока по умолчанию',
             defaultPlayerColor: 'Цвет игрока по умолчанию',
             language: 'Язык',
-            soundVolume: 'Громкость звуков'
+            soundVolume: 'Громкость звуков',
+            createGameStateBackup: 'Создать Бэкап Состояния Игры'
         }
     }
 })
@@ -96,6 +102,10 @@ const userColor = computed({
         }
     }
 })
+
+async function createBackup() {
+    wsService.createGameBackup()
+}
 
 function open() {
     userCopy.value = _.cloneDeep(localStore.user)

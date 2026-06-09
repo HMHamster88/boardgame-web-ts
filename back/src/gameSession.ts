@@ -1,5 +1,6 @@
 import type {
     Connection,
+    CrateGameBackupMessage,
     DataMessageListener,
     Game,
     GameActionMessage,
@@ -188,6 +189,7 @@ export class GameSession implements Connection {
             });
             const message = JSON.parse(messageString) as TypedMessage;
             type messageTypes =
+                | CrateGameBackupMessage
                 | GameActionMessage
                 | JoinGameMessage
                 | UpdateUserRequest
@@ -201,6 +203,16 @@ export class GameSession implements Connection {
             const gameSettingsProxy = watchChagesList(this.gameSettings, gameSettingsChanges);
 
             const handlers: MesasgeHandlers<messageTypes> = {
+                CrateGameBackupMessage: async () => {
+                    if (this.gameState) {
+                        const fileName = await db.createGameBackup(this.gameState?.id!)
+                        console.debug(`Game state backup created "${fileName}"`);
+                        connection.send<NotifyGameMessage>({
+                            type: "NotifyGameMessage",
+                            message: `Game state backup created "${fileName}"`
+                        })
+                    }
+                },
                 KickPlayerMessage: async (message: KickPlayerMessage) => {
                     const player = this.game.players.find((pl) => pl.userId == message.playerId);
                     if (!player) {

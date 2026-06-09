@@ -10,7 +10,8 @@ import {
     type CreateGameRequest,
     type User,
     type UpdateUserRequest,
-    type DeleteGameRequest
+    type DeleteGameRequest,
+    type CrateGameBackupMessage
 } from "boardgame-web-common/back";
 import { useLocalStore, useMemoryLocalStore } from "./localStore";
 import {
@@ -98,6 +99,12 @@ class WsService {
         this.sendMessage<CreateGameRequest>({
             type: 'CreateGameRequest',
             props: props
+        })
+    }
+
+    createGameBackup() {
+        this.sendMessage<CrateGameBackupMessage>({
+            type: 'CrateGameBackupMessage'
         })
     }
 
