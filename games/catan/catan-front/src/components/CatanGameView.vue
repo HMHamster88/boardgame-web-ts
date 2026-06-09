@@ -81,7 +81,7 @@ import { default as Dice } from './Dice.vue';
 import { computed, ref, useTemplateRef, type PropType } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { SelectPlayersDialog } from 'boardgame-web-common/front';
-import { distinct, type Game } from 'boardgame-web-common';
+import { distinct, GameStatusEnum, type Game } from 'boardgame-web-common';
 import type { GameAction, Player } from 'boardgame-web-common';
 import { rangeArray, recordEntries, recordValues, removeElement } from 'boardgame-web-common';
 import {
@@ -223,6 +223,9 @@ const freeBuilding = computed(() => {
 })
 
 const status = computed(() => {
+    if (props.game.status == GameStatusEnum.FINISHED) {
+        return t('gameFinished')
+    }
     const phase = props.gameState.phase
     if (phase == CatanGamePhase.PLAYER_TURN && isLocalPlayerTurn) {
         if (buildItemType.value) {
@@ -397,7 +400,7 @@ function getFlatResources(resources: CatanResources) {
 }
 
 const canRollDices = computed<boolean>(() => {
-    return (props.gameState.phase == CatanGamePhase.THROWING_DICE) && isLocalPlayerTurn.value
+    return (props.gameState.phase == CatanGamePhase.THROWING_DICE) && isLocalPlayerTurn.value && props.game.status == GameStatusEnum.STARTED
 })
 
 const diceContainerClass = computed(() => {

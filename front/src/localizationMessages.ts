@@ -15,7 +15,8 @@ export const localizationMessages = {
         settings: 'Settings',
         name: 'Name',
         kickPlayer: 'Kick player',
-        kickPlayerQuestion: 'Kick player {player}?'
+        kickPlayerQuestion: 'Kick player {player}?',
+        gameFinished: 'Game Finished',
     },
     ru: {
         ok: 'OK',
@@ -33,6 +34,7 @@ export const localizationMessages = {
         settings: 'Настройки',
         name: "Имя",
         kickPlayer: 'Выкинуть игрока',
-        kickPlayerQuestion: 'Выкинуть игрока {player}?'
+        kickPlayerQuestion: 'Выкинуть игрока {player}?',
+        gameFinished: 'Игра Закончена',
     }
 }

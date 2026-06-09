@@ -32,7 +32,7 @@
     </div>
 
     <div v-if="showGameView && game.status == GameStatusEnum.FINISHED" class="card flex-col">
-        {{ t('gameFinished') }}
+        <h2>{{ t('gameFinished') }}</h2>
         <p>{{ t('winners') }}</p>
         <span v-for="player in winners">{{ player.name }}</span>
 
@@ -76,7 +76,6 @@ const { messages, t } = useI18n({
             join: 'Join',
             gameSettings: 'Game Settings',
             startGame: 'Start Game',
-            gameFinished: 'Game Finished',
             winners: 'Winners:',
             yourTurn: 'Your turn'
         },
@@ -88,7 +87,6 @@ const { messages, t } = useI18n({
             join: 'Присоединиться',
             gameSettings: 'Настройки Игры',
             startGame: 'Начать игру',
-            gameFinished: 'Игра Закончена',
             winners: 'Победители:',
             yourTurn: 'Ваш ход'
         }
