@@ -1,5 +1,5 @@
 <template>
-    <o-dialog v-model:active="showDialog" modal :header="t('playerTradeOffer', { player: playerName?.name })">
+    <o-dialog v-model:active="showDialog" modal :title="t('playerTradeOffer', { player: playerName?.name })">
         <div class="flex flex-col">
             <div class="flex justify-center items-center gap-4 mb-8">
                 <div class="flex flex-col gap-1 items-center" style="width: 50%;">
