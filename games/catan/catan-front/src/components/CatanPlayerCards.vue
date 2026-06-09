@@ -22,7 +22,7 @@
                     </div>
                 </div>
                 <span v-if="openedDevelopmentCards.length" class="cards-delimeter">{{ t('usedDevelopmentCards')
-                }}</span>
+                    }}</span>
                 <div class="flex justify-center">
                     <div v-for="devCard in openedDevelopmentCards" class="resource-card"
                         style="display: flex; flex-direction: column; justify-content: center; align-items: center;">
@@ -58,7 +58,7 @@
 
 <script setup lang="ts">
 import { OIcon } from '@oruga-ui/oruga-next';
-import { computed, ref, useTemplateRef, type PropType } from 'vue';
+import { computed, ref, useTemplateRef, watch, type PropType } from 'vue';
 import { rangeArray, recordEntries, removeElement } from 'boardgame-web-common';
 import type { CatanUseDevelopmentCardAction } from 'catan-back';
 import { CatanSpecialCard, initResources, type CatanDevelopmentCardType, type CatanResources, getAllResourcesCount } from 'catan-back';
@@ -84,6 +84,12 @@ const { t } = useI18n({
 })
 
 const model = defineModel<CatanResources>()
+
+watch(model, (newValue) => {
+    if (newValue && getAllResourcesCount(newValue) == 0) {
+        selectedCardsInds.value = []
+    }
+})
 
 const selectedCardsInds = ref<number[]>([])
 function cardClick(index: number) {
