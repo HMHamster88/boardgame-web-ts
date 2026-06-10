@@ -11,6 +11,9 @@
             <o-field>
                 <o-switch :label="t('spreadHexTypes')" v-model="settings.fieldGenerationSettings.spreadHexTypes" />
             </o-field>
+            <o-field :label="t('maxPoints')">
+                <o-input :model-value="settings.maxPoints" number type="number" :min="4" placeholder="Number" />
+            </o-field>
             <o-field>
                 <o-button v-on:click="generateGameField">{{ t('generateField') }}</o-button>
             </o-field>
@@ -21,7 +24,7 @@
 
 <script setup lang="ts">
 
-import { OButton, OSelect, OSwitch, OField } from '@oruga-ui/oruga-next';
+import { OButton, OSelect, OSwitch, OField, OInput } from '@oruga-ui/oruga-next';
 
 import { type PropType } from 'vue';
 import CatanHexGrid from './CatanHexGrid.vue';

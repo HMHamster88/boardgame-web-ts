@@ -27,7 +27,7 @@
     </div>
 
     <div v-if="showGameSetting" name="settings" class="card flex-col">
-        {{ t('gameSettings') }}
+        <h2>{{ t('gameSettings') }}</h2>
         <component :is="settingsComponent" class="tab" :settings="gameSettings" @performAction="peformGameAction"
             :canEdit="isGameOwner">
         </component>
