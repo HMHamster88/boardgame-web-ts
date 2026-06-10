@@ -46,6 +46,23 @@ export function getPlayerPrices(field: CatanField, playerId: string): CatanResou
     return result
 }
 
+
+export function getNonNullResurceTypes(resources: CatanResources): CatanResourceType[] {
+    const result: CatanResourceType[] = []
+    for (let [resourceType, resourceCount] of recordEntries(resources)) {
+        if (resourceCount != 0) {
+            result.push(resourceType)
+        }
+    }
+    return result
+}
+
+export function addResources(dest: CatanResources, source: CatanResources) {
+    for (let [resourceType, resourceCount] of recordEntries(source)) {
+        dest[resourceType] += resourceCount
+    }
+}
+
 export function getAllResourcesCount(resources: CatanResources) {
     return Object.values(resources).reduce((a, c) => a + c, 0)
 }

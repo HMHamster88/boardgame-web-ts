@@ -1,4 +1,4 @@
-import type { GameSettings } from "boardgame-web-common/back";
+import type { GameSettings, GameStatistics } from "boardgame-web-common/back";
 import type { GamePrivateState, GamePublicState, PlayerPrivateState, PlayerPublicState } from "boardgame-web-common/back";
 import { initEnumRecord } from "boardgame-web-common/back";
 import type { Vector2DLike } from "boardgame-web-common/back";
@@ -191,6 +191,12 @@ export interface CatanPlayerTradeOffer {
     offered: CatanResources
     required: CatanResources,
     rejectedPlayerIds: string[]
+}
+
+export interface CatanGameStatistics extends GameStatistics {
+    resourcesReceived: CatanResources,
+    diceNumbersRolled: number[]
+    diceRolledCount: number
 }
 
 export interface CatanPublicGameState extends GamePublicState {

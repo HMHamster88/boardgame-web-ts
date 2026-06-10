@@ -92,10 +92,15 @@ export interface PlayerPrivateState {
     playerId: string
 }
 
+export interface GameStatistics {
+    turnCount: number
+}
+
 export interface GamePublicState {
     activePlayerIndex: number
     playersStates: PlayerPublicState[] | null
     winnersIds: string[]
+    statistics: GameStatistics
 }
 
 export interface GamePrivateState {

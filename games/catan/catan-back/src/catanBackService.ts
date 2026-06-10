@@ -1,10 +1,10 @@
-import { findByCoordsArray, GameStatusEnum, getEdgeNeighborhoodsPositions, getHexEdgesPositions, getHexNeighborhoodsPositions, getHexVerticesPositions, getShuffledArray, getVertexHexesPositions, handleMessage, isOutEdge, randomEnumVal, rangeArray, recordAsArray, recordEntries, removeCopmarableElements, removeElement, Vector2D, type Game, type GameAction, type GameBackService, type GameContext, type GameSettings, type GameState, type MesasgeHandlers } from "boardgame-web-common/back";
-import { CatanBuyItemType, CatanDevelopmentCardType, CatanDiceValue, CatanGamePhase, CatanIntersectionObjectType, CatanResourceType, CatanSpecialCard, CatanTradeType, developmentCardPoints, developmentCardSaves, developmentCardsCount, getBuyItems, initResources, intersectionObjectRoBuyItem, type CatanField, type CatanFieldGenerationSettings, type CatanGameSettings, type CatanHarbour, type CatanIntersection, type CatanPlayerPrivateState, type CatanPlayerPublicState, type CatanPrivateGameState, type CatanPublicGameState, type CatanResources, type CatanRoad, type CatanTerrainHex } from "./types/types";
+import { findByCoordsArray, GameStatusEnum, getEdgeNeighborhoodsPositions, getHexEdgesPositions, getHexNeighborhoodsPositions, getHexVerticesPositions, getShuffledArray, getVertexHexesPositions, handleMessage, isOutEdge, randomElement, randomEnumVal, rangeArray, recordAsArray, recordEntries, removeCopmarableElements, removeElement, Vector2D, type Game, type GameAction, type GameBackService, type GameContext, type GameSettings, type GameState, type MesasgeHandlers } from "boardgame-web-common/back";
+import { CatanBuyItemType, CatanDevelopmentCardType, CatanDiceValue, CatanGamePhase, CatanIntersectionObjectType, CatanResourceType, CatanSpecialCard, CatanTradeType, developmentCardPoints, developmentCardSaves, developmentCardsCount, getBuyItems, initResources, intersectionObjectRoBuyItem, type CatanField, type CatanFieldGenerationSettings, type CatanGameSettings, type CatanGameStatistics, type CatanHarbour, type CatanIntersection, type CatanPlayerPrivateState, type CatanPlayerPublicState, type CatanPrivateGameState, type CatanPublicGameState, type CatanResources, type CatanRoad, type CatanTerrainHex } from "./types/types";
 import { CatanGameFieldType } from "./types/catanGameFieldType";
 import { CatanTerrainHexType } from "./types/catanTerrainHexType";
 import _ from "lodash";
 import type { CatanBuildIntObjectAction, CatanBuildRoadAction, CatanBuyDevelopmentCardAction, CatanDiscardResourceCards, CatanEmbarkAction, CatanEndTurnAction, CatanGenerateFieldAction, CatanMoveRobberAction, CatanRollDicesAction, CatanTradeAction, CatanTradeResponseAction, CatanUseDevelopmentCardAction, CatanUseResourceDevelopmentCardAction, CatanUseResourceTypeDevelopmentCardAction } from "./types/actions";
-import { checkDeal, findLongestRoad, getAllResourcesCount, getPlayerPrices, moveAllResourcesByType } from "./types/utils";
+import { addResources, checkDeal, findLongestRoad, getAllResourcesCount, getNonNullResurceTypes, getPlayerPrices, moveAllResourcesByType } from "./types/utils";
 
 const embarkRoadsCount = 2
 const minLargestArmyCount = 3
@@ -30,6 +30,12 @@ export class CatanGameBackService implements GameBackService {
             }
             return state
         })
+        const statisctics: CatanGameStatistics = {
+            turnCount: 0,
+            diceNumbersRolled: [],
+            diceRolledCount: 0,
+            resourcesReceived: initResources({})
+        }
         const publicState: CatanPublicGameState = {
             field: settings.field,
             phase: CatanGamePhase.EMBARK_FIRST,
@@ -42,7 +48,8 @@ export class CatanGameBackService implements GameBackService {
             },
             playerThrowedDices: false,
             playerTradeOffer: undefined,
-            longestRoad: []
+            longestRoad: [],
+            statistics: statisctics
         }
         const privatePlayerStates = game.players.map(player => {
             const state: CatanPlayerPrivateState = {
@@ -205,6 +212,7 @@ export class CatanGameBackService implements GameBackService {
             return
         }
         const publicState = gameState.publicState as CatanPublicGameState
+        const statistics = gameState.publicState.statistics as CatanGameStatistics
         const field = publicState.field
         const privateState = gameState.privateState as CatanPrivateGameState
         const activePlayer = game.players[publicState.activePlayerIndex]
@@ -255,7 +263,10 @@ export class CatanGameBackService implements GameBackService {
                     const hexes = hexPoitions.map(hexPos => field.hexes.find(hex => Vector2D.equals(hexPos, hex.position))).filter(hex => hex)
                     const resources = hexes.map(hex => hex?.type!)
                         .map(hexType => this.getHexResources(hexType, settlement.intersectionObjects[0]?.type!))
-                    resources.forEach(resource => this.addResources(activePlayerPrivteState, resource))
+                    resources.forEach(resource => {
+                        this.addResourcesToPlayer(activePlayerPrivteState, resource)
+                        addResources(statistics.resourcesReceived, resource)
+                    })
                 }
 
                 const roadsCount = field.roads.length
@@ -295,6 +306,16 @@ export class CatanGameBackService implements GameBackService {
                 const allDiceValue = (publicState.dices.redDice as number) + (publicState.dices.yellowDice)
                 publicState.playerThrowedDices = true
 
+                statistics.diceRolledCount++
+
+                let statisticsDiceNuberRolled = statistics.diceNumbersRolled[allDiceValue]
+                if (!statisticsDiceNuberRolled) {
+                    statisticsDiceNuberRolled = 0
+                }
+                statisticsDiceNuberRolled++
+                statistics.diceNumbersRolled[allDiceValue] = statisticsDiceNuberRolled
+
+
                 if (allDiceValue == 7) {
                     let anyoneHasResourceExcess = false
                     for (let player of privateState.playersStates) {
@@ -328,9 +349,9 @@ export class CatanGameBackService implements GameBackService {
                     intObjects.forEach(intObject => {
                         const resources = this.getHexResources(hex.type, intObject.type)
                         const playerState = privateState.playersStates.find(player => player.playerId == intObject.playerId)!
-                        this.addResources(playerState, resources)
+                        this.addResourcesToPlayer(playerState, resources)
+                        addResources(statistics.resourcesReceived, resources)
                         playersUpdateId.push(playerState.playerId)
-
                     })
                 }
 
@@ -412,6 +433,7 @@ export class CatanGameBackService implements GameBackService {
                 publicState.activePlayerIndex = (publicState.activePlayerIndex + 1) % game.players.length
                 publicState.playerThrowedDices = false
                 publicState.phase = CatanGamePhase.THROWING_DICE
+                statistics.turnCount++
             },
             CatanDiscardResourceCards: (action: CatanDiscardResourceCards) => {
                 if (privatePlayerState.discardCardsCount != getAllResourcesCount(action.resources)) {
@@ -427,20 +449,20 @@ export class CatanGameBackService implements GameBackService {
             },
             CatanMoveRobberAction: (action: CatanMoveRobberAction) => {
                 field.robberPos = action.position
-
-
                 if (action.playerToRob) {
                     const playerToRob = privateState.playersStates.find(ps => ps.playerId == action.playerToRob)!
                     if (getAllResourcesCount(playerToRob?.resources) > 0) {
-                        const resourceType = randomEnumVal(CatanResourceType)
-                        const resourceRob = initResources({
-                            [resourceType]: 1
-                        })
-                        this.removeResources(playerToRob, resourceRob)
-                        this.addResources(privatePlayerState, resourceRob)
-                        const playerToRobName = game.players.find(p => p.userId == playerToRob.playerId)?.name
-                        gameContext.sendNotify(playerId, 'youRobbed', { playerName: playerToRobName, t_resource: 'resourceType.' + resourceType })
-                        gameContext.sendNotify(playerToRob.playerId, 'playerStoleFromYou', { playerName: activePlayer.name, t_resource: 'resourceType.' + resourceType })
+                        const resourceType = randomElement(getNonNullResurceTypes(playerToRob.resources))
+                        if (resourceType) {
+                            const resourceRob = initResources({
+                                [resourceType]: 1
+                            })
+                            this.removeResources(playerToRob, resourceRob)
+                            this.addResourcesToPlayer(privatePlayerState, resourceRob)
+                            const playerToRobName = game.players.find(p => p.userId == playerToRob.playerId)?.name
+                            gameContext.sendNotify(playerId, 'youRobbed', { playerName: playerToRobName, t_resource: 'resourceType.' + resourceType })
+                            gameContext.sendNotify(playerToRob.playerId, 'playerStoleFromYou', { playerName: activePlayer.name, t_resource: 'resourceType.' + resourceType })
+                        }
                     }
                 }
                 if (publicState.playerThrowedDices) {
@@ -460,7 +482,7 @@ export class CatanGameBackService implements GameBackService {
                 }
                 if (deal.type == CatanTradeType.BANK) {
                     this.removeResources(privatePlayerState, deal.offered)
-                    this.addResources(privatePlayerState, deal.required)
+                    this.addResourcesToPlayer(privatePlayerState, deal.required)
                 } else {
                     publicState.playerTradeOffer = {
                         playerId: playerId,
@@ -479,10 +501,10 @@ export class CatanGameBackService implements GameBackService {
                 if (action.accepted) {
                     const tradePlayerState = privateState.playersStates.find(ps => ps.playerId == tradeOffer.playerId)!
                     this.removeResources(privatePlayerState, tradeOffer.required)
-                    this.addResources(privatePlayerState, tradeOffer.offered)
+                    this.addResourcesToPlayer(privatePlayerState, tradeOffer.offered)
 
                     this.removeResources(tradePlayerState, tradeOffer.offered)
-                    this.addResources(tradePlayerState, tradeOffer.required)
+                    this.addResourcesToPlayer(tradePlayerState, tradeOffer.required)
                     publicState.playerTradeOffer = undefined
                     gameContext.sendNotify(tradeOffer.playerId, 'playerAcceptedDeal', { player: game.players.find(pl => pl.userId == playerId)?.name })
                 } else {
@@ -525,7 +547,8 @@ export class CatanGameBackService implements GameBackService {
                         return
                     case CatanDevelopmentCardType.YEAR_OF_PLENTY:
                         const resourceAction = action as CatanUseResourceDevelopmentCardAction
-                        this.addResources(privatePlayerState, resourceAction.resources)
+                        addResources(statistics.resourcesReceived, resourceAction.resources)
+                        this.addResourcesToPlayer(privatePlayerState, resourceAction.resources)
                 }
             }
         }
@@ -650,7 +673,7 @@ export class CatanGameBackService implements GameBackService {
         return true
     }
 
-    addResources(playerState: CatanPlayerPrivateState, resources: CatanResources) {
+    addResourcesToPlayer(playerState: CatanPlayerPrivateState, resources: CatanResources) {
         for (let [resourceType, resourceCount] of recordEntries(resources)) {
             playerState.resources[resourceType] += resourceCount
         }
