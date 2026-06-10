@@ -25,7 +25,8 @@ export class CatanGameBackService implements GameBackService {
                 playerId: player.userId,
                 points: 0,
                 openedDevelopmentCards: [],
-                specialCards: []
+                specialCards: [],
+                resourceCount: 0
             }
             return state
         })
@@ -607,6 +608,11 @@ export class CatanGameBackService implements GameBackService {
         )
 
         const maxPlayerPointsId = Array.from(allPoints.entries()).reduce((prev, current) => (prev[1]! > current[1]!) ? prev : current)[0]
+
+        publicState.playersStates.forEach(playerPublicState => {
+            const privatePlayerState = privateState.playersStates.find(pl => pl.playerId == playerPublicState.playerId)!
+            playerPublicState.resourceCount = getAllResourcesCount(privatePlayerState.resources)
+        })
 
         if (allPoints.get(maxPlayerPointsId)! >= settings.maxPoints) {
             game.status = GameStatusEnum.FINISHED

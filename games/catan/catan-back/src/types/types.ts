@@ -167,7 +167,8 @@ export enum CatanSpecialCard {
 
 export interface CatanPlayerPublicState extends PlayerPublicState {
     openedDevelopmentCards: CatanDevelopmentCardType[],
-    specialCards: CatanSpecialCard[]
+    specialCards: CatanSpecialCard[],
+    resourceCount: number
 }
 
 export enum CatanDiceValue {

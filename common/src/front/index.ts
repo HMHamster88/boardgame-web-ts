@@ -8,6 +8,7 @@ export interface GameFrontService {
     type: string
     readonly settingsComponent: Component
     readonly gameViewComponent: Component
+    readonly playerComponent: Component | undefined
     readonly localization: any
     gameStaticSettings: GameStaticSettings
 }

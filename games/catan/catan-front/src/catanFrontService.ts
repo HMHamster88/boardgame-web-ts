@@ -3,6 +3,7 @@ import type { Component } from "vue";
 
 import CatanSettings from "./components/CatanSettings.vue";
 import CatanGameView from "./components/CatanGameView.vue";
+import PlayerComponent from "./components/PlayerComponent.vue";
 
 export const catanGameType = "CATAN"
 
@@ -10,6 +11,7 @@ export class CatanFrontService implements GameFrontService {
     type: string = catanGameType
     settingsComponent: Component = CatanSettings
     gameViewComponent: Component = CatanGameView
+    playerComponent: Component = PlayerComponent
     localization: any = {
         en: {
             CATAN: 'Catan',

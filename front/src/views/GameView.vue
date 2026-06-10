@@ -14,6 +14,9 @@
                         </div>
                         <div v-if="playersPoints && playersPoints[index] != null" style="text-align: center;">
                             {{ t('playerPoints', { points: playersPoints[index] }) }}</div>
+                        <component :is="playerComponent" :player="player" :gameState="gameState">
+
+                        </component>
                     </div>
 
                 </o-tag>
@@ -126,6 +129,13 @@ function playerClassStyle(player: Player) {
         "active-player": player == activePlayer.value
     }
 }
+
+const playerComponent = computed(() => {
+    if (!gameState.value || !gameService.value) {
+        return null
+    }
+    return gameService.value.playerComponent
+})
 
 const gameViewComponent = computed(() => {
     if (!gameState.value || !gameService.value) {
