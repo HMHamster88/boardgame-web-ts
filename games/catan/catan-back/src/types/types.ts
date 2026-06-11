@@ -196,7 +196,6 @@ export interface CatanPlayerTradeOffer {
 export interface CatanGameStatistics extends GameStatistics {
     resourcesReceived: CatanResources,
     diceNumbersRolled: number[]
-    diceRolledCount: number
 }
 
 export interface CatanPublicGameState extends GamePublicState {

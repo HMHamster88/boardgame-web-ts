@@ -38,7 +38,11 @@
         <h2>{{ t('gameFinished') }}</h2>
         <p>{{ t('winners') }}</p>
         <span v-for="player in winners">{{ player.name }}</span>
-
+        <div v-if="gameState?.statistics">
+            <h4>{{ t('statistics') }}</h4>
+            <component :is="statisticsComponent" :statistics="gameState?.statistics">
+            </component>
+        </div>
     </div>
 
     <div v-if="showGameView" class="card flex-col">
@@ -72,6 +76,7 @@ const { messages, t } = useI18n({
     locale: 'en',
     messages: {
         en: {
+            statistics: 'Statistics',
             playerPoints: 'Points: {points}',
             connecting: 'Connecting...',
             connected: 'Connected',
@@ -83,6 +88,7 @@ const { messages, t } = useI18n({
             yourTurn: 'Your turn'
         },
         ru: {
+            statistics: 'Статистика',
             playerPoints: 'Очки: {points}',
             connecting: 'Подключение...',
             connected: 'Подключено',
@@ -135,6 +141,13 @@ const playerComponent = computed(() => {
         return null
     }
     return gameService.value.playerComponent
+})
+
+const statisticsComponent = computed(() => {
+    if (!gameState.value || !gameService.value) {
+        return null
+    }
+    return gameService.value.statisticsComponent
 })
 
 const gameViewComponent = computed(() => {

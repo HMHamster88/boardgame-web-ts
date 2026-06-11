@@ -1,5 +1,5 @@
-import { findByCoordsArray, GameStatusEnum, getEdgeNeighborhoodsPositions, getHexEdgesPositions, getHexNeighborhoodsPositions, getHexVerticesPositions, getShuffledArray, getVertexHexesPositions, handleMessage, isOutEdge, randomElement, randomEnumVal, rangeArray, recordAsArray, recordEntries, removeCopmarableElements, removeElement, Vector2D, type Game, type GameAction, type GameBackService, type GameContext, type GameSettings, type GameState, type MesasgeHandlers } from "boardgame-web-common/back";
-import { CatanBuyItemType, CatanDevelopmentCardType, CatanDiceValue, CatanGamePhase, CatanIntersectionObjectType, CatanResourceType, CatanSpecialCard, CatanTradeType, developmentCardPoints, developmentCardSaves, developmentCardsCount, getBuyItems, initResources, intersectionObjectRoBuyItem, type CatanField, type CatanFieldGenerationSettings, type CatanGameSettings, type CatanGameStatistics, type CatanHarbour, type CatanIntersection, type CatanPlayerPrivateState, type CatanPlayerPublicState, type CatanPrivateGameState, type CatanPublicGameState, type CatanResources, type CatanRoad, type CatanTerrainHex } from "./types/types";
+import { findByCoordsArray, GameStatusEnum, getEdgeNeighborhoodsPositions, getHexEdgesPositions, getHexNeighborhoodsPositions, getHexVerticesPositions, getShuffledArray, getVertexHexesPositions, handleMessage, isOutEdge, randomElement, rangeArray, recordAsArray, recordEntries, removeCopmarableElements, removeElement, Vector2D, type Game, type GameAction, type GameBackService, type GameContext, type GameSettings, type GameState, type MesasgeHandlers } from "boardgame-web-common/back";
+import { CatanBuyItemType, CatanDevelopmentCardType, CatanDiceValue, CatanGamePhase, CatanIntersectionObjectType, CatanSpecialCard, CatanTradeType, developmentCardPoints, developmentCardSaves, developmentCardsCount, getBuyItems, initResources, intersectionObjectRoBuyItem, type CatanField, type CatanFieldGenerationSettings, type CatanGameSettings, type CatanGameStatistics, type CatanHarbour, type CatanIntersection, type CatanPlayerPrivateState, type CatanPlayerPublicState, type CatanPrivateGameState, type CatanPublicGameState, type CatanResources, type CatanRoad, type CatanTerrainHex } from "./types/types";
 import { CatanGameFieldType } from "./types/catanGameFieldType";
 import { CatanTerrainHexType } from "./types/catanTerrainHexType";
 import _ from "lodash";
@@ -33,7 +33,6 @@ export class CatanGameBackService implements GameBackService {
         const statisctics: CatanGameStatistics = {
             turnCount: 0,
             diceNumbersRolled: [],
-            diceRolledCount: 0,
             resourcesReceived: initResources({})
         }
         const publicState: CatanPublicGameState = {
@@ -305,8 +304,6 @@ export class CatanGameBackService implements GameBackService {
 
                 const allDiceValue = (publicState.dices.redDice as number) + (publicState.dices.yellowDice)
                 publicState.playerThrowedDices = true
-
-                statistics.diceRolledCount++
 
                 let statisticsDiceNuberRolled = statistics.diceNumbersRolled[allDiceValue]
                 if (!statisticsDiceNuberRolled) {
