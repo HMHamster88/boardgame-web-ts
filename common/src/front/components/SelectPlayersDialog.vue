@@ -1,5 +1,6 @@
 <template>
-    <o-dialog v-model:active="showDialog" modal :header="multiple ? t('selctPlayers') : t('selectPlayer')">
+    <o-dialog v-model:active="showDialog" modal :header="multiple ? t('selctPlayers') : t('selectPlayer')"
+        :closable="false" :closeOnBackdrop="false" :closeOnEscape="false">
         <div class="flex items-center" style="margin-bottom: 1rem;">
             <o-listbox :multiple="multiple" v-model="selectedPlayes" :options="players" ariaLabel="name" checkmark
                 :highlightOnSelect="false" class="w-full md:w-56">

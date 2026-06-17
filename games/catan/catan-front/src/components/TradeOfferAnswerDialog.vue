@@ -1,5 +1,6 @@
 <template>
-    <Dialog v-model:visible="showDialog" modal :header="t('waitingForPlayerAnswers')">
+    <o-dialog v-model:active="showDialog" modal :title="t('waitingForPlayerAnswers')" :closable="false"
+        :closeOnBackdrop="false" :closeOnEscape="false">
         <div class="flex flex-col">
             <div class="flex justify-center items-center gap-4 mb-8 flex-col">
                 <div v-for="player in notAnsweredPlayers">
@@ -7,10 +8,12 @@
                 </div>
             </div>
         </div>
-    </Dialog>
+    </o-dialog>
 </template>
 
 <script setup lang="ts">
+
+import { ODialog } from '@oruga-ui/oruga-next';
 import { computed, type PropType } from 'vue'
 import type { CatanPlayerTradeOffer } from 'catan-back'
 import { useI18n } from 'vue-i18n'

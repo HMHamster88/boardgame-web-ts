@@ -1,5 +1,6 @@
 <template>
-    <o-dialog :active="showDialog" :title="t('resourceExchange')" :closeOnBackdrop="false">
+    <o-dialog :active="showDialog" :title="t('resourceExchange')" :closable="false" :closeOnBackdrop="false"
+        :closeOnEscape="false">
         <template #content>
             <div class="flex flex-col">
                 <o-select v-model="deal.type" :options="tradeTypes">

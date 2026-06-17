@@ -1,5 +1,6 @@
 <template>
-    <o-dialog v-model:active="showDialog" modal :header="t('developmentCard')" :closable="false">
+    <o-dialog v-model:active="showDialog" modal :header="t('developmentCard')" :closable="false"
+        :closeOnBackdrop="false" :closeOnEscape="false">
         <div class="flex justify-center  m-1 mb-2">
             <img :src="developmentCardsImgs[developmentCard]" class="dev-card">
             </img>
