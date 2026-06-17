@@ -48,7 +48,8 @@ export class CatanGameBackService implements GameBackService {
             playerThrowedDices: false,
             playerTradeOffer: undefined,
             longestRoad: [],
-            statistics: statisctics
+            statistics: statisctics,
+            onHandResources: initResources({})
         }
         const privatePlayerStates = game.players.map(player => {
             const state: CatanPlayerPrivateState = {
@@ -634,6 +635,14 @@ export class CatanGameBackService implements GameBackService {
             const privatePlayerState = privateState.playersStates.find(pl => pl.playerId == playerPublicState.playerId)!
             playerPublicState.resourceCount = getAllResourcesCount(privatePlayerState.resources)
         })
+
+        const onHandResource = initResources({})
+
+        privateState.playersStates.forEach(pl => {
+            addResources(onHandResource, pl.resources)
+        })
+
+        publicState.onHandResources = onHandResource
 
         if (allPoints.get(maxPlayerPointsId)! >= settings.maxPoints) {
             game.status = GameStatusEnum.FINISHED

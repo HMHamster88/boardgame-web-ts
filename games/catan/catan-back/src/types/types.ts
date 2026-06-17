@@ -207,6 +207,7 @@ export interface CatanPublicGameState extends GamePublicState {
     playerThrowedDices: boolean
     playerTradeOffer: CatanPlayerTradeOffer | undefined,
     longestRoad: CatanRoad[]
+    onHandResources: CatanResources
 }
 
 export type CatanResources = Record<CatanResourceType, number>

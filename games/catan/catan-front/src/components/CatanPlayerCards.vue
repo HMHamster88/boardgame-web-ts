@@ -22,7 +22,7 @@
                     </div>
                 </div>
                 <span v-if="openedDevelopmentCards.length" class="cards-delimeter">{{ t('usedDevelopmentCards')
-                    }}</span>
+                }}</span>
                 <div class="flex justify-center">
                     <div v-for="devCard in openedDevelopmentCards" class="resource-card"
                         style="display: flex; flex-direction: column; justify-content: center; align-items: center;">
@@ -42,29 +42,21 @@
                 </div>
             </div>
         </div>
-        <div class="flex justify-center gap-3">
-            <div class="flex overflow-auto gap-2 items-center">
-                <o-icon icon="sigma"></o-icon>
-                <span class="no-wrap">{{ allResourcesCount }}</span>
-                <div v-for="[resourceType, resourceCount] in recordEntries(resources)" class="flex items-center">
-                    <img class="resource-icon" :src="resourcesImages[resourceType]"></img>
-                    <span class="m-1">{{ resourceCount }}</span>
-                </div>
-            </div>
-        </div>
+        <ResorcesComponent :resources="resources"></ResorcesComponent>
         <DevelopmentCardDialog ref="devCardDialog" :is-local-player-turn="isLocalPlayerTurn"></DevelopmentCardDialog>
     </div>
 </template>
 
 <script setup lang="ts">
-import { OIcon } from '@oruga-ui/oruga-next';
+
 import { computed, ref, useTemplateRef, watch, type PropType } from 'vue';
 import { rangeArray, recordEntries, removeElement } from 'boardgame-web-common';
 import type { CatanUseDevelopmentCardAction } from 'catan-back';
 import { CatanSpecialCard, initResources, type CatanDevelopmentCardType, type CatanResources, getAllResourcesCount } from 'catan-back';
 import DevelopmentCardDialog from './DevelopmentCardDialog.vue';
-import { developmentCardsImgs, resourceCardsImg, resourcesImages, specialCardsImgs } from './graphics';
+import { developmentCardsImgs, resourceCardsImg, specialCardsImgs } from './graphics';
 import { useI18n } from 'vue-i18n';
+import ResorcesComponent from './ResorcesComponent.vue';
 
 let localization: any = {
     en: {
@@ -120,10 +112,6 @@ async function clickDevCard(devCard: CatanDevelopmentCardType) {
         emit('useDevCard', action)
     }
 }
-
-const allResourcesCount = computed(() => {
-    return getAllResourcesCount(props.resources)
-})
 
 const emit = defineEmits<{
     (e: 'useDevCard', action: CatanUseDevelopmentCardAction): void

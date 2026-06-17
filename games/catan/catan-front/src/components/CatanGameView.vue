@@ -1,4 +1,6 @@
 <template>
+    <div class="flex justify-center items-center mb-2">{{ t('onHandResources') }}</div>
+    <ResorcesComponent :resources="gameState.onHandResources"></ResorcesComponent>
     <div>
         <CatanHexGrid v-if="gameState.field" :field="gameState.field" @road-overlay-click="roadOverlayClick"
             :longest-road="gameState.longestRoad" :players="game.players"
@@ -132,6 +134,7 @@ import { resourcesImages } from './graphics';
 import PlayerTradeOfferDialog from './PlayerTradeOfferDialog.vue';
 import TradeOfferAnswerDialog from './TradeOfferAnswerDialog.vue';
 import BuyItemIcon from './BuyItemIcon.vue';
+import ResorcesComponent from "./ResorcesComponent.vue";
 
 const { t } = useI18n({
     locale: 'en',
@@ -170,7 +173,8 @@ const { t } = useI18n({
                 SETTLEMENT: 'Choose place for settlement',
                 CITY: 'Choose settlement for upgrade'
             },
-            discardCards: 'Discard cards'
+            discardCards: 'Discard cards',
+            onHandResources: 'Players on hand resources'
         },
         ru: {
             buy: 'Купить',
@@ -206,7 +210,8 @@ const { t } = useI18n({
                 SETTLEMENT: 'Выберите место для поселения',
                 CITY: 'Выберите поселение для улучшения'
             },
-            discardCards: 'Сбросить карты'
+            discardCards: 'Сбросить карты',
+            onHandResources: 'Ресурсы на руках у игроков'
         }
     }
 })
