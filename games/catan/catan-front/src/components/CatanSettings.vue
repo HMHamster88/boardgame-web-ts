@@ -12,7 +12,10 @@
                 <o-switch :label="t('spreadHexTypes')" v-model="settings.fieldGenerationSettings.spreadHexTypes" />
             </o-field>
             <o-field :label="t('maxPoints')">
-                <o-input :model-value="settings.maxPoints" number type="number" :min="4" placeholder="Number" />
+                <o-input v-model="settings.maxPoints" number type="number" :min="4" placeholder="Number" />
+            </o-field>
+            <o-field :label="t('maxResorceCount')">
+                <o-input v-model="settings.maxResourceCount" number type="number" :min="4" placeholder="Number" />
             </o-field>
             <o-field>
                 <o-button v-on:click="generateGameField">{{ t('generateField') }}</o-button>
@@ -45,7 +48,8 @@ const { t } = useI18n({
             fieldType: 'Field Type:',
             generateField: 'Generate Field',
             spreadHexTypes: 'Spread hex types',
-            spreadCircularNumbers: 'Spread Circular Numbers'
+            spreadCircularNumbers: 'Spread Circular Numbers',
+            maxResorceCount: 'Mximum resource count'
         },
         ru: {
             fieldTypes: {
@@ -55,7 +59,8 @@ const { t } = useI18n({
             fieldType: 'Тип Поля:',
             generateField: 'Сгенерировать поле',
             spreadHexTypes: 'Распределить типы гексов',
-            spreadCircularNumbers: 'Распределить номера'
+            spreadCircularNumbers: 'Распределить номера',
+            maxResorceCount: 'Максимальное количество ресурсов'
         }
     }
 })

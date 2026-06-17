@@ -157,7 +157,8 @@ export interface CatanFieldGenerationSettings {
 export interface CatanGameSettings extends GameSettings {
     fieldGenerationSettings: CatanFieldGenerationSettings
     field: CatanField
-    maxPoints: number
+    maxPoints: number,
+    maxResourceCount: number
 }
 
 export enum CatanSpecialCard {

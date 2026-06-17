@@ -103,7 +103,8 @@ export class CatanGameBackService implements GameBackService {
             id: '',
             fieldGenerationSettings: fieldGenerationSettings,
             field: this.generateField(fieldGenerationSettings),
-            maxPoints: 10
+            maxPoints: 10,
+            maxResourceCount: 7
         }
         return settings
     }
@@ -317,7 +318,7 @@ export class CatanGameBackService implements GameBackService {
                     let anyoneHasResourceExcess = false
                     for (let player of privateState.playersStates) {
                         const allResourcesCount = getAllResourcesCount(player.resources)
-                        const maxPlayerResources = this.maxPlayerResources(player)
+                        const maxPlayerResources = this.maxPlayerResources(player, settings)
 
                         if (allResourcesCount > maxPlayerResources) {
                             const discardCardsCount = Math.floor(allResourcesCount / 2)
@@ -644,8 +645,8 @@ export class CatanGameBackService implements GameBackService {
         return playerState.openedDevelopmentCards.filter(devCard => devCard == CatanDevelopmentCardType.KNIGNT).length
     }
 
-    maxPlayerResources(_playerState: CatanPlayerPrivateState) {
-        return 7
+    maxPlayerResources(_playerState: CatanPlayerPrivateState, settings: CatanGameSettings) {
+        return settings.maxResourceCount
     }
 
     checkPlayerHasResources(playerState: CatanPlayerPrivateState, resources: CatanResources): boolean {
