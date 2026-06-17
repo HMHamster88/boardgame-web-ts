@@ -24,7 +24,7 @@
         <o-dropdown :active="buyMenuActive" @open="buyClick()">
             <template #trigger>
                 <o-tooltip :label="t('buy')">
-                    <o-button :disabled="!canBuy" icon-left="cart-arrow-down"></o-button>
+                    <o-button icon-left="cart-arrow-down"></o-button>
                 </o-tooltip>
             </template>
             <o-dropdown-item v-for="item in buyItems" @click="buyItemClick(item)">
@@ -374,6 +374,9 @@ function buyItemClick(item: CatanBuyItem) {
 }
 
 function canBuyItem(item: CatanBuyItem): boolean {
+    if (!canBuy.value) {
+        return false
+    }
     if (!availableBuyItems.value) {
         return false
     }
