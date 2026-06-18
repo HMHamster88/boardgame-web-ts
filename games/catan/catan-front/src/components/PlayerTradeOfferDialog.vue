@@ -1,7 +1,7 @@
 <template>
     <o-dialog v-model:active="showDialog" modal :title="t('playerTradeOffer', { player: playerName?.name })"
         :closable="false" :closeOnBackdrop="false" :closeOnEscape="false">
-        <div class="flex flex-col">
+        <div class="flex flex-col items-center">
             <div class="flex justify-center items-center gap-4 mb-8">
                 <div class="flex flex-col gap-1 items-center" style="width: 50%;">
                     <span>{{ t('playerOffer') }}</span>
@@ -28,6 +28,8 @@
                     </div>
                 </div>
             </div>
+            <span>{{ t('yourResources') }}</span>
+            <ResorcesComponent :resources="availableResources"></ResorcesComponent>
         </div>
         <div class="flex justify-end gap-2">
             <o-button type="button" :label="$t('reject')" severity="secondary" @click="close(false)"></o-button>
@@ -46,19 +48,22 @@ import type { Player } from 'boardgame-web-common'
 import { filterRecord, partialRecordEntries, recordEntries } from 'boardgame-web-common'
 import { type CatanPlayerTradeOffer, type CatanResources, type CatanResourceType } from 'catan-back'
 import { resourcesImages } from './graphics'
+import ResorcesComponent from "./ResorcesComponent.vue";
 
 let localization: any = {
     en: {
         playerTradeOffer: '{player} offered a deal',
         playerOffer: 'Player offer',
         playerWants: 'Player Wants',
-        youHave: 'You have'
+        youHave: 'You have',
+        yourResources: 'Your Resources'
     },
     ru: {
         playerTradeOffer: '{player} предлагает сделку',
         playerOffer: 'Игрок предлагает',
         playerWants: 'Игрок хочет',
-        youHave: 'У вас имеется'
+        youHave: 'У вас имеется',
+        yourResources: 'Ваши ресурсы'
     }
 }
 const { t } = useI18n({
