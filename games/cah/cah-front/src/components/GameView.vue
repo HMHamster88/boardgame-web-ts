@@ -1,28 +1,27 @@
 <template>
     <div style="width: 100%;">
-        <div v-if="gameState.phase == CahGamePhase.ACTIVE_PLAYER_CHOOSE_ANSWERS">
-            <div class="white-card-container">
+        <div class="flex items-center" style="flex-direction: column">
+            <div v-if="gameState.phase == CahGamePhase.PLAYERS_CHOOSE_ANSWERS" class="red-card"
+                v-html="modifiedQuestionText">
+            </div>
+
+            <div class="white-card-container" v-if="gameState.phase == CahGamePhase.ACTIVE_PLAYER_CHOOSE_ANSWERS">
                 <div v-for="qaCard in questionAnswersCards" :class="qaCardClassStyle(qaCard)"
                     v-on:click="selectQACard(qaCard)" v-html="qaCard.text">
                 </div>
             </div>
-            <o-button v-if="isLocalPlayerTurn" v-on:click="submitQA" :disabled="submitQaDisabled">{{ t('submit')
-                }}</o-button>
-        </div>
-        <div class="flex items-center" style="flex-direction: column"
-            v-if="gameState.phase == CahGamePhase.PLAYERS_CHOOSE_ANSWERS">
-            <div class="red-card" v-html="modifiedQuestionText">
-            </div>
-            <div v-if="!isLocalPlayerTurn" style="width: 100%;">
+
+            <div style="width: 100%;">
                 <div class="white-card-container">
                     <div v-for="answerCard in playerAnswersCards" :class="answerCardClassStyle(answerCard)"
                         v-on:click="selectAnswerCard(answerCard)">
                         {{ answerCard.text }}
                     </div>
                 </div>
-                <o-button v-on:click="submitAnswers" :disabled="submitAnswersDisabled">{{ t('submit') }}</o-button>
             </div>
         </div>
+
+        <o-button v-on:click="submit" :disabled="!submitEnabled">{{ t('submit') }}</o-button>
     </div>
 </template>
 
@@ -62,9 +61,32 @@ interface QuestionAnswerCard {
 
 const selectedQaCard = ref<QuestionAnswerCard | null>(null)
 
-const submitQaDisabled = computed(() => {
-    return !selectedQaCard.value
+
+const submitEnabled = computed(() => {
+    switch (props.gameState.phase) {
+        case CahGamePhase.ACTIVE_PLAYER_CHOOSE_ANSWERS:
+            return isLocalPlayerTurn.value && selectedQaCard.value
+        case CahGamePhase.PLAYERS_CHOOSE_ANSWERS:
+            return !isLocalPlayerTurn.value && selectedAnswers.value.length == requiredAnswersCount.value &&
+                props.playerPrivateState.onHandAswersIds.length == cahPlayerCardsCount
+        default:
+            return false
+    }
 })
+
+function submit() {
+    switch (props.gameState.phase) {
+        case CahGamePhase.ACTIVE_PLAYER_CHOOSE_ANSWERS:
+            submitQA()
+            break
+        case CahGamePhase.PLAYERS_CHOOSE_ANSWERS:
+            if (isLocalPlayerTurn.value) {
+                return
+            }
+            submitAnswers()
+            break
+    }
+}
 
 function submitQA() {
     performAction<CahSelectAnswerAction>({
@@ -111,9 +133,7 @@ function submitAnswers() {
     selectedAnswers.value = []
 }
 
-const submitAnswersDisabled = computed(() => {
-    return selectedAnswers.value.length != requiredAnswersCount.value || props.playerPrivateState.onHandAswersIds.length != cahPlayerCardsCount
-})
+
 
 function countOccurrences(mainString: string, subString: string): number {
     const regex = new RegExp(subString, 'gi');
@@ -187,6 +207,12 @@ const playerAnswersCards = computed(() => {
 })
 
 function selectAnswerCard(answerCard: AnswerCard) {
+    if (isLocalPlayerTurn.value) {
+        return
+    }
+    if (submittedLocalPlayerAnswer.value) {
+        return
+    }
     const alreadeSelectedIndex = selectedAnswers.value.findIndex(answer => answer.id == answerCard.id)
     if (alreadeSelectedIndex >= 0) {
         selectedAnswers.value.splice(alreadeSelectedIndex, 1)
@@ -258,6 +284,7 @@ const props = defineProps({
     width: 100%;
     gap: 1rem;
     padding-bottom: 1rem;
+    margin-bottom: 1rem;
 }
 
 .white-card {
