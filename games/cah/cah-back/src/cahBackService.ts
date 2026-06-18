@@ -132,6 +132,7 @@ export class CahGameBackService implements GameBackService {
                 if (publicState.playersSlectedAswers.length >= privateState.playersStates.length - 1) {
                     publicState.playersSlectedAswers = getShuffledArray(publicState.playersSlectedAswers)
                     publicState.phase = CahGamePhase.ACTIVE_PLAYER_CHOOSE_ANSWERS
+                    gameContext.sendNotify(activePlayerId, 'selectCard', undefined)
                 }
             },
             CahSelectAnswerAction: (action) => {

@@ -15,10 +15,12 @@ export class CatanFrontService implements GameFrontService {
     statisticsComponent: Component | undefined = undefined
     localization: any = {
         en: {
-            CARDS_AGAINST_HUMANITY: 'Cards Against Humanity'
+            CARDS_AGAINST_HUMANITY: 'Cards Against Humanity',
+            selectCard: 'Select Red Card'
         },
         ru: {
-            CARDS_AGAINST_HUMANITY: 'Карты против всех'
+            CARDS_AGAINST_HUMANITY: 'Карты против всех',
+            selectCard: 'Выберите красную карту'
         }
     }
     gameStaticSettings = {
