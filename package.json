@@ -15,8 +15,8 @@
   "type": "commonjs",
   "main": "index.js",
   "scripts": {
-    "install-all": "npm install --prefix ./common --legacy-peer-deps && npm install --prefix ./back --legacy-peer-deps && npm install --prefix ./front --legacy-peer-deps && npm install --prefix ./games/catan/catan-back --legacy-peer-deps && npm install --prefix ./games/catan/catan-front --legacy-peer-deps",
-    "build-all": "npm run build --prefix ./common && npm run build --prefix ./games/catan/catan-back && npm run build --prefix ./games/catan/catan-front && npm run build --prefix ./front && npm run build --prefix ./back",
+    "install-all": "npm install --prefix ./common --legacy-peer-deps && npm install --prefix ./back --legacy-peer-deps && npm install --prefix ./front --legacy-peer-deps && npm install --prefix ./games/catan/catan-back --legacy-peer-deps && npm install --prefix ./games/catan/catan-front --legacy-peer-deps && npm install --prefix ./games/cah/cah-back --legacy-peer-deps && npm install --prefix ./games/cah/cah-front --legacy-peer-deps",
+    "build-all": "npm run build --prefix ./common && npm run build --prefix ./games/catan/catan-back && npm run build --prefix ./games/catan/catan-front && npm run build --prefix ./games/cah/cah-back && npm run build --prefix ./games/cah/cah-front && npm run build --prefix ./front && npm run build --prefix ./back",
     "start": "npm run start --prefix ./back"
   },
   "dependencies": {
