@@ -106,7 +106,8 @@ export class CatanGameBackService implements GameBackService {
             field: this.generateField(fieldGenerationSettings),
             maxPoints: 10,
             maxResourceCount: 7,
-            resourcesForEachEvenSettlement: true
+            resourcesForEachEvenSettlement: true,
+            resourceForRobberOnVacantHex: true
         }
         return settings
     }
@@ -467,6 +468,11 @@ export class CatanGameBackService implements GameBackService {
                             gameContext.sendNotify(playerToRob.playerId, 'playerStoleFromYou', { playerName: activePlayer.name, t_resource: 'resourceType.' + resourceType })
                         }
                     }
+                } else if (settings.resourceForRobberOnVacantHex) {
+                    const hex = field.hexes.find(hex => Vector2D.equals(hex.position, action.position))
+                    const resources = this.getHexResources(hex?.type!, CatanIntersectionObjectType.SETTLEMENT)
+                    this.addResourcesToPlayer(privatePlayerState, resources)
+                    addResources(statistics.resourcesReceived, resources)
                 }
                 if (publicState.playerThrowedDices) {
                     publicState.phase = CatanGamePhase.PLAYER_TURN

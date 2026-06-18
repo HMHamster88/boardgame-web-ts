@@ -160,6 +160,7 @@ export interface CatanGameSettings extends GameSettings {
     maxPoints: number
     maxResourceCount: number
     resourcesForEachEvenSettlement: boolean
+    resourceForRobberOnVacantHex: boolean
 }
 
 export enum CatanSpecialCard {

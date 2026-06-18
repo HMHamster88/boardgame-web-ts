@@ -22,6 +22,9 @@
                     v-model="settings.resourcesForEachEvenSettlement" />
             </o-field>
             <o-field>
+                <o-switch :label="t('resourceForRobberOnVacantHex')" v-model="settings.resourceForRobberOnVacantHex" />
+            </o-field>
+            <o-field>
                 <o-button v-on:click="generateGameField">{{ t('generateField') }}</o-button>
             </o-field>
         </div>
@@ -54,7 +57,8 @@ const { t } = useI18n({
             spreadHexTypes: 'Spread hex types',
             spreadCircularNumbers: 'Spread Circular Numbers',
             maxResorceCount: 'Mximum resource count',
-            resourcesForEachEvenSettlement: 'Resources For Each Even Settlement'
+            resourcesForEachEvenSettlement: 'Resources For Each Even Settlement',
+            resourceForRobberOnVacantHex: "Resource For Robber On Vacant Hex"
         },
         ru: {
             fieldTypes: {
@@ -66,7 +70,8 @@ const { t } = useI18n({
             spreadHexTypes: 'Распределить типы гексов',
             spreadCircularNumbers: 'Распределить номера',
             maxResorceCount: 'Максимальное количество ресурсов',
-            resourcesForEachEvenSettlement: 'Ресурсы за каждое второе поселение'
+            resourcesForEachEvenSettlement: 'Ресурсы за каждое второе поселение',
+            resourceForRobberOnVacantHex: "Ресурс за разбойников на не занятом гексе"
         }
     }
 })
