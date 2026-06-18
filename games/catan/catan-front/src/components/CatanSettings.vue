@@ -18,6 +18,10 @@
                 <o-input v-model="settings.maxResourceCount" number type="number" :min="4" placeholder="Number" />
             </o-field>
             <o-field>
+                <o-switch :label="t('resourcesForEachEvenSettlement')"
+                    v-model="settings.resourcesForEachEvenSettlement" />
+            </o-field>
+            <o-field>
                 <o-button v-on:click="generateGameField">{{ t('generateField') }}</o-button>
             </o-field>
         </div>
@@ -49,7 +53,8 @@ const { t } = useI18n({
             generateField: 'Generate Field',
             spreadHexTypes: 'Spread hex types',
             spreadCircularNumbers: 'Spread Circular Numbers',
-            maxResorceCount: 'Mximum resource count'
+            maxResorceCount: 'Mximum resource count',
+            resourcesForEachEvenSettlement: 'Resources For Each Even Settlement'
         },
         ru: {
             fieldTypes: {
@@ -60,7 +65,8 @@ const { t } = useI18n({
             generateField: 'Сгенерировать поле',
             spreadHexTypes: 'Распределить типы гексов',
             spreadCircularNumbers: 'Распределить номера',
-            maxResorceCount: 'Максимальное количество ресурсов'
+            maxResorceCount: 'Максимальное количество ресурсов',
+            resourcesForEachEvenSettlement: 'Ресурсы за каждое второе поселение'
         }
     }
 })

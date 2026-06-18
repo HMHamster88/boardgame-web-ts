@@ -1,10 +1,10 @@
-import { findByCoordsArray, GameStatusEnum, getEdgeNeighborhoodsPositions, getHexEdgesPositions, getHexNeighborhoodsPositions, getHexVerticesPositions, getShuffledArray, getVertexHexesPositions, handleMessage, isOutEdge, randomElement, rangeArray, recordAsArray, recordEntries, removeCopmarableElements, removeElement, Vector2D, type Game, type GameAction, type GameBackService, type GameContext, type GameSettings, type GameState, type MesasgeHandlers } from "boardgame-web-common/back";
+import { findByCoordsArray, GameStatusEnum, getEdgeNeighborhoodsPositions, getHexEdgesPositions, getHexNeighborhoodsPositions, getHexVerticesPositions, getShuffledArray, getVertexHexesPositions, handleMessage, isOutEdge, randomElement, rangeArray, recordAsArray, recordEntries, removeCopmarableElements, removeElement, Vector2D, type Game, type GameAction, type GameBackService, type GameContext, type GameSettings, type GameState, type MesasgeHandlers, type Vector2DLike } from "boardgame-web-common/back";
 import { CatanBuyItemType, CatanDevelopmentCardType, CatanDiceValue, CatanGamePhase, CatanIntersectionObjectType, CatanSpecialCard, CatanTradeType, developmentCardPoints, developmentCardSaves, developmentCardsCount, getBuyItems, initResources, intersectionObjectRoBuyItem, type CatanField, type CatanFieldGenerationSettings, type CatanGameSettings, type CatanGameStatistics, type CatanHarbour, type CatanIntersection, type CatanPlayerPrivateState, type CatanPlayerPublicState, type CatanPrivateGameState, type CatanPublicGameState, type CatanResources, type CatanRoad, type CatanTerrainHex } from "./types/types";
 import { CatanGameFieldType } from "./types/catanGameFieldType";
 import { CatanTerrainHexType } from "./types/catanTerrainHexType";
 import _ from "lodash";
 import type { CatanBuildIntObjectAction, CatanBuildRoadAction, CatanBuyDevelopmentCardAction, CatanDiscardResourceCards, CatanEmbarkAction, CatanEndTurnAction, CatanGenerateFieldAction, CatanMoveRobberAction, CatanRollDicesAction, CatanTradeAction, CatanTradeResponseAction, CatanUseDevelopmentCardAction, CatanUseResourceDevelopmentCardAction, CatanUseResourceTypeDevelopmentCardAction } from "./types/actions";
-import { addResources, checkDeal, findLongestRoad, getAllResourcesCount, getNonNullResurceTypes, getPlayerPrices, moveAllResourcesByType } from "./types/utils";
+import { addResources, checkDeal, findLongestRoad, getAllResourcesCount, getNonNullResurceTypes, getPlayerPrices, loaclityTypes, moveAllResourcesByType } from "./types/utils";
 
 const embarkRoadsCount = 2
 const minLargestArmyCount = 3
@@ -105,7 +105,8 @@ export class CatanGameBackService implements GameBackService {
             fieldGenerationSettings: fieldGenerationSettings,
             field: this.generateField(fieldGenerationSettings),
             maxPoints: 10,
-            maxResourceCount: 7
+            maxResourceCount: 7,
+            resourcesForEachEvenSettlement: true
         }
         return settings
     }
@@ -260,14 +261,9 @@ export class CatanGameBackService implements GameBackService {
                 field.roads.push(road)
 
                 if (publicState.phase == CatanGamePhase.EMBARK_SECOND) {
-                    const hexPoitions = getVertexHexesPositions(settlement.position!)
-                    const hexes = hexPoitions.map(hexPos => field.hexes.find(hex => Vector2D.equals(hexPos, hex.position))).filter(hex => hex)
-                    const resources = hexes.map(hex => hex?.type!)
-                        .map(hexType => this.getHexResources(hexType, settlement.intersectionObjects[0]?.type!))
-                    resources.forEach(resource => {
-                        this.addResourcesToPlayer(activePlayerPrivteState, resource)
-                        addResources(statistics.resourcesReceived, resource)
-                    })
+                    const resources = this.getResourcesForIntersection(field, settlement.position!, CatanIntersectionObjectType.SETTLEMENT)
+                    this.addResourcesToPlayer(activePlayerPrivteState, resources)
+                    addResources(statistics.resourcesReceived, resources)
                 }
 
                 const roadsCount = field.roads.length
@@ -419,6 +415,14 @@ export class CatanGameBackService implements GameBackService {
                     intObject = {
                         type: action.objectType,
                         playerId: playerId
+                    }
+                    if (settings.resourcesForEachEvenSettlement && action.objectType == CatanIntersectionObjectType.SETTLEMENT) {
+                        const localitiesCount = field.intersections.flatMap(int => int.intersectionObjects).filter(obj => obj.playerId == playerId && loaclityTypes.includes(obj.type)).length
+                        if ((localitiesCount + 1) % 2 == 0) {
+                            const resources = this.getResourcesForIntersection(field, action.position, CatanIntersectionObjectType.SETTLEMENT)
+                            this.addResourcesToPlayer(activePlayerPrivteState, resources)
+                            addResources(statistics.resourcesReceived, resources)
+                        }
                     }
                     int.intersectionObjects.push(intObject)
                 }
@@ -648,6 +652,18 @@ export class CatanGameBackService implements GameBackService {
             game.status = GameStatusEnum.FINISHED
             gameState.publicState.winnersIds = [maxPlayerPointsId!]
         }
+    }
+
+    getResourcesForIntersection(field: CatanField, position: Vector2DLike, objType: CatanIntersectionObjectType): CatanResources {
+        const hexPoitions = getVertexHexesPositions(position)
+        const hexes = hexPoitions.map(hexPos => field.hexes.find(hex => Vector2D.equals(hexPos, hex.position))).filter(hex => hex)
+        const resourcesList = hexes.map(hex => hex?.type!)
+            .map(hexType => this.getHexResources(hexType, CatanIntersectionObjectType.SETTLEMENT))
+        const result = initResources({})
+        resourcesList.forEach(resource => {
+            addResources(result, resource)
+        })
+        return result
     }
 
     armyCount(playerState: CatanPlayerPublicState) {
