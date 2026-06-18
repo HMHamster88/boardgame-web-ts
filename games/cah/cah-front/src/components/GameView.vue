@@ -7,7 +7,7 @@
                 </div>
             </div>
             <o-button v-if="isLocalPlayerTurn" v-on:click="submitQA" :disabled="submitQaDisabled">{{ t('submit')
-            }}</o-button>
+                }}</o-button>
         </div>
         <div class="flex items-center" style="flex-direction: column"
             v-if="gameState.phase == CahGamePhase.PLAYERS_CHOOSE_ANSWERS">
@@ -140,10 +140,17 @@ const modifiedQuestionText = computed(() => {
     if (!questionText.value) {
         return null
     }
+    const answersToReplace = submittedLocalPlayerAnswer.value ? submittedLocalPlayerAnswer.value.answersIds.map(answerId => {
+        const answerCard: AnswerCard = {
+            id: answerId,
+            text: answers[answerId]
+        }
+        return answerCard
+    }) : selectedAnswers.value
     const toReplaceList = Array.from({ length: requiredAnswersCount.value }, (_v, i) => i)
         .map(i => {
-            if (selectedAnswers.value.length > i) {
-                return selectedAnswers.value[i]?.text!
+            if (answersToReplace.length > i) {
+                return answersToReplace[i]?.text!
             }
             return '_______'
         })
@@ -191,6 +198,14 @@ function selectAnswerCard(answerCard: AnswerCard) {
     }
     selectedAnswers.value.push(answerCard)
 }
+
+const localPlayer = computed(() => {
+    return props.game.players[props.localPlayerIndex]
+})
+
+const submittedLocalPlayerAnswer = computed(() => {
+    return props.gameState.playersSlectedAswers.find(answer => answer.playerId == localPlayer.value.userId)
+})
 
 function performAction<T extends GameAction>(action: T) {
     emit('performAction', action)
