@@ -1,16 +1,17 @@
 import type { GameFrontService } from "boardgame-web-common/front";
 import type { Component } from "vue";
 
-import CatanSettings from "./components/Settings.vue";
-import CatanGameView from "./components/GameView.vue";
+import SettingsComponent from "./components/Settings.vue";
+import CahGameView from "./components/GameView.vue";
+import PlayerComponent from "./components/PlayerComponent.vue";
 
 export const cahGameType = "CARDS_AGAINST_HUMANITY"
 
 export class CatanFrontService implements GameFrontService {
     type: string = cahGameType
-    settingsComponent: Component = CatanSettings
-    gameViewComponent: Component = CatanGameView
-    playerComponent: Component | undefined = undefined
+    settingsComponent: Component = SettingsComponent
+    gameViewComponent: Component = CahGameView
+    playerComponent: Component | undefined = PlayerComponent
     statisticsComponent: Component | undefined = undefined
     localization: any = {
         en: {
