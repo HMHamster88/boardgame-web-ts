@@ -21,7 +21,7 @@
     "dist"
   ],
   "scripts": {
-    "build": "tsdown & npm run copy-dist",
+    "build": "tsdown && npm run copy-dist",
     "dev": "tsdown --watch",
     "test": "vitest",
     "typecheck": "tsc --noEmit",
