@@ -3,6 +3,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    volumes:
+      - ./back/db:/usr/src/app/back/db
     ports:
       - "8000:8000"
     environment:
