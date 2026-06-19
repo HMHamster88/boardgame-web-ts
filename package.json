@@ -22,7 +22,7 @@
     "install-catan-back": "npm install --prefix ./games/catan/catan-back --legacy-peer-deps",
     "install-catan-front": "npm install --prefix ./games/catan/catan-front --legacy-peer-deps",
     "install-cah-back": "npm install --prefix ./games/cah/cah-back --legacy-peer-deps",
-    "install-cah-front": "npm install --prefix ./games/cah/cah-back --legacy-peer-deps",
+    "install-cah-front": "npm install --prefix ./games/cah/cah-front --legacy-peer-deps",
     "build-all": "npm run build-common && npm run build-catan-back && npm run build-catan-front && npm run build-cah-back && npm run build-cah-front && npm run build-front && npm run build-back",
     "build-common": "npm run build --prefix ./common",
     "build-back": "npm run build --prefix ./back",
