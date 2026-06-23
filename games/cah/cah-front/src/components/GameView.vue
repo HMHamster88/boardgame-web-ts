@@ -15,7 +15,7 @@
                 <div class="white-card-container">
                     <div v-for="answerCard in playerAnswersCards" :class="answerCardClassStyle(answerCard)"
                         v-on:click="selectAnswerCard(answerCard)">
-                        {{ answerCard.text }}
+                        {{ answerCard.text[WordCase.NOMINATIVE_CASE] }}
                     </div>
                 </div>
             </div>
@@ -36,7 +36,7 @@ import { useI18n } from 'vue-i18n';
 import { type Game } from 'boardgame-web-common';
 import type { GameAction } from 'boardgame-web-common';
 
-import { answers, CahGamePhase, cahPlayerCardsCount, questions, type CahGamePublicState, type CahPrivatePlayerState, type CahSelectAnswerAction, type CahSendAnswersAction, type PlayerAnswers } from "cah-back";
+import { answers, CahGamePhase, cahPlayerCardsCount, questions, WordCase, type CahGamePublicState, type CahPrivatePlayerState, type CahSelectAnswerAction, type CahSendAnswersAction, type PlayerAnswers, type QuestionPlaceHolder } from "cah-back";
 
 const { t } = useI18n({
     locale: 'en',
@@ -51,7 +51,7 @@ const { t } = useI18n({
 
 interface AnswerCard {
     id: number
-    text: string
+    text: Record<WordCase, string>
 }
 
 interface QuestionAnswerCard {
@@ -63,6 +63,9 @@ const selectedQaCard = ref<QuestionAnswerCard | null>(null)
 
 
 const submitEnabled = computed(() => {
+    console.log("selectedAnswers.value.length == requiredAnswersCount.value", selectedAnswers.value.length == requiredAnswersCount.value)
+    console.log("selectedAnswers.value.length == requiredAnswersCount.value", selectedAnswers.value.length == requiredAnswersCount.value)
+    console.log("props.playerPrivateState.onHandAswersIds.length == cahPlayerCardsCount", props.playerPrivateState.onHandAswersIds.length == cahPlayerCardsCount)
     switch (props.gameState.phase) {
         case CahGamePhase.ACTIVE_PLAYER_CHOOSE_ANSWERS:
             return isLocalPlayerTurn.value && selectedQaCard.value
@@ -145,14 +148,27 @@ const questionText = computed(() => {
     return questions[props.gameState.questionCardId]
 })
 
-function replacePlaceholders(text: string, toReplaceList: string[]) {
-    const regex = new RegExp('{}', 'i');
+function replacePlaceholders(text: string, toReplaceList: Record<WordCase, string>[]) {
+    const regex = new RegExp('{(.*?)}', 'ig');
+
+    const regexResult = [...text.matchAll(regex)]
+
+    let replaceIndex = 0
 
     let result = text
 
-    toReplaceList.forEach(toReplace => {
-        result = result.replace(regex, '<span class="underline">' + toReplace + '</span>');
+    regexResult.forEach(regexMatch => {
+        const questionPlaceHolder = JSON.parse(regexMatch[0]) as QuestionPlaceHolder
+        const replace = toReplaceList[replaceIndex]
+        if (replace) {
+            const wordCase = questionPlaceHolder.case ? questionPlaceHolder.case : WordCase.NOMINATIVE_CASE
+            result = result.replace(regexMatch[0], '<span class="underline">' + replace[wordCase] + '</span>');
+        } else {
+            result = result.replace(regexMatch[0], '_______')
+        }
+        replaceIndex++
     })
+
     return result
 }
 
@@ -167,13 +183,7 @@ const modifiedQuestionText = computed(() => {
         }
         return answerCard
     }) : selectedAnswers.value
-    const toReplaceList = Array.from({ length: requiredAnswersCount.value }, (_v, i) => i)
-        .map(i => {
-            if (answersToReplace.length > i) {
-                return answersToReplace[i]?.text!
-            }
-            return '_______'
-        })
+    const toReplaceList = answersToReplace.map(ans => ans.text)
     return replacePlaceholders(questionText.value, toReplaceList)
 })
 
@@ -181,7 +191,7 @@ const requiredAnswersCount = computed(() => {
     if (!questionText.value) {
         return 0
     }
-    return countOccurrences(questionText.value, '{}')
+    return countOccurrences(questionText.value, '{(.*?)}')
 })
 
 const selectedAnswers = ref<AnswerCard[]>([])

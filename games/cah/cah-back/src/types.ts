@@ -51,3 +51,16 @@ export interface CahSelectAnswerAction extends GameAction {
     type: 'CahSelectAnswerAction'
     playerId: string
 }
+
+export enum WordCase {
+    NOMINATIVE_CASE = "NOMINATIVE_CASE", // Именительный Есть Кто? Что? Кот, книга
+    GENITIVE_CASE = "GENITIVE_CASE", // Родительный Нет Кого? Чего? Кота, книги
+    DATIVE_CASE = "DATIVE_CASE", // Дательный Дать Кому? Чему? Коту, книге
+    ACCUSATIVE_CASE = "ACCUSATIVE_CASE", // Винительный Вижу Кого? Что? Кота, книгу
+    INSTRUMENTAL_CASE = "INSTRUMENTAL_CASE", // Творительный Горжусь Кем? Чем? Котом, книгой
+    PREPOSITIONAL_CASE = "PREPOSITIONAL_CASE" // Предложный Думаю О ком? О чём? О коте, о книге
+}
+
+export interface QuestionPlaceHolder {
+    case: WordCase | undefined
+}
