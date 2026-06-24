@@ -28,19 +28,21 @@
             </CatanRoadComponent>
         </g>
 
+        <g id="edgeOverlay">
+            <CatanEdgeOverlay v-for="edge in edges" :data="edge" :hexSize="hexSize" @click="roadOverlayClick"
+                :highlight="highlightEdges">
+            </CatanEdgeOverlay>
+        </g>
+
         <g id="intersections">
             <CatanIntersectionComponent v-for="intersection in field.intersections" :data="intersection"
                 :hexSize="hexSize" :players="players">
             </CatanIntersectionComponent>
         </g>
 
-        <g id="edgeOverlay">
-            <CatanEdgeOverlay v-for="edge in edges" :data="edge" :hexSize="hexSize" @click="roadOverlayClick">
-            </CatanEdgeOverlay>
-        </g>
         <g id="vertexOverlay">
             <CatanVertexOverlay v-for="vertex in vertices" :data="vertex" :hexSize="hexSize"
-                @click="intersectionOverlayClick">
+                :highlight="highlightVertices" @click="intersectionOverlayClick">
             </CatanVertexOverlay>
         </g>
 
@@ -66,7 +68,7 @@ import CatanIntersectionComponent from './CatanIntersectionComponent.vue';
 import CatanRoadComponent from './CatanRoadComponent.vue';
 import { terrainImages } from './graphics';
 
-import type { Player } from 'boardgame-web-common';
+import type { Player, Vector2DLike } from 'boardgame-web-common';
 import { distinct, type HexGridData } from 'boardgame-web-common';
 import { Vector2D } from 'boardgame-web-common';
 import { robberImage } from './graphics';
@@ -188,6 +190,14 @@ const props = defineProps({
     },
     longestRoad: {
         type: Object as PropType<Array<CatanRoad>>,
+        required: false
+    },
+    highlightVertices: {
+        type: Function as PropType<(position: Vector2DLike) => boolean>,
+        required: false
+    },
+    highlightEdges: {
+        type: Function as PropType<(position: Vector2DLike) => boolean>,
         required: false
     }
 })
