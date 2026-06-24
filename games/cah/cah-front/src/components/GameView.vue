@@ -1,6 +1,7 @@
 <template>
     <div style="width: 100%;">
         <div class="flex items-center" style="flex-direction: column">
+            <div style="margin-bottom: 1rem;">{{ t('status.' + status) }}</div>
             <div v-if="gameState.phase == CahGamePhase.PLAYERS_CHOOSE_ANSWERS" class="red-card"
                 v-html="modifiedQuestionText">
             </div>
@@ -10,8 +11,6 @@
                     v-on:click="selectQACard(qaCard)" v-html="qaCard.text">
                 </div>
             </div>
-
-
 
             <div style="width: 100%;">
                 <div class="white-card-container">
@@ -41,17 +40,35 @@ import { answers, type CahDrawCardsAction, CahGamePhase, cahPlayerCardsCount, qu
 
 const oruga = useOruga();
 
+enum Status {
+    SELECT_WHITE_CARD = "SELECT_WHITE_CARD",
+    SELECT_RED_CARD = "SELECT_RED_CARD",
+    WAITING_FOR_OTHER_PLAYERS = "WAITING_FOR_OTHER_PLAYERS"
+}
+
 const { t } = useI18n({
     locale: 'en',
     messages: {
         en: {
-            drawAllCards: 'Draw all cards for one point'
+            drawAllCards: 'Draw all cards for one point',
+            status: {
+                [Status.SELECT_WHITE_CARD]: "Select white card",
+                [Status.SELECT_RED_CARD]: "Select red card",
+                [Status.WAITING_FOR_OTHER_PLAYERS]: "Waiting for other players"
+            }
         },
         ru: {
-            drawAllCards: 'Сбросить все карыт за одно очко'
+            drawAllCards: 'Сбросить все карыт за одно очко',
+            status: {
+                [Status.SELECT_WHITE_CARD]: "Выберите белую карту",
+                [Status.SELECT_RED_CARD]: "Выберите красную карту",
+                [Status.WAITING_FOR_OTHER_PLAYERS]: "Ожидание других игроков"
+            }
         }
     }
 })
+
+
 
 interface AnswerCard {
     id: number
@@ -67,6 +84,21 @@ const selectedQaCard = ref<QuestionAnswerCard | null>(null)
 
 const drawAllCardsEnabled = computed(() => {
     return localPlayerPublicState.value.points && localPlayerPublicState.value.points > 0
+})
+
+const status = computed(() => {
+    switch (props.gameState.phase) {
+        case CahGamePhase.PLAYERS_CHOOSE_ANSWERS:
+            if (isLocalPlayerTurn.value || submittedLocalPlayerAnswer.value) {
+                return Status.WAITING_FOR_OTHER_PLAYERS
+            }
+            return Status.SELECT_WHITE_CARD
+        case CahGamePhase.ACTIVE_PLAYER_CHOOSE_ANSWERS:
+            if (isLocalPlayerTurn.value) {
+                return Status.SELECT_RED_CARD
+            }
+            return Status.WAITING_FOR_OTHER_PLAYERS
+    }
 })
 
 async function drawAllCards() {
@@ -90,9 +122,6 @@ async function drawAllCards() {
 }
 
 const submitEnabled = computed(() => {
-    console.log("selectedAnswers.value.length == requiredAnswersCount.value", selectedAnswers.value.length == requiredAnswersCount.value)
-    console.log("selectedAnswers.value.length == requiredAnswersCount.value", selectedAnswers.value.length == requiredAnswersCount.value)
-    console.log("props.playerPrivateState.onHandAswersIds.length == cahPlayerCardsCount", props.playerPrivateState.onHandAswersIds.length == cahPlayerCardsCount)
     switch (props.gameState.phase) {
         case CahGamePhase.ACTIVE_PLAYER_CHOOSE_ANSWERS:
             return isLocalPlayerTurn.value && selectedQaCard.value
