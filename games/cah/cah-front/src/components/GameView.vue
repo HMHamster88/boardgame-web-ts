@@ -6,7 +6,7 @@
                 v-html="modifiedQuestionText">
             </div>
 
-            <div class="white-card-container" v-if="gameState.phase == CahGamePhase.ACTIVE_PLAYER_CHOOSE_ANSWERS">
+            <div class="white-card-container" v-if="gameState.phase == CahGamePhase.VOTING_FOR_ANSWERS">
                 <div v-for="qaCard in questionAnswersCards" :class="qaCardClassStyle(qaCard)"
                     v-on:click="selectQACard(qaCard)" v-html="qaCard.text">
                 </div>
@@ -36,7 +36,7 @@ import { useI18n } from 'vue-i18n';
 import { type Game } from 'boardgame-web-common';
 import type { GameAction } from 'boardgame-web-common';
 
-import { answers, type CahDrawCardsAction, CahGamePhase, cahPlayerCardsCount, questions, WordCase, type CahGamePublicState, type CahPrivatePlayerState, type CahSelectAnswerAction, type CahSendAnswersAction, type PlayerAnswers, type QuestionPlaceHolder } from "cah-back";
+import { answers, type CahDrawCardsAction, CahGamePhase, cahPlayerCardsCount, questions, WordCase, type CahGamePublicState, type CahPrivatePlayerState, type CahSendAnswersAction, type PlayerAnswers, type QuestionPlaceHolder, type CahGameSettings, type CahVoteForAnswerAction } from "cah-back";
 
 const oruga = useOruga();
 
@@ -87,18 +87,25 @@ const drawAllCardsEnabled = computed(() => {
 })
 
 const status = computed(() => {
+    console.log('isLocalPlayerTurn.value', isLocalPlayerTurn.value)
+    console.log('props.gameSettings.voteMode', props.gameSettings.voteMode)
+    console.log('alreadyVoted', alreadyVoted)
     switch (props.gameState.phase) {
         case CahGamePhase.PLAYERS_CHOOSE_ANSWERS:
-            if (isLocalPlayerTurn.value || submittedLocalPlayerAnswer.value) {
+            if ((isLocalPlayerTurn.value && !props.gameSettings.voteMode) || submittedLocalPlayerAnswer.value) {
                 return Status.WAITING_FOR_OTHER_PLAYERS
             }
             return Status.SELECT_WHITE_CARD
-        case CahGamePhase.ACTIVE_PLAYER_CHOOSE_ANSWERS:
-            if (isLocalPlayerTurn.value) {
+        case CahGamePhase.VOTING_FOR_ANSWERS:
+            if ((isLocalPlayerTurn.value || props.gameSettings.voteMode) && !alreadyVoted.value) {
                 return Status.SELECT_RED_CARD
             }
             return Status.WAITING_FOR_OTHER_PLAYERS
     }
+})
+
+const alreadyVoted = computed(() => {
+    return props.gameState.playersSlectedAswers.flatMap(ans => ans.playerVotes).includes(localPlayer.value.userId)
 })
 
 async function drawAllCards() {
@@ -123,10 +130,10 @@ async function drawAllCards() {
 
 const submitEnabled = computed(() => {
     switch (props.gameState.phase) {
-        case CahGamePhase.ACTIVE_PLAYER_CHOOSE_ANSWERS:
-            return isLocalPlayerTurn.value && selectedQaCard.value
+        case CahGamePhase.VOTING_FOR_ANSWERS:
+            return (isLocalPlayerTurn.value || props.gameSettings.voteMode) && selectedQaCard.value
         case CahGamePhase.PLAYERS_CHOOSE_ANSWERS:
-            return !isLocalPlayerTurn.value && selectedAnswers.value.length == requiredAnswersCount.value &&
+            return (!isLocalPlayerTurn.value || props.gameSettings.voteMode) && selectedAnswers.value.length == requiredAnswersCount.value &&
                 props.playerPrivateState.onHandAswersIds.length == cahPlayerCardsCount
         default:
             return false
@@ -135,11 +142,11 @@ const submitEnabled = computed(() => {
 
 function submit() {
     switch (props.gameState.phase) {
-        case CahGamePhase.ACTIVE_PLAYER_CHOOSE_ANSWERS:
+        case CahGamePhase.VOTING_FOR_ANSWERS:
             submitQA()
             break
         case CahGamePhase.PLAYERS_CHOOSE_ANSWERS:
-            if (isLocalPlayerTurn.value) {
+            if (isLocalPlayerTurn.value && !props.gameSettings.voteMode) {
                 return
             }
             submitAnswers()
@@ -148,8 +155,8 @@ function submit() {
 }
 
 function submitQA() {
-    performAction<CahSelectAnswerAction>({
-        type: 'CahSelectAnswerAction',
+    performAction<CahVoteForAnswerAction>({
+        type: 'CahVoteForAnswerAction',
         playerId: selectedQaCard.value?.playerId!
     })
     selectedQaCard.value = null
@@ -164,14 +171,18 @@ function qaCardClassStyle(qaCard: QuestionAnswerCard) {
 }
 
 function selectQACard(card: QuestionAnswerCard) {
-    if (!isLocalPlayerTurn.value) {
+    if (props.gameSettings.voteMode) {
+        if (card.playerId == localPlayer.value.userId) {
+            return
+        }
+    } else if (!isLocalPlayerTurn.value) {
         return
     }
     selectedQaCard.value = card
 }
 
 const questionAnswersCards = computed(() => {
-    if (props.gameState.phase != CahGamePhase.ACTIVE_PLAYER_CHOOSE_ANSWERS) {
+    if (props.gameState.phase != CahGamePhase.VOTING_FOR_ANSWERS) {
         return []
     }
     const playersAnswers = props.gameState.playersSlectedAswers
@@ -273,7 +284,7 @@ const playerAnswersCards = computed(() => {
 })
 
 function selectAnswerCard(answerCard: AnswerCard) {
-    if (isLocalPlayerTurn.value) {
+    if (isLocalPlayerTurn.value && !props.gameSettings.voteMode) {
         return
     }
     if (submittedLocalPlayerAnswer.value) {
@@ -330,6 +341,10 @@ const props = defineProps({
     },
     localPlayerIndex: {
         type: Number,
+        required: true
+    },
+    gameSettings: {
+        type: Object as PropType<CahGameSettings>,
         required: true
     }
 })

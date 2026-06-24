@@ -14,7 +14,8 @@
                         </div>
                         <div v-if="playersPoints && playersPoints[index] != null" style="text-align: center;">
                             {{ t('playerPoints', { points: playersPoints[index] }) }}</div>
-                        <component :is="playerComponent" :player="player" :gameState="gameState">
+                        <component :is="playerComponent" :player="player" :gameState="gameState"
+                            :gameSettings="gameSettings">
 
                         </component>
                     </div>
@@ -46,9 +47,9 @@
     </div>
 
     <div v-if="showGameView" class="card flex-col">
-        <component v-if="gameState" :is="gameViewComponent" :game="game" :gameState="gameState"
-            :playerPrivateState="playerPrivateState" :localPlayerIndex="localPlayerIndex" ref="gameView"
-            @performAction="peformGameAction">
+        <component v-if="gameState" :is="gameViewComponent" :gameSettings="gameSettings" :game="game"
+            :gameState="gameState" :playerPrivateState="playerPrivateState" :localPlayerIndex="localPlayerIndex"
+            ref="gameView" @performAction="peformGameAction">
 
         </component>
     </div>

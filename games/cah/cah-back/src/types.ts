@@ -4,7 +4,8 @@ import type { GameAction, GamePrivateState, GamePublicState, GameSettings, Playe
 export const cahPlayerCardsCount = 10
 
 export interface CahGameSettings extends GameSettings {
-    pointsToWin: number;
+    pointsToWin: number
+    voteMode: boolean
 }
 
 export interface CahPublicPlayerState extends PlayerPublicState {
@@ -13,19 +14,20 @@ export interface CahPublicPlayerState extends PlayerPublicState {
 
 export enum CahGamePhase {
     PLAYERS_CHOOSE_ANSWERS,
-    ACTIVE_PLAYER_CHOOSE_ANSWERS
+    VOTING_FOR_ANSWERS
 }
 
 export interface PlayerAnswers {
     playerId: string,
-    answersIds: number[]
+    answersIds: number[],
+    playerVotes: string[]
 }
 
 export interface CahGamePublicState extends GamePublicState {
     phase: CahGamePhase
     questionCardId: number
     playersSlectedAswers: PlayerAnswers[]
-    playersStates: CahPublicPlayerState[]
+    playersStates: CahPublicPlayerState[],
 }
 
 export interface CahPrivatePlayerState extends PlayerPrivateState {
@@ -47,8 +49,8 @@ export interface CahSendAnswersAction extends GameAction {
     answersIds: number[]
 }
 
-export interface CahSelectAnswerAction extends GameAction {
-    type: 'CahSelectAnswerAction'
+export interface CahVoteForAnswerAction extends GameAction {
+    type: 'CahVoteForAnswerAction'
     playerId: string
 }
 

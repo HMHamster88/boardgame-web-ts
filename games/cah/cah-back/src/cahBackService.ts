@@ -1,5 +1,5 @@
 import { GameStatusEnum, getShuffledArray, handleMessage, type Game, type GameAction, type GameBackService, type GameContext, type GameSettings, type GameState, type MesasgeHandlers } from "boardgame-web-common"
-import { CahGamePhase, cahPlayerCardsCount, type CahDrawCardsAction, type CahGamePrivateState, type CahGamePublicState, type CahGameSettings, type CahPrivatePlayerState, type CahPublicPlayerState, type CahSelectAnswerAction, type CahSendAnswersAction } from "./types"
+import { CahGamePhase, cahPlayerCardsCount, type CahDrawCardsAction, type CahGamePrivateState, type CahGamePublicState, type CahGameSettings, type CahPrivatePlayerState, type CahPublicPlayerState, type CahVoteForAnswerAction, type CahSendAnswersAction } from "./types"
 import answers from "./texts/answers"
 import questions from "./texts/questions"
 import _ from "lodash"
@@ -74,7 +74,8 @@ export class CahGameBackService implements GameBackService {
     getDefaultSettings(): GameSettings {
         const settings: CahGameSettings = {
             id: '',
-            pointsToWin: 10
+            pointsToWin: 10,
+            voteMode: false
         }
         return settings
     }
@@ -106,7 +107,7 @@ export class CahGameBackService implements GameBackService {
         const playerPrivateState = privateState.playersStates.find(pl => pl.playerId == playerId)!
 
         type catanActionTypes = CahSendAnswersAction |
-            CahSelectAnswerAction |
+            CahVoteForAnswerAction |
             CahDrawCardsAction
 
         const handlers: MesasgeHandlers<catanActionTypes> = {
@@ -138,52 +139,80 @@ export class CahGameBackService implements GameBackService {
 
                 publicState.playersSlectedAswers.push({
                     playerId: playerId,
-                    answersIds: action.answersIds
+                    answersIds: action.answersIds,
+                    playerVotes: []
                 })
 
-                // all players except active selected their answers
-                if (publicState.playersSlectedAswers.length >= privateState.playersStates.length - 1) {
+                const requiredAnswerCount = settings.voteMode ? game.players.length : game.players.length - 1
+
+                if (publicState.playersSlectedAswers.length >= requiredAnswerCount) {
                     publicState.playersSlectedAswers = getShuffledArray(publicState.playersSlectedAswers)
-                    publicState.phase = CahGamePhase.ACTIVE_PLAYER_CHOOSE_ANSWERS
+                    publicState.phase = CahGamePhase.VOTING_FOR_ANSWERS
                     gameContext.sendNotify(activePlayerId, 'selectCard', undefined)
                 }
             },
-            CahSelectAnswerAction: (action) => {
-                if (publicState.phase != CahGamePhase.ACTIVE_PLAYER_CHOOSE_ANSWERS) {
+            CahVoteForAnswerAction: (action) => {
+                if (publicState.phase != CahGamePhase.VOTING_FOR_ANSWERS) {
                     return
                 }
-                if (playerId != activePlayerId) {
+                if (playerId != activePlayerId && !settings.voteMode) {
                     return
                 }
 
-                const player = publicState.playersStates.find(player => player.playerId == action.playerId)!
-                player.points!++
-
-                if (player.points! >= settings.pointsToWin) {
-                    publicState.winnersIds = [player.playerId]
-                    game.status = GameStatusEnum.FINISHED
+                if (playerId == action.playerId) {
+                    console.log('Cant vote for yourself')
+                    return
                 }
 
-                publicState.playersSlectedAswers.forEach(pa => {
-                    privateState.answerDiscardPile.push(...pa.answersIds)
+                const vote = publicState.playersSlectedAswers.find(answer => answer.playerVotes.includes(playerId))
 
-                })
-
-                privateState.playersStates?.forEach(ps => {
-                    this.pushFromDeck(privateState.answerDeck, privateState.answerDiscardPile, ps.onHandAswersIds, cahPlayerCardsCount - ps.onHandAswersIds.length)
-                })
-
-                privateState.questionDiscardPile.push(publicState.questionCardId)
-
-                if (privateState.questionDeck.length == 0) {
-                    privateState.questionDeck = getShuffledArray(privateState.questionDiscardPile)
+                if (vote) {
+                    console.log('Already voted')
+                    return
                 }
 
-                publicState.questionCardId = privateState.questionDeck.shift()!
+                const answerForVote = publicState.playersSlectedAswers.find(ans => ans.playerId == action.playerId)!
+                answerForVote?.playerVotes.push(playerId)
 
-                publicState.playersSlectedAswers = []
-                publicState.phase = CahGamePhase.PLAYERS_CHOOSE_ANSWERS
-                publicState.activePlayerIndex = (publicState.activePlayerIndex + 1) % game.players.length
+                const allVoteCount = publicState.playersSlectedAswers.flatMap(ans => ans.playerVotes).length
+
+                const requiredVoteCount = settings.voteMode ? game.players.length : 1
+
+                if (allVoteCount >= requiredVoteCount) {
+                    publicState.playersSlectedAswers.forEach(answer => {
+                        const answerPlayerState = publicState.playersStates.find(pl => pl.playerId == answer.playerId)!
+                        answerPlayerState.points! += answer.playerVotes.length
+                    })
+
+                    const playerPoints = publicState.playersStates.map(pl => pl.points!)
+                    const maxPlayerPoints = Math.max(...playerPoints)
+
+                    if (maxPlayerPoints >= settings.pointsToWin) {
+                        publicState.winnersIds = publicState.playersStates.filter(pl => pl.points! >= settings.pointsToWin).map(pl => pl.playerId)
+                        game.status = GameStatusEnum.FINISHED
+                    }
+
+                    publicState.playersSlectedAswers.forEach(pa => {
+                        privateState.answerDiscardPile.push(...pa.answersIds)
+
+                    })
+
+                    privateState.playersStates?.forEach(ps => {
+                        this.pushFromDeck(privateState.answerDeck, privateState.answerDiscardPile, ps.onHandAswersIds, cahPlayerCardsCount - ps.onHandAswersIds.length)
+                    })
+
+                    privateState.questionDiscardPile.push(publicState.questionCardId)
+
+                    if (privateState.questionDeck.length == 0) {
+                        privateState.questionDeck = getShuffledArray(privateState.questionDiscardPile)
+                    }
+
+                    publicState.questionCardId = privateState.questionDeck.shift()!
+
+                    publicState.playersSlectedAswers = []
+                    publicState.phase = CahGamePhase.PLAYERS_CHOOSE_ANSWERS
+                    publicState.activePlayerIndex = (publicState.activePlayerIndex + 1) % game.players.length
+                }
             }
         }
 

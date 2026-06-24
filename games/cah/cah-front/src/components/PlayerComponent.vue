@@ -9,17 +9,44 @@
 import { OIcon } from '@oruga-ui/oruga-next';
 
 import type { Player } from 'boardgame-web-common';
-import type { CahGamePublicState } from 'cah-back';
+import { CahGamePhase, type CahGamePublicState, type CahGameSettings } from 'cah-back';
 import { computed, type PropType } from 'vue';
 
 const status = computed(() => {
-    if (isActivePlayer.value) {
-        return 'active'
+    switch (props.gameState.phase) {
+        case CahGamePhase.PLAYERS_CHOOSE_ANSWERS:
+            if (props.gameSettings.voteMode) {
+                if (playerAnswer.value) {
+                    return 'checked'
+                }
+                return 'thinking'
+            } else {
+                if (isActivePlayer.value) {
+                    return 'active'
+                } else {
+                    if (playerAnswer.value) {
+                        return 'checked'
+                    }
+                    return 'thinking'
+                }
+            }
+        case CahGamePhase.VOTING_FOR_ANSWERS:
+            if (props.gameSettings.voteMode) {
+                if (isPlayerVoted.value) {
+                    return 'checked'
+                }
+                return 'thinking'
+            } else {
+                if (isActivePlayer.value) {
+                    if (isPlayerVoted.value) {
+                        return 'checked'
+                    }
+                    return 'thinking'
+                } else {
+                    return 'checked'
+                }
+            }
     }
-    if (playerAnswer.value) {
-        return 'checked'
-    }
-    return 'thinking'
 })
 
 const playerAnswer = computed(() => {
@@ -31,6 +58,10 @@ const isActivePlayer = computed(() => {
     return activePlayer.playerId == props.player.userId
 })
 
+const isPlayerVoted = computed(() => {
+    return props.gameState.playersSlectedAswers.flatMap(ans => ans.playerVotes).includes(props.player.userId)
+})
+
 const props = defineProps({
     player: {
         type: Object as PropType<Player>,
@@ -38,6 +69,10 @@ const props = defineProps({
     },
     gameState: {
         type: Object as PropType<CahGamePublicState>,
+        required: true
+    },
+    gameSettings: {
+        type: Object as PropType<CahGameSettings>,
         required: true
     }
 })
