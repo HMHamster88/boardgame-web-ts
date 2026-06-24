@@ -52,6 +52,10 @@ export interface CahSelectAnswerAction extends GameAction {
     playerId: string
 }
 
+export interface CahDrawCardsAction extends GameAction {
+    type: 'CahDrawCardsAction'
+}
+
 export enum WordCase {
     NOMINATIVE_CASE = "NOMINATIVE_CASE", // Именительный Есть Кто? Что? Кот, книга
     GENITIVE_CASE = "GENITIVE_CASE", // Родительный Нет Кого? Чего? Кота, книги

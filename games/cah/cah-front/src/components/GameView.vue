@@ -11,6 +11,8 @@
                 </div>
             </div>
 
+
+
             <div style="width: 100%;">
                 <div class="white-card-container">
                     <div v-for="answerCard in playerAnswersCards" :class="answerCardClassStyle(answerCard)"
@@ -20,15 +22,14 @@
                 </div>
             </div>
         </div>
-
-        <o-button v-on:click="submit" :disabled="!submitEnabled">{{ t('submit') }}</o-button>
+        <o-button v-on:click="submit" :disabled="!submitEnabled">{{ t('submit') }}</o-button> <o-button
+            v-on:click="drawAllCards" :disabled="!drawAllCardsEnabled">{{ t('drawAllCards') }}</o-button>
     </div>
 </template>
 
 <script setup lang="ts">
 
-import { OButton } from "@oruga-ui/oruga-next";
-
+import { OButton, useOruga } from "@oruga-ui/oruga-next";
 
 import { computed, ref, type PropType } from 'vue';
 import { useI18n } from 'vue-i18n';
@@ -36,15 +37,18 @@ import { useI18n } from 'vue-i18n';
 import { type Game } from 'boardgame-web-common';
 import type { GameAction } from 'boardgame-web-common';
 
-import { answers, CahGamePhase, cahPlayerCardsCount, questions, WordCase, type CahGamePublicState, type CahPrivatePlayerState, type CahSelectAnswerAction, type CahSendAnswersAction, type PlayerAnswers, type QuestionPlaceHolder } from "cah-back";
+import { answers, type CahDrawCardsAction, CahGamePhase, cahPlayerCardsCount, questions, WordCase, type CahGamePublicState, type CahPrivatePlayerState, type CahSelectAnswerAction, type CahSendAnswersAction, type PlayerAnswers, type QuestionPlaceHolder } from "cah-back";
+
+const oruga = useOruga();
 
 const { t } = useI18n({
     locale: 'en',
     messages: {
         en: {
+            drawAllCards: 'Draw all cards for one point'
         },
         ru: {
-
+            drawAllCards: 'Сбросить все карыт за одно очко'
         }
     }
 })
@@ -61,6 +65,29 @@ interface QuestionAnswerCard {
 
 const selectedQaCard = ref<QuestionAnswerCard | null>(null)
 
+const drawAllCardsEnabled = computed(() => {
+    return localPlayerPublicState.value.points && localPlayerPublicState.value.points > 0
+})
+
+async function drawAllCards() {
+    if (!drawAllCardsEnabled) {
+        return
+    }
+    const result = await oruga.dialog.open({
+        title: t('drawAllCards'),
+        content: t('drawAllCards') + '?',
+        confirmButton: t('ok'),
+        confirmVariant: "success",
+        cancelButton: t('cancel'),
+        buttonPosition: "right",
+        closeOnConfirm: true
+    }).promise
+    if (result[1] == 'confirm') {
+        performAction<CahDrawCardsAction>({
+            type: 'CahDrawCardsAction'
+        })
+    }
+}
 
 const submitEnabled = computed(() => {
     console.log("selectedAnswers.value.length == requiredAnswersCount.value", selectedAnswers.value.length == requiredAnswersCount.value)
@@ -234,6 +261,10 @@ function selectAnswerCard(answerCard: AnswerCard) {
     }
     selectedAnswers.value.push(answerCard)
 }
+
+const localPlayerPublicState = computed(() => {
+    return props.gameState.playersStates[props.localPlayerIndex]!
+})
 
 const localPlayer = computed(() => {
     return props.game.players[props.localPlayerIndex]

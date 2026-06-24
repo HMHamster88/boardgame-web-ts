@@ -1,5 +1,5 @@
 import { GameStatusEnum, getShuffledArray, handleMessage, type Game, type GameAction, type GameBackService, type GameContext, type GameSettings, type GameState, type MesasgeHandlers } from "boardgame-web-common"
-import { CahGamePhase, cahPlayerCardsCount, type CahGamePrivateState, type CahGamePublicState, type CahGameSettings, type CahPrivatePlayerState, type CahPublicPlayerState, type CahSelectAnswerAction, type CahSendAnswersAction } from "./types"
+import { CahGamePhase, cahPlayerCardsCount, type CahDrawCardsAction, type CahGamePrivateState, type CahGamePublicState, type CahGameSettings, type CahPrivatePlayerState, type CahPublicPlayerState, type CahSelectAnswerAction, type CahSendAnswersAction } from "./types"
 import answers from "./texts/answers"
 import questions from "./texts/questions"
 import _ from "lodash"
@@ -102,11 +102,24 @@ export class CahGameBackService implements GameBackService {
         const privateState = gameState.privateState as CahGamePrivateState
         const activePlayer = game.players[publicState.activePlayerIndex]
         const activePlayerId = activePlayer?.userId
+        const playerPublicState = publicState.playersStates.find(pl => pl.playerId == playerId)!
+        const playerPrivateState = privateState.playersStates.find(pl => pl.playerId == playerId)!
 
         type catanActionTypes = CahSendAnswersAction |
-            CahSelectAnswerAction
+            CahSelectAnswerAction |
+            CahDrawCardsAction
 
         const handlers: MesasgeHandlers<catanActionTypes> = {
+            CahDrawCardsAction: () => {
+                if (playerPublicState.points && playerPublicState.points > 0) {
+                    privateState.answerDiscardPile.push(...playerPrivateState.onHandAswersIds)
+                    playerPrivateState.onHandAswersIds = []
+                    this.pushFromDeck(privateState.answerDeck, privateState.answerDiscardPile, playerPrivateState.onHandAswersIds, cahPlayerCardsCount)
+                    playerPublicState.points--
+                } else {
+                    console.log('Player have no points')
+                }
+            },
             CahSendAnswersAction: (action) => {
                 if (publicState.phase != CahGamePhase.PLAYERS_CHOOSE_ANSWERS) {
                     return
