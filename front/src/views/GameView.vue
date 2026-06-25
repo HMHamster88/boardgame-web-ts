@@ -53,6 +53,14 @@
 
         </component>
     </div>
+    <o-dialog v-model:active="memoryLocalStore.showStatistics" closeable fullscreen>
+        <template #title>{{ t('statistics') }}</template>
+
+        <template #content>
+            <component :is="statisticsComponent" :statistics="gameState?.statistics">
+            </component>
+        </template>
+    </o-dialog>
 </template>
 
 <script setup lang="ts">
@@ -61,7 +69,7 @@ import { computed, onMounted, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 
 import { GameStatusEnum, type Game, type GamePublicState, type PlayerPrivateState, type Player, type GameAction, type GameSettings, createDeepProxy } from 'boardgame-web-common/back';
-import { useLocalStore } from '../services/localStore';
+import { useLocalStore, useMemoryLocalStore } from '../services/localStore';
 
 import { merge } from 'lodash';
 import { useI18n } from 'vue-i18n';
@@ -105,6 +113,7 @@ const { messages, t } = useI18n({
 
 const route = useRoute()
 const localStore = useLocalStore();
+const memoryLocalStore = useMemoryLocalStore()
 
 const gameId = route.params['id'] as string
 

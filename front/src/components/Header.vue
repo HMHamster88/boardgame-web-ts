@@ -5,6 +5,7 @@
         <o-tag :variant="connectStatusSeverity">
             {{ connectStatusText }}
         </o-tag>
+        <o-button v-if="isGameRoute" icon-right="chart-box" @click="memoryLocalStore.showStatistics = true"></o-button>
         <o-dropdown :keep-open="true" mobile-modal desktop-modal>
             <template #trigger>
                 <o-button icon-right="share-variant-outline" />
@@ -52,6 +53,9 @@ const { t } = useI18n({
 const settingsDialog = useTemplateRef('settingsDialog')
 
 const route = useRoute();
+
+const isGameRoute = computed(() => route.name === 'game')
+
 const fullUrl = computed(() => {
     return window.location.origin + route.fullPath;
 });

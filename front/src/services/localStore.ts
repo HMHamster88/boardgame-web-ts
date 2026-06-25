@@ -32,7 +32,8 @@ export const useLocalStore = defineStore(
 interface MemoryLocalStore {
     connectStatus: ConnectStatus,
     gameTypes: GameType[],
-    games: Game[]
+    games: Game[],
+    showStatistics: boolean
 }
 
 export const useMemoryLocalStore = defineStore(
@@ -41,7 +42,8 @@ export const useMemoryLocalStore = defineStore(
         state: (): MemoryLocalStore => ({
             connectStatus: ConnectStatus.DISCONNECTED,
             gameTypes: [],
-            games: []
+            games: [],
+            showStatistics: false
         }),
     }
 )

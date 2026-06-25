@@ -55,6 +55,15 @@
         <o-tooltip :label="t('endTurn')">
             <o-button :disabled="!canEndTurn" v-on:click="endTurn()" icon-left="clock-end"></o-button>
         </o-tooltip>
+
+        <o-dropdown>
+            <template #trigger>
+                <o-button icon-left="menu"></o-button>
+            </template>
+            <o-dropdown-item>
+                <o-switch :label="t('showSettlementBuildPlaces')" v-model="showSettlementBuildPlaces" />
+            </o-dropdown-item>
+        </o-dropdown>
     </div>
     <CatanResourceCards v-if="playerPrivateState && playerPrivateState.resources" v-model="selectedResorceCards"
         :resources="playerPrivateState.resources" :development-cards="playerPrivateState.developmentCards"
@@ -77,7 +86,7 @@
 
 <script setup lang="ts">
 
-import { OButton, ODropdown, OTooltip } from "@oruga-ui/oruga-next";
+import { OButton, ODropdown, OTooltip, ODropdownItem, OSwitch } from "@oruga-ui/oruga-next";
 
 import { default as Dice } from './Dice.vue';
 
@@ -175,7 +184,8 @@ const { t } = useI18n({
                 CITY: 'Choose settlement for upgrade'
             },
             discardCards: 'Discard cards',
-            onHandResources: 'Players on hand resources'
+            onHandResources: 'Players on hand resources',
+            showSettlementBuildPlaces: 'Settlement build places'
         },
         ru: {
             buy: 'Купить',
@@ -212,10 +222,13 @@ const { t } = useI18n({
                 CITY: 'Выберите поселение для улучшения'
             },
             discardCards: 'Сбросить карты',
-            onHandResources: 'Ресурсы на руках у игроков'
+            onHandResources: 'Ресурсы на руках у игроков',
+            showSettlementBuildPlaces: 'Места для постройки поселений'
         }
     }
 })
+
+const showSettlementBuildPlaces = ref(false)
 
 function intersectionNotEpmty(position: Vector2DLike) {
     const intersection = intersectsByCoords.value.get(position)
@@ -226,6 +239,10 @@ function intersectionNotEpmty(position: Vector2DLike) {
 }
 
 const highlightVertices = (position: Vector2DLike): boolean => {
+    if (showSettlementBuildPlaces.value) {
+        return !intersectionNeighbourhoodsOcupated(position) && !intersectionNotEpmty(position)
+    }
+
     if (!isLocalPlayerTurn.value) {
         return false
     }
