@@ -205,11 +205,11 @@ export class GameSession implements Connection {
             const handlers: MesasgeHandlers<messageTypes> = {
                 CrateGameBackupMessage: async () => {
                     if (this.gameState) {
-                        const fileName = await db.createGameBackup(this.gameState?.id!)
-                        console.debug(`Game state backup created "${fileName}"`);
+                        db.createGameBackup(this.gameState?.id!)
+                        console.debug(`Game state backup created`);
                         connection.send<NotifyGameMessage>({
                             type: "NotifyGameMessage",
-                            message: `Game state backup created "${fileName}"`
+                            message: `Game state backup created`
                         })
                     }
                 },

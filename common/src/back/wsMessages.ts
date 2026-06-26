@@ -43,7 +43,7 @@ export interface DeleteGameRequest extends TypedMessage {
 
 export interface UpdateUserRequest extends TypedMessage {
     type: 'UpdateUserRequest'
-    user: User
+    user: Omit<User, 'roles'>
 }
 
 export interface ConnectToGameMessage extends TypedMessage {

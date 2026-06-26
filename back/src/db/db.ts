@@ -1,138 +1,158 @@
 import { JSONFilePreset } from 'lowdb/node';
-import { Low } from 'lowdb';
 import {
-    findAndRemoveElement,
     type Game,
     type GameSettings,
     type GameState,
-    removeElement,
     type User
 } from 'boardgame-web-common/back';
 import path from 'node:path';
 import fs from 'node:fs/promises';
 import _ from 'lodash';
-import { format } from 'date-fns';
+import { DatabaseSync } from 'node:sqlite';
+import { v4 as uuidv4 } from 'uuid';
 
 const dbDir = './db';
 
+const sqliteDbUrl = path.join(dbDir, 'db.sqlite')
+
+const Tables = {
+    USERS: 'users',
+    GAMES: 'games',
+    GAME_SETTINGS: 'game_settings',
+    GAME_STATES: 'game_states',
+    GAME_BACKUPS: 'game_backups'
+} as const
+
+type TablesType = typeof Tables[keyof typeof Tables];
+
+interface IdObject {
+    id: string
+}
+
+interface GameBackup {
+    id: string
+    gameId: string
+    game: Game
+    settings: GameSettings
+    state: GameState
+    date: Date
+}
+
 export class DB {
-    users: Low<User[]> | undefined;
-    games: Low<Game[]> | undefined;
-    gamesSettings: Low<GameSettings[]> | undefined;
-    gamesStates: Low<GameState[]> | undefined;
+    sqliteDb!: DatabaseSync
 
     async init() {
         await fs.mkdir(dbDir, { recursive: true });
-        this.users = await JSONFilePreset<User[]>(path.join(dbDir, 'users.json'), []);
-        this.games = await JSONFilePreset<Game[]>(path.join(dbDir, 'games.json'), []);
-        this.gamesSettings = await JSONFilePreset<GameSettings[]>(
-            path.join(dbDir, 'games-settings.json'),
-            []
-        );
-        this.gamesStates = await JSONFilePreset<GameState[]>(
-            path.join(dbDir, 'games-states.json'),
-            []
-        );
+        this.sqliteDb = new DatabaseSync(sqliteDbUrl)
+        Object.values(Tables).forEach(tableName => {
+            this.sqliteDb.exec(`
+            CREATE TABLE IF NOT EXISTS ${tableName} (
+                id TEXT PRIMARY KEY,
+                json TEXT
+            )
+        `);
+        })
     }
 
-    async addUser(user: User) {
-        this.users?.data.push(user);
-        await this.users?.write();
-        return user;
+    addDbObject<T extends IdObject>(table: TablesType, object: T): T {
+        const insertStmt = this.sqliteDb.prepare(`INSERT INTO ${table} (id, json) VALUES (?, ?)`)
+        insertStmt.run(object.id, JSON.stringify(object))
+        return object
     }
 
-    getUser(id: string) {
-        return this.users?.data.find((user) => user.id == id);
+    getDbObject<T extends IdObject>(table: TablesType, id: string): T | undefined {
+        const selectOneStmt = this.sqliteDb.prepare(`SELECT * FROM ${table} WHERE id = ?`);
+        const record = selectOneStmt.get(id)
+        if (!record) {
+            return undefined
+        }
+        return JSON.parse(record['json'] as string)
+    }
+
+    getAllDbObjects<T extends IdObject>(table: TablesType): T[] {
+        const selectOneStmt = this.sqliteDb.prepare(`SELECT * FROM ${table}`);
+        const records = selectOneStmt.all()
+        return records.map(record => JSON.parse(record['json'] as string))
+    }
+
+    updateDbObject<T extends IdObject>(table: TablesType, object: T) {
+        const updateStmt = this.sqliteDb.prepare(`UPDATE ${table} SET json = ? WHERE id = ?`);
+        updateStmt.run(JSON.stringify(object), object.id)
+    }
+
+    deleteDbObject(table: TablesType, id: string) {
+        const updateStmt = this.sqliteDb.prepare(`DELETE ${table} WHERE id = ?`);
+        updateStmt.run(id)
+    }
+
+    addUser(user: User) {
+        return this.addDbObject(Tables.USERS, user)
+    }
+
+    getUser(id: string): User | undefined {
+        return this.getDbObject<User>(Tables.USERS, id)
     }
 
     updateUser(user: User) {
-        const existingUser = this.users?.data.find((u) => u.id == user.id);
-        if (existingUser) {
-            _.merge(existingUser, user);
-            this.users?.write();
-        }
+        return this.updateDbObject(Tables.USERS, user)
     }
 
-    async addGame(game: Game) {
-        this.games?.data.push(game);
-        await this.games?.write();
+    addGame(game: Game) {
+        return this.addDbObject(Tables.GAMES, game)
     }
 
-    async deleteGameAll(id: string) {
-        const game = this.getGame(id);
-        if (!game) {
-            return;
-        }
-        removeElement(this.games?.data!, game);
-        findAndRemoveElement(this.gamesSettings?.data!, (el) => el.id == id);
-        findAndRemoveElement(this.gamesStates?.data!, (el) => el.id == id);
-        this.games?.write();
-        this.gamesSettings?.write();
-        this.gamesStates?.write();
+    deleteGameAll(id: string) {
+        this.deleteDbObject(Tables.GAMES, id)
+        this.deleteDbObject(Tables.GAME_SETTINGS, id)
+        this.deleteDbObject(Tables.GAME_STATES, id)
     }
 
-    getGame(id: string) {
-        return this.games?.data.find((game) => game.id == id);
+    getGame(id: string): Game | undefined {
+        return this.getDbObject<Game>(Tables.GAMES, id)
     }
 
     updateGame(game: Game) {
-        const data = this.games?.data!;
-        const gameIndex = data.findIndex((g) => g.id == game.id)!;
-        data[gameIndex] = game;
-        this.games?.write();
+        return this.updateDbObject(Tables.GAMES, game)
     }
 
     getAllGames() {
-        return this.games?.data!;
+        return this.getAllDbObjects<Game>(Tables.GAMES)
     }
 
-    async addGameSettings(settings: GameSettings) {
-        this.gamesSettings?.data.push(settings);
-        await this.gamesSettings?.write();
+    addGameSettings(settings: GameSettings) {
+        return this.addDbObject(Tables.GAME_SETTINGS, settings)
     }
 
-    async updateGameSettings(settings: GameSettings) {
-        const data = this.gamesSettings?.data!;
-        const index = data.findIndex((g) => g.id == settings.id)!;
-        data[index] = settings;
-        this.gamesSettings?.write();
+    updateGameSettings(settings: GameSettings) {
+        return this.updateDbObject(Tables.GAME_SETTINGS, settings)
     }
 
     getGameSettings(id: string) {
-        return this.gamesSettings?.data.find((settings) => settings.id == id);
+        return this.getDbObject<GameSettings>(Tables.GAME_SETTINGS, id)
     }
 
-    async addGameState(state: GameState) {
-        this.gamesStates?.data.push(state);
-        await this.gamesStates?.write();
+    addGameState(state: GameState) {
+        return this.addDbObject(Tables.GAME_STATES, state)
     }
 
-    async updateGameState(settings: GameState) {
-        const existingState = this.getGameState(settings.id);
-        if (existingState) {
-            _.merge(existingState, settings);
-            await this.gamesStates?.write();
-        }
+    updateGameState(state: GameState) {
+        return this.updateDbObject(Tables.GAME_STATES, state)
     }
 
     getGameState(id: string) {
-        return this.gamesStates?.data.find((state) => state.id == id);
+        return this.getDbObject<GameState>(Tables.GAME_STATES, id)
     }
 
-    async createGameBackup(id: string) {
-        const state = this.gamesStates?.data.find((state) => state.id == id);
-        const game = this.games?.data.find((game) => game.id == id);
-        const gameDir = path.join(dbDir, 'game-backup', id)
-        console.log('Game dir', gameDir)
-        await fs.mkdir(gameDir, { recursive: true });
-        const dateString = format(new Date(), 'yyyy-MM-dd_HH-mm-ss');
-        const stateFileName = path.join(gameDir, `${dateString}-state.json`)
-        const stateBackup = await JSONFilePreset<GameState>(stateFileName, state!);
-        await stateBackup.write()
-        const gameFileName = path.join(gameDir, `${dateString}-game.json`)
-        const gameBackup = await JSONFilePreset<Game>(gameFileName, game!);
-        await gameBackup.write()
-        return stateFileName
+    createGameBackup(gameId: string) {
+        const backup: GameBackup = {
+            id: uuidv4(),
+            gameId: gameId,
+            game: this.getGame(gameId)!,
+            settings: this.getGameSettings(gameId)!,
+            state: this.getGameState(gameId)!,
+            date: new Date()
+        }
+        this.addDbObject(Tables.GAME_BACKUPS, backup)
     }
 }
 

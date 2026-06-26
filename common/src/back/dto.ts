@@ -7,10 +7,15 @@ export enum ConnectStatus {
     DISCONNECTED = 'DISCONNECTED'
 }
 
+export enum UserRole {
+    ADMIN = 'ADMIN'
+}
+
 export interface User {
     id: string
     name: string
-    color: string
+    color: string,
+    roles: UserRole[]
 }
 
 export interface GameType {

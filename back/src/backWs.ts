@@ -80,7 +80,8 @@ export class WsConnection {
                 db.addGame(newGame);
             },
             UpdateUserRequest: async (message: UpdateUserRequest) => {
-                db.updateUser(message.user);
+                this.user = { roles: this.user?.roles!, ...message.user }
+                db.updateUser(this.user);
             },
             ConnectToGameMessage: async (message: ConnectToGameMessage) => {
                 this.game = db.getGame(message.gameId);
@@ -111,7 +112,8 @@ export class WsConnection {
             this.user = await db.addUser({
                 id: this.userId,
                 name: 'User-' + this.userId,
-                color: '#FF0000'
+                color: '#FF0000',
+                roles: []
             });
         }
         const gameTypes = getAllGameServices().map((service) => {
