@@ -81,7 +81,7 @@ export class DB {
     }
 
     deleteDbObject(table: TablesType, id: string) {
-        const updateStmt = this.sqliteDb.prepare(`DELETE ${table} WHERE id = ?`);
+        const updateStmt = this.sqliteDb.prepare(`DELETE FROM ${table} WHERE id = ?`);
         updateStmt.run(id)
     }
 

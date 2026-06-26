@@ -9,6 +9,8 @@ import {
     type CreateGameRequest,
     type DeleteGameRequest,
     type Game,
+    type GameCreatedMessage,
+    type GameDeletedMessage,
     type GameType,
     type GetAllGamesRequest,
     type HandshakeResponse,
@@ -60,6 +62,13 @@ export class WsConnection {
         const handlers: MesasgeHandlers<messageTypes> = {
             DeleteGameRequest: async (message: DeleteGameRequest) => {
                 db.deleteGameAll(message.gameId);
+
+                connections.forEach(conn => {
+                    conn.send<GameDeletedMessage>({
+                        type: 'GameDeletedMessage',
+                        gameId: message.gameId
+                    })
+                })
             },
             GetAllGamesRequest: async () => {
                 this.send<AllGamesResponse>({
@@ -78,6 +87,12 @@ export class WsConnection {
                     created: new Date()
                 };
                 db.addGame(newGame);
+                connections.forEach(conn => {
+                    conn.send<GameCreatedMessage>({
+                        type: 'GameCreatedMessage',
+                        game: newGame
+                    })
+                })
             },
             UpdateUserRequest: async (message: UpdateUserRequest) => {
                 this.user = { roles: this.user?.roles!, ...message.user }
@@ -158,6 +173,7 @@ export async function startWs(server: Server) {
 
         const connection = new WsConnection(ws, userId);
         connection.init();
+        connections.push(connection)
 
         console.log('Clients count: ', wss.clients.size);
 

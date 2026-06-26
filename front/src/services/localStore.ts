@@ -18,7 +18,8 @@ export const useLocalStore = defineStore(
             user: {
                 id: '',
                 name: 'User',
-                color: '#FF0000'
+                color: '#FF0000',
+                roles: []
             },
             settings: {
                 locale: 'en',

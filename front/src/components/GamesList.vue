@@ -65,7 +65,6 @@ async function createGame() {
     if (createGameDialog.value) {
         const createGameProps = await createGameDialog.value.open()
         wsService.createGame(createGameProps)
-        loadGames();
     }
 }
 
@@ -81,7 +80,6 @@ async function deleteGame(game: Game) {
     }).promise
     if (result[1] == 'confirm') {
         wsService.deleteGame(game.id)
-        loadGames()
     }
 }
 

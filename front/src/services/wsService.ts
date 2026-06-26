@@ -11,7 +11,10 @@ import {
     type User,
     type UpdateUserRequest,
     type DeleteGameRequest,
-    type CrateGameBackupMessage
+    type CrateGameBackupMessage,
+    type GameCreatedMessage,
+    type GameDeletedMessage,
+    findAndRemoveElement
 } from "boardgame-web-common/back";
 import { useLocalStore, useMemoryLocalStore } from "./localStore";
 import {
@@ -63,7 +66,7 @@ class WsService {
             handshakeResolved = resolve
         })
 
-        type messageTypes = HandshakeResponse | AllGamesResponse
+        type messageTypes = HandshakeResponse | AllGamesResponse | GameCreatedMessage | GameDeletedMessage
         const handlers: MesasgeHandlers<messageTypes> = {
             HandshakeResponse: async (message: HandshakeResponse) => {
                 localStore.user = message.user
@@ -72,6 +75,12 @@ class WsService {
             },
             AllGamesResponse: async (message: AllGamesResponse) => {
                 memoryLocalStore.games = message.games
+            },
+            GameCreatedMessage: async (message: GameCreatedMessage) => {
+                memoryLocalStore.games.push(message.game)
+            },
+            GameDeletedMessage: async (message: GameDeletedMessage) => {
+                findAndRemoveElement(memoryLocalStore.games, game => game.id == message.gameId)
             }
         }
 

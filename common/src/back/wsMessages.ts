@@ -36,8 +36,18 @@ export interface CreateGameRequest extends TypedMessage {
     props: CreateGameProps
 }
 
+export interface GameCreatedMessage extends TypedMessage {
+    type: 'GameCreatedMessage'
+    game: Game
+}
+
 export interface DeleteGameRequest extends TypedMessage {
     type: 'DeleteGameRequest'
+    gameId: string
+}
+
+export interface GameDeletedMessage extends TypedMessage {
+    type: 'GameDeletedMessage'
     gameId: string
 }
 
