@@ -87,7 +87,7 @@ const language = computed<string>({
 
 const localStore = useLocalStore();
 
-const userCopy = ref<User>({ id: '', color: '', name: '' })
+const userCopy = ref<User>({ id: '', color: '', name: '', roles: [] })
 const settingsCopy = ref<Settings>({ locale: 'en', soundsVolume: 0.5 })
 
 const userColor = computed({
