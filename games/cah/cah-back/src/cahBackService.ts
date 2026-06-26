@@ -179,9 +179,20 @@ export class CahGameBackService implements GameBackService {
                 const requiredVoteCount = settings.voteMode ? game.players.length : 1
 
                 if (allVoteCount >= requiredVoteCount) {
+
                     publicState.playersSlectedAswers.forEach(answer => {
                         const answerPlayerState = publicState.playersStates.find(pl => pl.playerId == answer.playerId)!
                         answerPlayerState.points! += answer.playerVotes.length
+
+                    })
+
+                    const notifyParam = publicState.playersSlectedAswers.filter(ans => ans.playerVotes.length > 0).map(ans => {
+                        const player = game.players.find(pl => pl.userId == ans.playerId)
+                        return `${player?.name}: ${ans.playerVotes.length}`
+                    }).join(', ')
+
+                    gameContext.sendNotify(undefined, 'playersGotPoints', {
+                        players: notifyParam
                     })
 
                     const playerPoints = publicState.playersStates.map(pl => pl.points!)

@@ -16,11 +16,13 @@ export class CatanFrontService implements GameFrontService {
     localization: any = {
         en: {
             CARDS_AGAINST_HUMANITY: 'Cards Against Humanity',
-            selectCard: 'Select Red Card'
+            selectCard: 'Select Red Card',
+            playersGotPoints: 'Players got points: {players}'
         },
         ru: {
             CARDS_AGAINST_HUMANITY: 'Карты против всех',
-            selectCard: 'Выберите красную карту'
+            selectCard: 'Выберите красную карту',
+            playersGotPoints: 'Игроки получили очки: {players}'
         }
     }
     gameStaticSettings = {

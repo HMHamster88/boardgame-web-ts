@@ -99,11 +99,8 @@ export class WsConnection {
                 db.updateUser(this.user);
             },
             ConnectToGameMessage: async (message: ConnectToGameMessage) => {
-                this.game = db.getGame(message.gameId);
-                if (!this.game) {
-                    return;
-                }
                 const session = getGameSession(message.gameId);
+                this.game = session.game
                 session.addConnection(this);
             }
         };

@@ -81,8 +81,6 @@ export class GameSession implements Connection {
             messageParams: messageParams
         };
         const stringMessage = JSON.stringify(notifyMessage);
-        console.log('This', this);
-        console.log('This.send', this.send);
         if (peerId) {
             this.send(peerId, stringMessage);
         } else {
