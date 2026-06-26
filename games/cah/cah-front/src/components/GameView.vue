@@ -21,8 +21,10 @@
                 </div>
             </div>
         </div>
-        <o-button v-on:click="submit" :disabled="!submitEnabled">{{ t('submit') }}</o-button> <o-button
-            v-on:click="drawAllCards" :disabled="!drawAllCardsEnabled">{{ t('drawAllCards') }}</o-button>
+        <div class="flex flex-col gap-2">
+            <o-button v-on:click="submit" :disabled="!submitEnabled">{{ t('submit') }}</o-button>
+            <o-button v-on:click="drawAllCards" :disabled="!drawAllCardsEnabled">{{ t('drawAllCards') }}</o-button>
+        </div>
     </div>
 </template>
 
@@ -87,9 +89,6 @@ const drawAllCardsEnabled = computed(() => {
 })
 
 const status = computed(() => {
-    console.log('isLocalPlayerTurn.value', isLocalPlayerTurn.value)
-    console.log('props.gameSettings.voteMode', props.gameSettings.voteMode)
-    console.log('alreadyVoted', alreadyVoted)
     switch (props.gameState.phase) {
         case CahGamePhase.PLAYERS_CHOOSE_ANSWERS:
             if ((isLocalPlayerTurn.value && !props.gameSettings.voteMode) || submittedLocalPlayerAnswer.value) {
