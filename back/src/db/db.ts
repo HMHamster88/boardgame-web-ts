@@ -5,15 +5,9 @@ import {
     type GameState,
     type User
 } from 'boardgame-web-common/back';
-import path from 'node:path';
-import fs from 'node:fs/promises';
 import _ from 'lodash';
 import { DatabaseSync } from 'node:sqlite';
 import { v4 as uuidv4 } from 'uuid';
-
-const dbDir = './db';
-
-const sqliteDbUrl = path.join(dbDir, 'db.sqlite')
 
 const Tables = {
     USERS: 'users',
@@ -42,7 +36,7 @@ export class DB {
     sqliteDb!: DatabaseSync
 
     async init() {
-        await fs.mkdir(dbDir, { recursive: true });
+        const sqliteDbUrl = process.env.DB_URL || 'db.sqlite'
         this.sqliteDb = new DatabaseSync(sqliteDbUrl)
         Object.values(Tables).forEach(tableName => {
             this.sqliteDb.exec(`

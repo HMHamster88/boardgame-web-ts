@@ -1,0 +1,6 @@
+{
+    "main": "./dist/bundled/app.mjs",
+    "output": "./dist/sea/boardgame-web-ts-server.exe",
+    "mainFormat": "module",
+    "disableExperimentalSEAWarning": true
+}

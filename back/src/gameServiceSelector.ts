@@ -1,29 +1,8 @@
-/*import { createInstance } from '@module-federation/enhanced/runtime';
-import type { GameBackModule } from 'boardgame-web-common/back';
-
-export async function getGameService(type: string) {
-    const lowerType = type.toLocaleLowerCase()
-    const mf = createInstance({
-        name: 'host-back-app',
-        remotes: [
-            {
-                name: lowerType,
-                entry: 'http://localhost:8000/games-modules/' + lowerType + '/back/remoteEntry.js',
-                type: 'module'
-            },
-        ],
-    });
-
-    const module = await mf.loadRemote<GameBackModule>(lowerType + '/back')
-
-    console.log("GS module", module)
-    return module?.getGameBackService()
-}*/
-
 import type { GameBackModule, GameBackService } from "boardgame-web-common/back"
 import fs from 'fs'
+import { createRequire } from "module";
 
-const gamesDir = './public/games-modules'
+const gamesDir = './public/games-modules/'
 
 function getDirectories(source: string) {
     return fs.readdirSync(source, { withFileTypes: true })
@@ -34,14 +13,29 @@ function getDirectories(source: string) {
 let modules: GameBackModule[] = []
 let gameServices = new Map<string, GameBackService>()
 
+function checkIfSEA() {
+    try {
+        const sea = require('node:sea');
+        return sea.isSea();
+    } catch (error) {
+        return false;
+    }
+}
+
 export async function loadServices() {
+    const nodeEnv = process.env.NODE_ENV
+    const isSea = checkIfSEA()
     const dirs = getDirectories(gamesDir)
     if (modules.length != 0) {
         return
     }
     modules = await Promise.all(
         dirs.map(dir => {
-            return import('../' + gamesDir + '/' + dir + '/back/index.mjs')
+            if (isSea) {
+                const fileRequire = createRequire(process.execPath);
+                return fileRequire(gamesDir + dir + "/back/index.mjs");
+            }
+            return import((nodeEnv == 'production' ? './' : '../') + gamesDir + dir + '/back/index.mjs')
         })
     )
     gameServices = new Map<string, GameBackService>(modules.map((modules) => {
