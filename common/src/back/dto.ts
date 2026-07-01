@@ -64,6 +64,8 @@ export interface GameBackService {
     getDefaultSettings(): GameSettings
     performAction(gameContext: GameContext, gameAction: GameAction, playerId: string): Promise<void>
     startGame(game: Game, gameSettings: GameSettings): GameState
+    version: string
+    homepage: string
 }
 
 

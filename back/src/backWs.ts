@@ -154,12 +154,10 @@ export async function startWs(server: Server) {
     db.init();
     await loadServices();
 
-    console.log(
-        'game services loaded: ' +
-        getAllGameServices()
-            .map((service) => service.type)
-            .join(', ')
-    );
+    console.log('Game services loaded:')
+    getAllGameServices().forEach(service => {
+        console.log(`Type: ${service.type}, name: ${service.localizedName.en[service.type]}, version: ${service.version}, homepage: ${service.homepage}`)
+    })
 
     const wss = new WebSocketServer({ server });
 
