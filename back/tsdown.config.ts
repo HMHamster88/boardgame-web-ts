@@ -4,6 +4,7 @@ export default defineConfig({
     entry: 'src/app.ts',
     outDir: 'dist/bundled',
     deps: {
-        alwaysBundle: ['express', 'lodash', 'uuidv4', 'dotenv', 'connect-history-api-fallback', 'boardgame-web-common/back'],
+        neverBundle: ['@aws-sdk/client-s3'],
+        alwaysBundle: ['express', 'lodash', 'uuidv4', 'dotenv', 'connect-history-api-fallback', 'boardgame-web-common/back', 'semver'],
     },
 })
