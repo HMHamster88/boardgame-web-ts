@@ -11,7 +11,9 @@
     "cp-public": "shx cp -r ./public ./dist/bundled/public",
     "cp-env-to-bubdled": "shx cp .env.prod ./dist/bundled/.env",
     "cp-env-to-sea": "shx cp .env.prod ./dist/sea/.env",
-    "dev": "nodemon"
+    "dev": "nodemon",
+    "set-path": "cross-env GREET=\"Joe\"",
+    "get-path": "cross-env-shell \"echo Hello $GREET\""
   },
   "keywords": [],
   "author": "",

@@ -13,21 +13,18 @@
   "workspaces": [
     "common",
     "back",
-    "front",
-    "games/catan/*",
-    "games/cah/*"
+    "front"
   ],
   "license": "ISC",
   "author": "",
   "type": "commonjs",
   "main": "index.js",
   "scripts": {
-    "build-all": "npm run build-common && npm run build-catan && npm run build-cah && npm run build-front && npm run build-back",
-    "build-common": "npm run build -w common",
+    "build-all": "npm run build-common && npm run build-front && npm run build-back",
+    "make-common-link": "npm run make-link -w common",
+    "build-common": "npm run build -w common && npm run make-common-link",
     "build-back": "npm run build -w back",
     "build-front": "npm run build -w front",
-    "build-catan": "npm run build -w games/catan",
-    "build-cah": "npm run build -w games/cah",
     "start": "npm run start --prefix ./back"
   },
   "dependencies": {

@@ -4,7 +4,7 @@ Web based boardgames app
 
 To run:
 ```
-npm run install-all
+npm install
 npm run build-all
 npm run start
 ```
