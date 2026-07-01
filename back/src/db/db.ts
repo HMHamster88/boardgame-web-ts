@@ -13,7 +13,8 @@ const Tables = {
     GAMES: 'games',
     GAME_SETTINGS: 'game_settings',
     GAME_STATES: 'game_states',
-    GAME_BACKUPS: 'game_backups'
+    GAME_BACKUPS: 'game_backups',
+    GAME_MODULES: 'game_modules'
 } as const
 
 type TablesType = typeof Tables[keyof typeof Tables];
@@ -31,6 +32,19 @@ interface GameBackup {
     date: Date
 }
 
+export interface GameModule {
+    id: string
+    type: string | undefined
+    directory: string | undefined
+    version: string | undefined
+    homepage: string
+}
+
+const defaultGameModulesHomepages = [
+    'https://github.com/HMHamster88/boardgame-web-cah',
+    'https://github.com/HMHamster88/boardgame-web-catan'
+]
+
 export class DB {
     sqliteDb!: DatabaseSync
 
@@ -45,6 +59,38 @@ export class DB {
             )
         `);
         })
+        if (this.getGameModuels().length == 0) {
+            defaultGameModulesHomepages.forEach(homepage => {
+                this.addGameModule({
+                    id: uuidv4(),
+                    type: undefined,
+                    directory: undefined,
+                    version: undefined,
+                    homepage: homepage
+                })
+            })
+        }
+    }
+
+    addGameModule(gameModule: GameModule) {
+        this.addDbObject<GameModule>(Tables.GAME_MODULES, gameModule)
+    }
+
+    getGameModuels() {
+        return this.getAllDbObjects<GameModule>(Tables.GAME_MODULES)
+    }
+
+    getGameModuleByType(type: string) {
+        const selectOneStmt = this.sqliteDb.prepare(`SELECT * FROM ${Tables.GAME_MODULES} WHERE json ->> '$.type' = ?`);
+        const record = selectOneStmt.get(type)
+        if (!record) {
+            return undefined
+        }
+        return JSON.parse(record['json'] as string)
+    }
+
+    updateGameModule(gameModule: GameModule) {
+        this.updateDbObject(Tables.GAME_MODULES, gameModule)
     }
 
     addDbObject<T extends IdObject>(table: TablesType, object: T): T {

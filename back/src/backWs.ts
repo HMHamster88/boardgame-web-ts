@@ -128,10 +128,12 @@ export class WsConnection {
                 roles: []
             });
         }
+        const modules = db.getGameModuels()
         const gameTypes = getAllGameServices().map((service) => {
             return {
                 type: service.type,
-                localizedName: service.localizedName
+                localizedName: service.localizedName,
+                diectoryName: modules.find(module => module.type == service.type)?.directory
             } as GameType;
         });
         this.send<HandshakeResponse>({
@@ -152,7 +154,8 @@ export class WsConnection {
 
 export async function startWs(server: Server) {
     db.init();
-    await loadServices();
+    const checkForUpdates = (process.env.CHECK_FOR_UPDATES === "true") || false
+    await loadServices(db, checkForUpdates);
 
     console.log('Game services loaded:')
     getAllGameServices().forEach(service => {

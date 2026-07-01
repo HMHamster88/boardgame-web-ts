@@ -304,7 +304,8 @@ onMounted(async () => {
 
     gameClient.gameObjectSync.valueSetter = (value) => {
         game.value = value
-        getGameService(game.value.type).then(loadedGameService => {
+        const gameType = memoryLocalStore.gameTypes.find(type => type.type == game.value.type)!
+        getGameService(gameType).then(loadedGameService => {
             gameService.value = loadedGameService
             merge(messages.value, gameService.value.localization)
         })

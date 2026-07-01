@@ -1,4 +1,5 @@
 import { createInstance } from '@module-federation/enhanced/runtime';
+import type { GameType } from 'boardgame-web-common';
 import type { GameFrontModule, GameFrontService } from 'boardgame-web-common/front';
 const vue = await import('vue')
 const boardgameWebCommon = await import('boardgame-web-common')
@@ -7,18 +8,18 @@ const lodash = await import('lodash')
 
 const gameServices = new Map<string, GameFrontService>()
 
-export async function getGameService(type: string) {
-    const loadedService = gameServices.get(type)
+export async function getGameService(type: GameType) {
+    const loadedService = gameServices.get(type.type)
     if (loadedService) {
         return loadedService
     }
-    const lowerType = type.toLocaleLowerCase()
+    const lowerType = type.type.toLocaleLowerCase()
     const mf = createInstance({
         name: 'host-back-app',
         remotes: [
             {
                 name: lowerType,
-                entry: '/games-modules/' + lowerType + '/front/assets/remoteEntry.js',
+                entry: '/games-modules/' + type.diectoryName + '/front/assets/remoteEntry.js',
                 type: 'module'
             }
         ],
@@ -46,7 +47,7 @@ export async function getGameService(type: string) {
     const module = await mf.loadRemote(lowerType + '/front') as GameFrontModule
     const service = module.getGameFrontService()
     console.log("Game service loaded", service)
-    gameServices.set(type, service)
+    gameServices.set(type.type, service)
     return service
 }
 

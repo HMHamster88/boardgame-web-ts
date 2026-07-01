@@ -20,7 +20,8 @@ export interface User {
 
 export interface GameType {
     type: string
-    localizedName: any
+    localizedName: any,
+    diectoryName: string
 }
 
 export enum GameStatusEnum {

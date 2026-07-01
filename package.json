@@ -28,7 +28,9 @@
     "start": "npm run start --prefix ./back"
   },
   "dependencies": {
-    "all": "^0.0.0"
+    "@types/unzipper": "^0.10.11",
+    "all": "^0.0.0",
+    "unzipper": "^0.12.5"
   },
   "overrides": {
     "vue": "3.5.38"
