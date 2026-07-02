@@ -1,6 +1,6 @@
 {
   "name": "boardgame-web-ts",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Web based boardgame engine",
   "homepage": "https://github.com/HMHamster88/boardgame-web-ts#readme",
   "bugs": {

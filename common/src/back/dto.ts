@@ -1,3 +1,4 @@
+import type { TypedMessage } from "./messageHandler"
 import type { ObjectSync } from "./objectSync"
 import type { GameAction } from "./wsMessages"
 
@@ -58,6 +59,13 @@ export interface GameContext {
     sendNotify(peerId: string | undefined, message: string, messageParams: any | undefined): void
 }
 
+export interface BotGameContext {
+    game: Game
+    gameSettings: GameSettings
+    gameState: GameState
+    performGameAction: (action: GameAction, playerId: string) => Promise<void>
+}
+
 export interface GameBackService {
     type: string
     localizedName: any
@@ -65,6 +73,7 @@ export interface GameBackService {
     getDefaultSettings(): GameSettings
     performAction(gameContext: GameContext, gameAction: GameAction, playerId: string): Promise<void>
     startGame(game: Game, gameSettings: GameSettings): GameState
+    runBotsActions(botGameContext: BotGameContext): Promise<void>
     version: string
     homepage: string
 }
@@ -75,6 +84,7 @@ export interface Player {
     name: string
     color: string
     online: boolean
+    isBot: boolean
 }
 
 export interface Game {

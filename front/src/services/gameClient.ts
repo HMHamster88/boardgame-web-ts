@@ -15,7 +15,10 @@ import {
     type DataMessageListener,
     type PeerFilter,
     type ConnectToGameMessage,
-    type GameSettings
+    type GameSettings,
+    type AddBotGameMessage,
+    type Player,
+    type UpdateBotGameMessage
 } from "boardgame-web-common/back";
 
 import { wsService } from "./wsService.ts";
@@ -86,6 +89,20 @@ export default class GameClient {
     join() {
         this.send<JoinGameMessage>({
             type: 'JoinGameMessage'
+        })
+    }
+
+    addBot(player: Player) {
+        this.send<AddBotGameMessage>({
+            type: 'AddBotGameMessage',
+            player: player
+        })
+    }
+
+    updateBot(player: Player) {
+        this.send<UpdateBotGameMessage>({
+            type: 'UpdateBotGameMessage',
+            player: player
         })
     }
 

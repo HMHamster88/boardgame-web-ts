@@ -3,14 +3,17 @@
         <div class="flex items-center">
             <div class="players-container">
                 <o-tag v-for="player, index in game.players" :closeable="canKickPlayer(player)"
-                    @close="kickPlayer(player)" :class="playerClassStyle(player)" v-on:click="playerClick(player)">
+                    @close="kickPlayer(player)" :class="playerClassStyle(player)">
                     <div>
                         <div class="flex items-center">
                             <div class="rounded-box" :style="playerColorStyle(player)"></div>
                             <div class="ml-1 mr-1">{{ player.name }}</div>
                             <div :class="{ 'bg-red': !player.online, 'bg-green-yellow': player.online, circle: true }">
                             </div>
-                            <br>
+                            <o-button v-if="player.isBot && game.status == GameStatusEnum.CREATED"
+                                v-on:click="editBot(player)" icon-left="file-edit-outline" variant="secondary" inverted>
+
+                            </o-button>
                         </div>
                         <div v-if="playersPoints && playersPoints[index] != null" style="text-align: center;">
                             {{ t('playerPoints', { points: playersPoints[index] }) }}</div>
@@ -23,7 +26,10 @@
                 </o-tag>
             </div>
             <div class="mr-auto"></div>
-            <o-button v-on:click="join" v-if="canJoin">{{ t('join') }}</o-button>
+            <div class="flex items-center gap-1">
+                <o-button v-on:click="join" v-if="canJoin">{{ t('join') }}</o-button>
+                <o-button v-on:click="addBot" v-if="canAddBot">{{ t('addBot') }}</o-button>
+            </div>
         </div>
     </div>
 
@@ -61,10 +67,11 @@
             </component>
         </template>
     </o-dialog>
+    <edit-bot-dialog ref="editBotDialog"></edit-bot-dialog>
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue';
+import { computed, onMounted, ref, watch, useTemplateRef } from 'vue';
 
 import { useRoute } from 'vue-router';
 
@@ -78,6 +85,7 @@ import GameClient from '../services/gameClient.ts';
 import type { GameFrontService } from 'boardgame-web-common/front';
 import { getGameService } from '../services/gameFrontServiceSelector.ts';
 import { useOruga } from '@oruga-ui/oruga-next';
+import EditBotDialog from '../components/EditBotDialog.vue';
 
 const oruga = useOruga();
 
@@ -94,7 +102,8 @@ const { messages, t } = useI18n({
             gameSettings: 'Game Settings',
             startGame: 'Start Game',
             winners: 'Winners:',
-            yourTurn: 'Your turn'
+            yourTurn: 'Your turn',
+            addBot: 'Add Bot'
         },
         ru: {
             statistics: 'Статистика',
@@ -106,10 +115,13 @@ const { messages, t } = useI18n({
             gameSettings: 'Настройки Игры',
             startGame: 'Начать игру',
             winners: 'Победители:',
-            yourTurn: 'Ваш ход'
+            yourTurn: 'Ваш ход',
+            addBot: 'Добавить Бота'
         }
     }
 })
+
+const editBotDialog = useTemplateRef('editBotDialog')
 
 const route = useRoute()
 const localStore = useLocalStore();
@@ -213,6 +225,10 @@ const canJoin = computed(() => {
     return gameService.value && game.value.players.length < gameService.value.gameStaticSettings.maxPlayers && !localPlayer.value && game.value.status == GameStatusEnum.CREATED
 })
 
+const canAddBot = computed(() => {
+    return gameService.value && gameService.value.canAddBot && game.value.players.length < gameService.value.gameStaticSettings.maxPlayers && isGameOwner.value && game.value.status == GameStatusEnum.CREATED
+})
+
 const isGameOwner = computed(() => {
     return game.value.owner == localStore.user.id
 })
@@ -265,6 +281,18 @@ const localPlayer = computed(() => {
     return game.value.players.find(player => player.userId == localStore.user.id)
 })
 
+async function addBot() {
+    const bot = await editBotDialog.value?.open({
+        userId: '',
+        name: 'bot',
+        color: '#FF0000',
+        online: true,
+        isBot: true
+    })
+    if (bot) {
+        gameClient.addBot(bot)
+    }
+}
 
 function join() {
     gameClient.join();
@@ -335,8 +363,13 @@ onMounted(async () => {
     await gameClient.start()
 })
 
-function playerClick(player: Player) {
-    player.online = !player.online
+async function editBot(player: Player) {
+    if (player.isBot) {
+        const bot = await editBotDialog.value?.open(player)
+        if (bot) {
+            gameClient.updateBot(bot)
+        }
+    }
 }
 
 </script>

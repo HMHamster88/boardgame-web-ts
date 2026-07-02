@@ -12,6 +12,7 @@ export interface GameFrontService {
     readonly statisticsComponent: Component | undefined
     readonly localization: any
     gameStaticSettings: GameStaticSettings
+    readonly canAddBot: boolean
 }
 
 export interface GameFrontModule {

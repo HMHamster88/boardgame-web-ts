@@ -1,8 +1,10 @@
 import type {
+    AddBotGameMessage,
     Connection,
     CrateGameBackupMessage,
     DataMessageListener,
     Game,
+    GameAction,
     GameActionMessage,
     GameBackService,
     GamePublicState,
@@ -17,6 +19,7 @@ import type {
     PropChange,
     StartGameMessage,
     TypedMessage,
+    UpdateBotGameMessage,
     UpdateUserRequest,
 
 } from 'boardgame-web-common/back';
@@ -32,6 +35,8 @@ import {
 import { WsConnection } from './backWs.ts';
 import { getGameSerivce } from './gameServiceSelector.ts';
 import { db } from './db/db.ts';
+import { v4 as uuidv4 } from 'uuid';
+import _ from 'lodash'
 
 export class GameSession implements Connection {
     game: Game;
@@ -72,6 +77,23 @@ export class GameSession implements Connection {
         });
 
         this.createGameStateSyncs();
+
+        setInterval(() => {
+            if (this.gameService.runBotsActions && this.gameState && this.game.status == GameStatusEnum.STARTED) {
+                this.gameService.runBotsActions({
+                    game: this.game,
+                    gameSettings: this.gameSettings,
+                    gameState: this.gameState,
+                    performGameAction: async (action: GameAction, playerId: string) => {
+                        const actionMessage: GameActionMessage = {
+                            type: 'GameActionMessage',
+                            action: action
+                        }
+                        this.handleGameMessage(actionMessage, undefined, playerId)
+                    }
+                })
+            }
+        }, 100)
     }
 
     sendNotify(peerId: string | undefined, message: string, messageParams: any | undefined) {
@@ -153,6 +175,202 @@ export class GameSession implements Connection {
         connections.forEach((connection) => connection.webSocket.send(message));
     }
 
+    async handleGameMessage(message: TypedMessage, connection: WsConnection | undefined, playerId: string) {
+        if (this.actionBlocker) {
+            console.log('Action blocked')
+            return
+        }
+        this.actionBlocker = true
+        type messageTypes =
+            | CrateGameBackupMessage
+            | GameActionMessage
+            | JoinGameMessage
+            | AddBotGameMessage
+            | UpdateBotGameMessage
+            | UpdateUserRequest
+            | StartGameMessage
+            | KickPlayerMessage;
+
+        const gameChanges: PropChange[] = [];
+        const gameProxy = watchChagesList(this.game, gameChanges);
+
+        const gameSettingsChanges: PropChange[] = [];
+        const gameSettingsProxy = watchChagesList(this.gameSettings, gameSettingsChanges);
+
+        const handlers: MesasgeHandlers<messageTypes> = {
+            CrateGameBackupMessage: async () => {
+                if (this.gameState) {
+                    db.createGameBackup(this.gameState?.id!)
+                    console.debug(`Game state backup created`);
+                    if (connection) {
+                        connection.send<NotifyGameMessage>({
+                            type: "NotifyGameMessage",
+                            message: `Game state backup created`
+                        })
+                    }
+                }
+            },
+            KickPlayerMessage: async (message: KickPlayerMessage) => {
+                if (!connection) {
+                    return
+                }
+                const player = this.game.players.find((pl) => pl.userId == message.playerId);
+                if (!player) {
+                    console.debug(`No player with id "${message.playerId}"`);
+                    return;
+                }
+                if (this.game.owner != connection.id() && player.userId != connection.id()) {
+                    console.debug(`Kick player "${message.playerId}" not allowed`);
+                    return;
+                }
+                removeElement(this.game.players, player);
+                db.updateGame(this.game);
+                this.gameSync.sendUpdate('players');
+            },
+            StartGameMessage: async () => {
+                if (this.gameState != undefined) {
+                    return;
+                }
+                this.gameState = this.gameService.startGame(gameProxy, gameSettingsProxy);
+                db.addGameState(this.gameState);
+                this.createGameStateSyncs();
+            },
+            UpdateUserRequest: async (message: UpdateUserRequest) => {
+                const player = gameProxy.players.find((pl) => pl.userId == message.user.id);
+                if (!player) {
+                    return;
+                }
+                player.color = message.user.color;
+                player.name = message.user.name;
+            },
+            JoinGameMessage: async () => {
+                if (!connection) {
+                    return
+                }
+                const user = connection.user!;
+                if (gameProxy.players.find((pl) => pl.userId == user.id)) {
+                    return;
+                }
+                gameProxy.players.push({
+                    userId: user.id,
+                    name: user.name,
+                    color: user.color,
+                    online: true,
+                    isBot: false
+                });
+            },
+            AddBotGameMessage: async (message: AddBotGameMessage) => {
+                message.player.isBot = true
+                message.player.userId = uuidv4()
+                gameProxy.players.push(message.player);
+            },
+            UpdateBotGameMessage: async (message: UpdateBotGameMessage) => {
+                const bot = gameProxy.players.find(pl => pl.userId == message.player.userId)
+                if (bot) {
+                    _.merge(bot, message.player)
+                }
+            },
+            GameActionMessage: async (message: GameActionMessage) => {
+                console.log(`Game action ${message.action.type} connection ${playerId}`);
+                this.gameSync.updateSended = false;
+                this.gameSettingsSync.updateSended = false;
+                if (this.gamePublicStateSync) {
+                    this.gamePublicStateSync.updateSended = false;
+                }
+                this.playerPrivateStateSync.forEach((sync) => (sync.updateSended = false));
+
+                const gameStateChanges: PropChange[] = [];
+
+                const gameStateProxy = this.gameState
+                    ? watchChagesList(this.gameState, gameStateChanges)
+                    : undefined;
+
+                await this.gameService.performAction(
+                    {
+                        game: gameProxy,
+                        gameSync: this.gameSync,
+                        gameState: gameStateProxy,
+                        gamePublicStateSync: this.gamePublicStateSync,
+                        gameSettings: gameSettingsProxy,
+                        gameSettingsSync: this.gameSettingsSync,
+                        playerPrivateStateSync: this.playerPrivateStateSync,
+                        sendNotify: (
+                            peerId: string | undefined,
+                            message: string,
+                            messageParams: any | undefined
+                        ) => this.sendNotify(peerId, message, messageParams)
+                    },
+                    message.action,
+                    playerId
+                );
+
+                if (this.gameState) {
+                    const publicStateChanges = getSubObjectChanges(gameStateChanges, [
+                        'publicState'
+                    ]);
+
+                    if (this.gamePublicStateSync) {
+                        this.gamePublicStateSync.sendPropChanges(publicStateChanges);
+                    }
+
+                    const privatePlayerStatesChanges = getSubObjectChanges(gameStateChanges, [
+                        'privateState',
+                        'playersStates'
+                    ]);
+                    const playerChangesMap = new Map<number, PropChange[]>();
+
+                    for (const change of privatePlayerStatesChanges) {
+                        const playerIndex = Number(change.path[0]);
+                        let playerChanges = playerChangesMap.get(playerIndex);
+                        if (!playerChanges) {
+                            playerChanges = [];
+                            playerChangesMap.set(playerIndex, playerChanges);
+                        }
+                        const playerChange: PropChange = {
+                            path: change.path.slice(1),
+                            value: change.value
+                        };
+                        playerChanges.push(playerChange);
+                    }
+
+                    playerChangesMap.forEach((change, playerIndex) => {
+                        const playerId =
+                            this.gameState?.privateState?.playersStates![playerIndex]
+                                ?.playerId!;
+                        const playerSync = this.playerPrivateStateSync.get(playerId);
+                        playerSync?.sendPropChanges(change);
+                    });
+
+                    if (this.gameState) {
+                        const playersUpdated = !Array.from(
+                            this.playerPrivateStateSync.values()
+                        ).find((sync) => sync.updateSended);
+                        if (
+                            playersUpdated ||
+                            (this.gamePublicStateSync && this.gamePublicStateSync.updateSended)
+                        ) {
+                            db.updateGameState(this.gameState);
+                        }
+                    }
+                }
+            }
+        };
+
+        await handleMessage(handlers, message);
+
+        this.gameSync.sendPropChanges(gameChanges);
+        this.gameSettingsSync.sendPropChanges(gameSettingsChanges);
+
+        if (this.gameSync.updateSended || gameChanges.length > 0) {
+            db.updateGame(this.game);
+        }
+
+        if (this.gameSettingsSync.updateSended || gameSettingsChanges.length > 0) {
+            db.updateGameSettings(this.gameSettings);
+        }
+        this.actionBlocker = false;
+    }
+
     addConnection(connection: WsConnection) {
         if (this.connections.get(connection.id())) {
             this.connections.delete(connection.id());
@@ -177,181 +395,12 @@ export class GameSession implements Connection {
             }
         }
         connection.webSocket.on('message', async (messageString: string) => {
-            if (this.actionBlocker) {
-                console.log('Action blocked')
-                return
-            }
-            this.actionBlocker = true
             this.dataListeners.forEach((listener) => {
                 listener(connection.id(), messageString);
             });
+
             const message = JSON.parse(messageString) as TypedMessage;
-            type messageTypes =
-                | CrateGameBackupMessage
-                | GameActionMessage
-                | JoinGameMessage
-                | UpdateUserRequest
-                | StartGameMessage
-                | KickPlayerMessage;
-
-            const gameChanges: PropChange[] = [];
-            const gameProxy = watchChagesList(this.game, gameChanges);
-
-            const gameSettingsChanges: PropChange[] = [];
-            const gameSettingsProxy = watchChagesList(this.gameSettings, gameSettingsChanges);
-
-            const handlers: MesasgeHandlers<messageTypes> = {
-                CrateGameBackupMessage: async () => {
-                    if (this.gameState) {
-                        db.createGameBackup(this.gameState?.id!)
-                        console.debug(`Game state backup created`);
-                        connection.send<NotifyGameMessage>({
-                            type: "NotifyGameMessage",
-                            message: `Game state backup created`
-                        })
-                    }
-                },
-                KickPlayerMessage: async (message: KickPlayerMessage) => {
-                    const player = this.game.players.find((pl) => pl.userId == message.playerId);
-                    if (!player) {
-                        console.debug(`No player with id "${message.playerId}"`);
-                        return;
-                    }
-                    if (this.game.owner != connection.id() && player.userId != connection.id()) {
-                        console.debug(`Kick player "${message.playerId}" not allowed`);
-                        return;
-                    }
-                    removeElement(this.game.players, player);
-                    db.updateGame(this.game);
-                    this.gameSync.sendUpdate('players');
-                },
-                StartGameMessage: async () => {
-                    if (this.gameState != undefined) {
-                        return;
-                    }
-                    this.gameState = this.gameService.startGame(gameProxy, gameSettingsProxy);
-                    db.addGameState(this.gameState);
-                    this.createGameStateSyncs();
-                },
-                UpdateUserRequest: async (message: UpdateUserRequest) => {
-                    const player = gameProxy.players.find((pl) => pl.userId == message.user.id);
-                    if (!player) {
-                        return;
-                    }
-                    player.color = message.user.color;
-                    player.name = message.user.name;
-                },
-                JoinGameMessage: async () => {
-                    const user = connection.user!;
-                    if (gameProxy.players.find((pl) => pl.userId == user.id)) {
-                        return;
-                    }
-                    gameProxy.players.push({
-                        userId: user.id,
-                        name: user.name,
-                        color: user.color,
-                        online: true
-                    });
-                },
-                GameActionMessage: async (message: GameActionMessage) => {
-                    console.log(`Game action ${message.action.type} connection ${connection.id()}`);
-                    this.gameSync.updateSended = false;
-                    this.gameSettingsSync.updateSended = false;
-                    if (this.gamePublicStateSync) {
-                        this.gamePublicStateSync.updateSended = false;
-                    }
-                    this.playerPrivateStateSync.forEach((sync) => (sync.updateSended = false));
-
-                    const gameStateChanges: PropChange[] = [];
-
-                    const gameStateProxy = this.gameState
-                        ? watchChagesList(this.gameState, gameStateChanges)
-                        : undefined;
-
-                    await this.gameService.performAction(
-                        {
-                            game: gameProxy,
-                            gameSync: this.gameSync,
-                            gameState: gameStateProxy,
-                            gamePublicStateSync: this.gamePublicStateSync,
-                            gameSettings: gameSettingsProxy,
-                            gameSettingsSync: this.gameSettingsSync,
-                            playerPrivateStateSync: this.playerPrivateStateSync,
-                            sendNotify: (
-                                peerId: string | undefined,
-                                message: string,
-                                messageParams: any | undefined
-                            ) => this.sendNotify(peerId, message, messageParams)
-                        },
-                        message.action,
-                        connection.id()
-                    );
-
-                    if (this.gameState) {
-                        const publicStateChanges = getSubObjectChanges(gameStateChanges, [
-                            'publicState'
-                        ]);
-
-                        if (this.gamePublicStateSync) {
-                            this.gamePublicStateSync.sendPropChanges(publicStateChanges);
-                        }
-
-                        const privatePlayerStatesChanges = getSubObjectChanges(gameStateChanges, [
-                            'privateState',
-                            'playersStates'
-                        ]);
-                        const playerChangesMap = new Map<number, PropChange[]>();
-
-                        for (const change of privatePlayerStatesChanges) {
-                            const playerIndex = Number(change.path[0]);
-                            let playerChanges = playerChangesMap.get(playerIndex);
-                            if (!playerChanges) {
-                                playerChanges = [];
-                                playerChangesMap.set(playerIndex, playerChanges);
-                            }
-                            const playerChange: PropChange = {
-                                path: change.path.slice(1),
-                                value: change.value
-                            };
-                            playerChanges.push(playerChange);
-                        }
-
-                        playerChangesMap.forEach((change, playerIndex) => {
-                            const playerId =
-                                this.gameState?.privateState?.playersStates![playerIndex]
-                                    ?.playerId!;
-                            const playerSync = this.playerPrivateStateSync.get(playerId);
-                            playerSync?.sendPropChanges(change);
-                        });
-
-                        if (this.gameState) {
-                            const playersUpdated = !Array.from(
-                                this.playerPrivateStateSync.values()
-                            ).find((sync) => sync.updateSended);
-                            if (
-                                playersUpdated ||
-                                (this.gamePublicStateSync && this.gamePublicStateSync.updateSended)
-                            ) {
-                                db.updateGameState(this.gameState);
-                            }
-                        }
-                    }
-                }
-            };
-
-            await handleMessage(handlers, message);
-
-            this.gameSync.sendPropChanges(gameChanges);
-            this.gameSettingsSync.sendPropChanges(gameSettingsChanges);
-
-            if (this.gameSync.updateSended || gameChanges.length > 0) {
-                db.updateGame(this.game);
-            }
-
-            if (this.gameSettingsSync.updateSended || gameSettingsChanges.length > 0) {
-                db.updateGameSettings(this.gameSettings);
-            }
-            this.actionBlocker = false;
+            await this.handleGameMessage(message, connection, connection.id())
         });
         connection.webSocket.on('close', () => {
             this.connections.delete(connection.id());

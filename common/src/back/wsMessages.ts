@@ -1,5 +1,5 @@
 import type { TypedMessage } from "./messageHandler.js"
-import type { Game, User, CreateGameProps, GameSettings, GameType } from "./dto.js"
+import type { Game, User, CreateGameProps, GameSettings, GameType, Player } from "./dto.js"
 
 export interface HandshakeRequest extends TypedMessage {
     type: 'HandshakeRequest'
@@ -88,6 +88,16 @@ export interface StartGameMessage extends GameMessage {
 
 export interface JoinGameMessage extends GameMessage {
     type: 'JoinGameMessage'
+}
+
+export interface AddBotGameMessage extends GameMessage {
+    type: 'AddBotGameMessage'
+    player: Player
+}
+
+export interface UpdateBotGameMessage extends GameMessage {
+    type: 'UpdateBotGameMessage'
+    player: Player
 }
 
 export interface KickPlayerMessage extends GameMessage {
