@@ -132,6 +132,10 @@ export class DB {
         return this.getDbObject<User>(Tables.USERS, id)
     }
 
+    getAllUsers(): User[] {
+        return this.getAllDbObjects<User>(Tables.USERS)
+    }
+
     updateUser(user: User) {
         return this.updateDbObject(Tables.USERS, user)
     }

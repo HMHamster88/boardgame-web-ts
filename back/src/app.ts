@@ -3,6 +3,7 @@ import { configDotenv } from 'dotenv';
 import history from 'connect-history-api-fallback';
 import { startWs } from './backWs.ts';
 import os from 'os';
+import { startCli } from './cli.ts';
 
 configDotenv();
 
@@ -25,14 +26,16 @@ app.use(
 
 app.use(staticMw);
 
-const server = app.listen(port, () => {
-    console.log(`Static server is running on port ${port}`);
-});
+const server = app.listen(port);
 
-startWs(server);
+await startWs(server);
 
 Object.values(os.networkInterfaces()).forEach((interfaces) => {
     interfaces?.forEach((int) => {
         console.log(`http://${int.address}:${port}`);
     });
 });
+
+startCli()
+
+
