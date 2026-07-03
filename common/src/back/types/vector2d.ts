@@ -1,4 +1,4 @@
-import type { Comparable } from '../arrayUtils'
+import type { Comparable } from '../utils/arrayUtils'
 
 export interface Vector2DLike {
     x: number

@@ -22,7 +22,7 @@ import type {
     UpdateBotGameMessage,
     UpdateUserRequest,
 
-} from 'boardgame-web-common/back';
+} from 'boardgame-web-common';
 
 import {
     GameStatusEnum,
@@ -31,7 +31,7 @@ import {
     ObjectSync,
     removeElement,
     watchChagesList
-} from 'boardgame-web-common/back';
+} from 'boardgame-web-common';
 import { WsConnection } from './backWs.ts';
 import { getGameSerivce } from './gameServiceSelector.ts';
 import { db } from './db/db.ts';

@@ -17,7 +17,6 @@
 import { ODialog, OButton, OListbox, type ListboxOptions } from '@oruga-ui/oruga-next';
 
 import { useI18n } from 'vue-i18n';
-import _ from 'lodash';
 import type { Player } from "../../back/dto";
 import { ref } from 'vue';
 

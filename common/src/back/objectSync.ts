@@ -1,9 +1,6 @@
-import EventEmitter from 'eventemitter3';
-import _ from 'lodash';
-import { typedPath, type TypedPathWrapper } from 'typed-path';
-
 import type { PropChange } from './proxyObject';
 import type { Connection, PeerFilter } from './connection';
+import { getValueByPath, isObject, setValueByPath } from './utils/objectUtils';
 
 interface ObjectSyncPart {
     path: string | undefined,
@@ -25,21 +22,11 @@ interface ObjectSyncConfig<T> {
     peerFiler?: (peerId: string) => boolean
 }
 
-interface ObjectSyncEvents {
-    syncronized: (message: ObjectSyncMessage) => void
-}
-
 type PropName<T extends object> = T extends string | symbol
     ? T
     : keyof T;
 
-interface HasToString {
-    toString(): string
-}
-
-type TypedPathFun<T> = (tp: TypedPathWrapper<T, Record<never, never>>) => HasToString | HasToString[]
-
-export class ObjectSync<T extends object> extends EventEmitter<ObjectSyncEvents> {
+export class ObjectSync<T extends object> {
     id: string
     value?: T
     valueSetter?: ((va: T) => T)
@@ -51,7 +38,6 @@ export class ObjectSync<T extends object> extends EventEmitter<ObjectSyncEvents>
     changingByUpdate: boolean = false
 
     constructor(config: ObjectSyncConfig<T>) {
-        super()
         this.id = config.id
         this.value = config.value
         this.valueSetter = config.valueSetter
@@ -68,17 +54,16 @@ export class ObjectSync<T extends object> extends EventEmitter<ObjectSyncEvents>
                     if (!part.path && this.valueSetter) {
                         this.value = this.valueSetter(part.value)
                     } else if (this.value && part.path) {
-                        const oldVal = _.get(this.value, part.path)
-                        if (_.isObject(part.value) && !_.isArray(part.value) && oldVal) {
+                        const oldVal = getValueByPath(this.value, part.path)
+                        if (isObject(part.value) && !Array.isArray(part.value) && oldVal) {
                             Object.assign(oldVal, part.value)
                         } else {
-                            _.set(this.value, part.path, part.value)
+                            setValueByPath(this.value, part.path, part.value)
                         }
                     }
 
                 }
                 this.changingByUpdate = false
-                this.emit('syncronized', message)
                 if (this.retranslateChanges) {
                     this.sendMessage(message, (peerId) => {
                         return peerId != _peerId
@@ -86,41 +71,6 @@ export class ObjectSync<T extends object> extends EventEmitter<ObjectSyncEvents>
                 }
             }
         })
-    }
-
-    sendUpdateTypedPath(peerFilter: string | PeerFilter | null, pathFun: TypedPathFun<T>) {
-        if (!this.value) {
-            return
-        }
-
-        const paths = pathFun(typedPath<T>())
-        let parts: ObjectSyncPart[] = []
-
-        if (Array.isArray(paths)) {
-            parts = paths.map(prop => {
-                const path = prop.toString()
-                const propVal: any = _.get(this.value, path)
-                const part: ObjectSyncPart = {
-                    path: prop.toString(),
-                    value: propVal
-                }
-                return part
-            })
-        } else {
-            parts = [
-                {
-                    path: paths.toString(),
-                    value: _.get(this.value, paths.toString())
-                }
-            ]
-        }
-
-        const updateMessage: ObjectSyncMessage = {
-            type: 'ObjectSyncMessage',
-            objectId: this.id,
-            parts: parts
-        }
-        this.sendMessage(updateMessage, peerFilter)
     }
 
     sendUpdateTSBack(props: PropName<T>[] | PropName<T>, peerFilter: string | PeerFilter | null = null) {
@@ -188,14 +138,14 @@ export class ObjectSync<T extends object> extends EventEmitter<ObjectSyncEvents>
             parts = [
                 {
                     path: paths,
-                    value: _.get(this.value, paths)
+                    value: getValueByPath(this.value, paths)
                 }
             ]
         } else {
             parts = paths.map(path => {
                 const part: ObjectSyncPart = {
                     path: path,
-                    value: _.get(this.value, path)
+                    value: getValueByPath(this.value, path)
                 }
                 return part
             })

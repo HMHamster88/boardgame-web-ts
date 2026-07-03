@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node src/app.ts",
     "build": "npm run clean && tsdown && npm run cp-public && npm run cp-env-to-bubdled",
-    "build:sea": "shx mkdir -p dist/sea && shx cp -r public dist/sea/public && node --build-sea sea-config.json && npm run cp-env-to-sea",
+    "build:sea": "npm run build && shx mkdir -p dist/sea && shx cp -r public dist/sea/public && node --build-sea sea-config.json && npm run cp-env-to-sea",
     "clean": "shx rm -rf dist",
     "cp-public": "shx cp -r ./public ./dist/bundled/public",
     "cp-env-to-bubdled": "shx cp .env.prod ./dist/bundled/.env",
@@ -20,17 +20,13 @@
   "license": "ISC",
   "type": "module",
   "dependencies": {
-    "@module-federation/enhanced": "^2.5.0",
     "@types/express-ws": "^3.0.6",
-    "@types/lodash": "^4.17.24",
-    "@types/lowdb": "^1.0.15",
     "boardgame-web-common": "file:../common",
     "connect-history-api-fallback": "^2.0.0",
     "date-fns": "^4.4.0",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "express-ws": "^5.0.2",
-    "lodash": "^4.18.1",
     "semver": "^7.6.3",
     "uuidv4": "^6.2.13"
   },

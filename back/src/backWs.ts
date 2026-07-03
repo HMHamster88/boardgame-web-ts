@@ -18,7 +18,7 @@ import {
     type TypedMessage,
     type UpdateUserRequest,
     type User
-} from 'boardgame-web-common/back';
+} from 'boardgame-web-common';
 import { db } from './db/db.ts';
 import { v4 as uuidv4 } from 'uuid';
 import { getAllGameServices, loadServices } from './gameServiceSelector.ts';

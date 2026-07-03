@@ -3,8 +3,7 @@ import {
     type GameSettings,
     type GameState,
     type User
-} from 'boardgame-web-common/back';
-import _ from 'lodash';
+} from 'boardgame-web-common';
 import { DatabaseSync } from 'node:sqlite';
 import { v4 as uuidv4 } from 'uuid';
 

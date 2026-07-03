@@ -1,4 +1,4 @@
-import type { GameBackModule, GameBackService } from "boardgame-web-common/back"
+import type { GameBackModule, GameBackService } from "boardgame-web-common"
 import fs from 'fs'
 import { createRequire } from "module";
 import semver from 'semver'
@@ -96,33 +96,37 @@ export async function loadServices(db: DB, checkForUpdates: boolean) {
     const modules: GameBackModule[] = []
 
     for (let dbModule of dbModules) {
-        let module: GameBackModule | undefined = undefined
-        const moduleAlreadyDownloaded = dbModule.directory != undefined
-        let needUpdateDbModule = false
-        if (moduleAlreadyDownloaded) {
-            if (checkForUpdates && await checkNeedUpdate(dbModule)) {
-                console.log(`Updated needed for ${dbModule.type}`)
+        try {
+            let module: GameBackModule | undefined = undefined
+            const moduleAlreadyDownloaded = dbModule.directory != undefined
+            let needUpdateDbModule = false
+            if (moduleAlreadyDownloaded) {
+                if (checkForUpdates && await checkNeedUpdate(dbModule)) {
+                    console.log(`Updated needed for ${dbModule.type}`)
+                    module = await downloadModule(dbModule)
+                    needUpdateDbModule = true
+                } else {
+                    module = await loadModule(dbModule.directory!)
+                }
+            } else {
                 module = await downloadModule(dbModule)
                 needUpdateDbModule = true
-            } else {
-                module = await loadModule(dbModule.directory!)
             }
-        } else {
-            module = await downloadModule(dbModule)
-            needUpdateDbModule = true
-        }
 
-        if (!module) {
-            continue
-        }
-        const gameService = module.getGameBackService()
-        gameServices.set(gameService.type, gameService)
-        modulesMap.set(gameService.type, module)
-        modules.push(module)
-        if (needUpdateDbModule) {
-            dbModule.type = gameService.type
-            dbModule.version = gameService.version
-            db.updateGameModule(dbModule)
+            if (!module) {
+                continue
+            }
+            const gameService = module.getGameBackService()
+            gameServices.set(gameService.type, gameService)
+            modulesMap.set(gameService.type, module)
+            modules.push(module)
+            if (needUpdateDbModule) {
+                dbModule.type = gameService.type
+                dbModule.version = gameService.version
+                db.updateGameModule(dbModule)
+            }
+        } catch (error) {
+            console.log('\x1b[31m%s\x1b[0m', error)
         }
     }
     return modules
