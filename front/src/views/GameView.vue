@@ -75,7 +75,7 @@ import { computed, onMounted, ref, watch, useTemplateRef } from 'vue';
 
 import { useRoute } from 'vue-router';
 
-import { GameStatusEnum, type Game, type GamePublicState, type PlayerPrivateState, type Player, type GameAction, type GameSettings, createDeepProxy } from 'boardgame-web-common/back';
+import { GameStatusEnum, type Game, type GamePublicState, type PlayerPrivateState, type Player, type GameAction, type GameSettings, createDeepProxy, deepMerge } from 'boardgame-web-common/back';
 import { useLocalStore, useMemoryLocalStore } from '../services/localStore';
 
 import { useI18n } from 'vue-i18n';
@@ -334,7 +334,7 @@ onMounted(async () => {
         const gameType = memoryLocalStore.gameTypes.find(type => type.type == game.value.type)!
         getGameService(gameType).then(loadedGameService => {
             gameService.value = loadedGameService
-            Object.assign(messages.value, gameService.value.localization)
+            deepMerge(messages.value, gameService.value.localization)
         })
         return game.value
     }

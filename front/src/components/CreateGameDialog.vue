@@ -17,7 +17,7 @@
 
 <script setup lang="ts">
 import { ref, watch } from 'vue';
-import { type CreateGameProps } from 'boardgame-web-common/back';
+import { deepMerge, type CreateGameProps } from 'boardgame-web-common/back';
 import { useLocalStore, useMemoryLocalStore } from '../services/localStore'
 import { useI18n } from 'vue-i18n';
 
@@ -71,7 +71,7 @@ var openPromiseReject: (reason?: any) => void
 async function open(): Promise<CreateGameProps> {
     memoryLocalStore.gameTypes.forEach(type => {
         if (type.localizedName) {
-            localization = Object.assign(localization, type.localizedName)
+            deepMerge(localization, type.localizedName)
         }
     })
 

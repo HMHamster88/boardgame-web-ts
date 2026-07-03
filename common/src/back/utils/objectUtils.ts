@@ -32,3 +32,25 @@ export function getValueByPath(
         return acc && acc[key] !== undefined ? acc[key] : undefined;
     }, obj);
 }
+
+export function deepMerge(target: any, source: any) {
+
+    function merge(tgt: any, src: any) {
+        if (typeof tgt !== 'object' || tgt === null || typeof src !== 'object' || src === null) {
+            return src;
+        }
+
+        for (const key of Object.keys(src)) {
+            if (src[key] !== undefined) {
+                if (tgt[key] && typeof tgt[key] === 'object' && typeof src[key] === 'object') {
+                    tgt[key] = merge(tgt[key], src[key]);
+                } else {
+                    tgt[key] = src[key];
+                }
+            }
+        }
+        return tgt;
+    }
+
+    return merge(target, source);
+}
