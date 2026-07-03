@@ -26,7 +26,6 @@
 import { computed, ref } from 'vue';
 import { type Settings, useLocalStore } from '../services/localStore'
 import { useI18n } from 'vue-i18n'
-import _ from 'lodash';
 import type { User } from 'boardgame-web-common';
 import { wsService } from '../services/wsService';
 import { useRoute } from 'vue-router';
@@ -108,8 +107,8 @@ async function createBackup() {
 }
 
 function open() {
-    userCopy.value = _.cloneDeep(localStore.user)
-    settingsCopy.value = _.cloneDeep(localStore.settings)
+    userCopy.value = Object.assign({}, localStore.user)
+    settingsCopy.value = Object.assign({}, localStore.settings)
     showDialog.value = true;
 }
 

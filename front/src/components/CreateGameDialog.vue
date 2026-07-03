@@ -20,7 +20,7 @@ import { ref, watch } from 'vue';
 import { type CreateGameProps } from 'boardgame-web-common/back';
 import { useLocalStore, useMemoryLocalStore } from '../services/localStore'
 import { useI18n } from 'vue-i18n';
-import _ from 'lodash';
+
 
 let localization: any = {
     en: {
@@ -71,7 +71,7 @@ var openPromiseReject: (reason?: any) => void
 async function open(): Promise<CreateGameProps> {
     memoryLocalStore.gameTypes.forEach(type => {
         if (type.localizedName) {
-            localization = _.merge(localization, type.localizedName)
+            localization = Object.assign(localization, type.localizedName)
         }
     })
 

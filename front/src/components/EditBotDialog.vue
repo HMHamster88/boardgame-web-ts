@@ -18,7 +18,6 @@
 <script setup lang="ts">
 import type { Player } from 'boardgame-web-common';
 import { useI18n } from 'vue-i18n'
-import _ from 'lodash';
 import { computed, ref } from 'vue';
 
 const t = useI18n({
@@ -61,7 +60,7 @@ var openPromiseResolve: (value: Player | PromiseLike<Player>) => void
 var openPromiseReject: (reason?: any) => void
 
 async function open(bot: Player): Promise<Player> {
-    botCopy.value = _.cloneDeep(bot)
+    botCopy.value = Object.assign({}, bot)
     showDialog.value = true;
     openPromise = new Promise((resolve, reject) => {
         openPromiseResolve = resolve

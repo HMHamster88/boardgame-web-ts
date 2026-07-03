@@ -36,7 +36,7 @@ import { WsConnection } from './backWs.ts';
 import { getGameSerivce } from './gameServiceSelector.ts';
 import { db } from './db/db.ts';
 import { v4 as uuidv4 } from 'uuid';
-import _ from 'lodash'
+
 
 export class GameSession implements Connection {
     game: Game;
@@ -267,7 +267,7 @@ export class GameSession implements Connection {
             UpdateBotGameMessage: async (message: UpdateBotGameMessage) => {
                 const bot = gameProxy.players.find(pl => pl.userId == message.player.userId)
                 if (bot) {
-                    _.merge(bot, message.player)
+                    Object.assign(bot, message.player);
                 }
             },
             GameActionMessage: async (message: GameActionMessage) => {

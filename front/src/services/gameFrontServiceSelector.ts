@@ -4,7 +4,6 @@ import type { GameFrontModule, GameFrontService } from 'boardgame-web-common/fro
 const vue = await import('vue')
 const boardgameWebCommon = await import('boardgame-web-common')
 const oruga = await import('@oruga-ui/oruga-next')
-const lodash = await import('lodash')
 
 const gameServices = new Map<string, GameFrontService>()
 
@@ -37,9 +36,6 @@ export async function getGameService(type: GameType) {
             },
             '@oruga-ui/oruga-next': {
                 get: () => () => oruga as any
-            },
-            'lodash': {
-                get: () => () => lodash as any
             }
         }
     });
