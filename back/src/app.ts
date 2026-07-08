@@ -4,11 +4,15 @@ import history from 'connect-history-api-fallback';
 import { startWs } from './backWs.ts';
 import os from 'os';
 import { startCli } from './cli.ts';
+import packageInfo from '../../package.json' with { type: 'json' };
 
 configDotenv();
 
 const app = express();
 const port = process.env.PORT ?? 8000;
+
+console.log('Starting boardgames engine...')
+console.log(`Version ${packageInfo.version}`)
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
