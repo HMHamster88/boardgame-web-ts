@@ -6,12 +6,10 @@
             {{ connectStatusText }}
         </o-tag>
         <o-button v-if="isGameRoute" icon-right="chart-box" @click="memoryLocalStore.showStatistics = true"></o-button>
-        <o-dropdown :keep-open="true" mobile-modal desktop-modal>
-            <template #trigger>
-                <o-button icon-right="share-variant-outline" />
-            </template>
-            <qrcode-vue :value="fullUrl" :size="280" style="margin: 0.5rem;"></qrcode-vue>
-        </o-dropdown>
+        <o-button icon-right="share-variant-outline" @click="showHideQrCode()" />
+        <o-dialog v-model:active="qrCodeActive" bodyClass="qr-dialog-body-class" fullscreen>
+            <qrcode-vue :value="fullUrl" class="qr-code" render-as="svg" @click="showHideQrCode()"></qrcode-vue>
+        </o-dialog>
         <o-button icon-left="cog" @click="settingsDialog?.open()"></o-button>
     </div>
     <SettingsDialog ref="settingsDialog"></SettingsDialog>
@@ -19,7 +17,7 @@
 
 <script setup lang="ts">
 import { useRoute } from 'vue-router';
-import { computed, useTemplateRef } from "vue";
+import { computed, useTemplateRef, ref } from "vue";
 import { useI18n } from 'vue-i18n';
 import { useMemoryLocalStore } from '../services/localStore';
 import { ConnectStatus } from 'boardgame-web-common/back';
@@ -50,6 +48,12 @@ const { t } = useI18n({
     }
 })
 
+const qrCodeActive = ref(false)
+
+function showHideQrCode() {
+    qrCodeActive.value = !qrCodeActive.value
+}
+
 const settingsDialog = useTemplateRef('settingsDialog')
 
 const route = useRoute();
@@ -75,3 +79,14 @@ const connectStatusSeverity = computed(() => {
 })
 
 </script>
+
+<style>
+.qr-dialog-body-class {
+    height: 100%;
+}
+
+.qr-code {
+    width: 100%;
+    height: 100%;
+}
+</style>
