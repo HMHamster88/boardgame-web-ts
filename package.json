@@ -1,6 +1,6 @@
 {
   "name": "boardgame-web-ts",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Web based boardgame engine",
   "homepage": "https://github.com/HMHamster88/boardgame-web-ts#readme",
   "bugs": {
@@ -17,18 +17,21 @@
   ],
   "license": "ISC",
   "author": "",
-  "type": "commonjs",
+  "type": "module",
   "main": "index.js",
   "scripts": {
     "build-all": "npm run build-common && npm run build-front && npm run build-back",
     "make-common-link": "npm run make-link -w common",
     "build-common": "npm run build -w common && npm run make-common-link",
-    "build-back": "npm run build -w back",
+    "build-back": "npm run build -w back && npm run build-sea -w back",
     "build-front": "npm run build -w front",
-    "start": "npm run start --prefix ./back"
+    "start": "npm run start --prefix ./back",
+    "create-zip": "node create-zip.js",
+    "create-release": "npm run build-all && npm run create-zip"
   },
   "dependencies": {
     "@types/unzipper": "^0.10.11",
+    "adm-zip": "^0.5.18",
     "all": "^0.0.0",
     "unzipper": "^0.12.5"
   },

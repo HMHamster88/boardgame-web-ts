@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node src/app.ts",
     "build": "npm run clean && tsdown && npm run cp-public && npm run cp-env-to-bubdled",
-    "build:sea": "npm run build && shx mkdir -p dist/sea && shx cp -r public dist/sea/public && node --build-sea sea-config.json && npm run cp-env-to-sea",
+    "build-sea": "npm run build && shx mkdir -p dist/sea && shx cp -r public dist/sea/public && node --build-sea sea-config.json && npm run cp-env-to-sea",
     "clean": "shx rm -rf dist",
     "cp-public": "shx cp -r ./public ./dist/bundled/public",
     "cp-env-to-bubdled": "shx cp .env.prod ./dist/bundled/.env",
