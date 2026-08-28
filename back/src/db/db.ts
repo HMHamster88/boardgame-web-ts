@@ -58,16 +58,33 @@ export class DB {
             )
         `);
         })
-        if (this.getGameModuels().length == 0) {
-            defaultGameModulesHomepages.forEach(homepage => {
-                this.addGameModule({
-                    id: uuidv4(),
-                    type: undefined,
-                    directory: undefined,
-                    version: undefined,
-                    homepage: homepage
-                })
-            })
+        const existingModulesHomepages = this.getAllGameModulesHomepages()
+        defaultGameModulesHomepages.forEach(homepage => {
+            if (!existingModulesHomepages.includes(homepage)) {
+                console.log(`Adding default game module "${homepage}"`)
+                this.addGameModuleByHomePage(homepage)
+            }
+        })
+
+    }
+
+    getAllGameModulesHomepages() {
+        const selectStmt = this.sqliteDb.prepare(`SELECT json ->> '$.homepage' AS homepage FROM ${Tables.GAME_MODULES}`);
+        const records = selectStmt.all()
+        return records.map(record => record['homepage'] as string)
+    }
+
+    addGameModuleByHomePage(homepageUrl: string) {
+        this.addGameModule(this.gameModuleFromHomapage(homepageUrl))
+    }
+
+    gameModuleFromHomapage(homepageUrl: string): GameModule {
+        return {
+            id: uuidv4(),
+            type: undefined,
+            directory: undefined,
+            version: undefined,
+            homepage: homepageUrl
         }
     }
 

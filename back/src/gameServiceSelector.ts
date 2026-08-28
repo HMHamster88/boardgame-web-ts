@@ -90,6 +90,21 @@ async function checkNeedUpdate(dbModule: GameModule) {
     return versionCompareResult == 1
 }
 
+export async function downloadNewModule(db: DB, homepageUrl: string) {
+    const dbModule: GameModule = db.gameModuleFromHomapage(homepageUrl)
+    const module = await downloadModule(dbModule)
+    if (!module) {
+        throw new Error(`Failed to load module from "${homepageUrl}"`)
+    }
+    const gameService = module.getGameBackService()
+    gameServices.set(gameService.type, gameService)
+    modulesMap.set(gameService.type, module)
+    dbModule.type = gameService.type
+    dbModule.version = gameService.version
+    db.addGameModule(dbModule)
+    console.log(`Module ${dbModule.type} ${dbModule.version} loaded`)
+}
+
 export async function loadServices(db: DB, checkForUpdates: boolean) {
     const dbModules = db.getGameModuels()
 
@@ -161,5 +176,9 @@ export function getAllGameServices() {
 }
 
 export function getGameSerivce(gameType: string): GameBackService {
-    return getAllGameServices().find(service => service.type == gameType)!
+    const service = getAllGameServices().find(service => service.type == gameType)
+    if (!service) {
+        throw new Error(`No game service with type ${gameType}`)
+    }
+    return service
 }

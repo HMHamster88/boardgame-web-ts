@@ -2,10 +2,11 @@ import readline from 'node:readline/promises';
 import { stdin as input, stdout as output } from 'node:process';
 import { db } from './db/db.ts';
 import { removeElement, UserRole } from 'boardgame-web-common';
+import { downloadNewModule } from './gameServiceSelector.ts';
 
 interface Command {
     name: string
-    func: ((args: string[]) => void) | undefined
+    func: ((args: string[]) => Promise<void>) | undefined
     description: string
     subCommands: Command[] | undefined
 }
@@ -30,13 +31,44 @@ export async function startCli() {
             subCommands: undefined
         },
         {
+            name: 'game-modules',
+            func: undefined,
+            description: 'Game modules commands',
+            subCommands: [
+                {
+                    name: 'list',
+                    func: async () => {
+                        const gameModules = db.getGameModuels()
+                        gameModules.forEach(gameModule => {
+                            console.log(gameModule)
+                        })
+                    },
+                    description: 'List all game modules',
+                    subCommands: undefined,
+                },
+                {
+                    name: 'add',
+                    func: async (args: string[]) => {
+                        const homepage = args[0]
+                        if (!homepage) {
+                            console.log('Homepage URL must be specified')
+                            return
+                        }
+                        await downloadNewModule(db, homepage)
+                    },
+                    description: 'Add game module. Args: [homepage-url]',
+                    subCommands: undefined,
+                }
+            ]
+        },
+        {
             name: 'users',
             func: undefined,
             description: 'User commands:',
             subCommands: [
                 {
                     name: 'list',
-                    func: () => {
+                    func: async () => {
                         const allUsers = db.getAllUsers()
                         console.log(allUsers)
                     },
@@ -50,7 +82,7 @@ export async function startCli() {
                     subCommands: [
                         {
                             name: 'add',
-                            func: (args: string[]) => {
+                            func: async (args: string[]) => {
                                 const userId = args[0]!
                                 const role = args[1]! as UserRole
                                 const isValidRole = Object.values(UserRole).includes(role);
@@ -76,7 +108,7 @@ export async function startCli() {
                         },
                         {
                             name: 'remove',
-                            func: (args: string[]) => {
+                            func: async (args: string[]) => {
                                 const userId = args[0]!
                                 const role = args[1]! as UserRole
                                 const user = db.getUser(userId)
@@ -97,7 +129,7 @@ export async function startCli() {
         },
         {
             name: 'help',
-            func: () => {
+            func: async () => {
                 console.log('List of all commands: \r\n')
                 commands.forEach(cmd => {
                     conmandDescription(cmd, '')
@@ -108,15 +140,15 @@ export async function startCli() {
         }
     ]
 
-    function runCommand(command: Command, args: string[]) {
+    async function runCommand(command: Command, args: string[]) {
         if (command.func) {
-            command.func(args)
+            await command.func(args)
             return
         }
         const subCommandName = args[0]!
         const subCommand = command.subCommands?.find(cmd => cmd.name == subCommandName)
         if (subCommand) {
-            runCommand(subCommand, args.slice(1))
+            await runCommand(subCommand, args.slice(1))
         } else {
             console.log(`Unknown subcommand "${subCommandName}"`)
         }
@@ -131,7 +163,7 @@ export async function startCli() {
                 let commandName = commandArgs[0]!
                 let command = commands.find(cmd => cmd.name == commandName)
                 if (command) {
-                    runCommand(command, commandArgs.slice(1))
+                    await runCommand(command, commandArgs.slice(1))
                 } else {
                     console.log(`Unknown command "${commandName}"`)
                 }
