@@ -1,5 +1,5 @@
+import type { CreateGameProps, Game, GameSettings, GameState, GameType, Player, User } from "./dto.js"
 import type { TypedMessage } from "./messageHandler.js"
-import type { Game, User, CreateGameProps, GameSettings, GameType, Player } from "./dto.js"
 
 export interface HandshakeRequest extends TypedMessage {
     type: 'HandshakeRequest'
@@ -62,7 +62,8 @@ export interface ConnectToGameMessage extends TypedMessage {
 }
 
 export interface GameMessage {
-    type: string;
+    id?: string
+    type: string
 }
 
 export interface GameInfoMessage extends GameMessage {
@@ -116,5 +117,31 @@ export interface GameActionMessage extends GameMessage {
 
 export interface CrateGameBackupMessage extends GameMessage {
     type: 'CrateGameBackupMessage'
+}
+
+export interface GetAdminGameMessage extends GameMessage {
+    type: 'GetAdminGameMessage'
+    gameId: string
+}
+
+export interface FullGameData {
+    settings: GameSettings
+    game: Game
+    gameState: GameState | undefined
+}
+
+export interface AdminGameMessageResponse extends GameMessage {
+    type: 'AdminGameMessageResponse'
+    fullGameData: FullGameData
+}
+
+export interface UpdateFullGameDataMessage extends GameMessage {
+    type: 'UpdateFullGameDataMessage'
+    fullGameData: FullGameData
+}
+
+export interface UpdateFullGameDataResponse extends GameMessage {
+    type: 'UpdateFullGameDataResponse'
+    error: string | undefined
 }
 

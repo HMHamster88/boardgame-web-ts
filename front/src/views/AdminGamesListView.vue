@@ -7,30 +7,25 @@
             <o-table-column field="id" v-slot="{ row }" position="right">
                 <o-button :label="t('go')" tag="router-link" :to="'/games/' + row.id" as="router-link"
                     style="margin-right: 0.5rem;" />
+                <o-button :label="t('edit')" tag="router-link" :to="'/admin/games/' + row.id" as="router-link"
+                    style="margin-right: 0.5rem;" />
                 <o-button icon-left="trash-can-outline" @click="deleteGame(row)" />
             </o-table-column>
         </o-table>
-        <div class="flex items-center gap-2">
-            <o-button @click="createGame">{{ t('create') }}</o-button>
-        </div>
     </div>
-    <CreateGameDialog ref="createGameDialog"></CreateGameDialog>
 </template>
 
 <script setup lang="ts">
-import { onMounted, useTemplateRef } from 'vue'
-
-import { useOruga } from '@oruga-ui/oruga-next'
-import type { Game } from 'boardgame-web-common/back'
-import { useI18n } from 'vue-i18n'
-import CreateGameDialog from '../components/CreateGameDialog.vue'
-import { useMemoryLocalStore } from '../services/localStore'
-import { wsService } from '../services/wsService'
-
-const oruga = useOruga();
+import { useOruga } from '@oruga-ui/oruga-next';
+import type { Game } from 'boardgame-web-common/back';
+import { onMounted } from 'vue';
+import { useI18n } from 'vue-i18n';
+import { useMemoryLocalStore } from '../services/localStore';
+import { wsService } from '../services/wsService';
 
 const memoryLocalStore = useMemoryLocalStore()
 
+const oruga = useOruga();
 const { t } = useI18n({
     locale: 'en',
     messages: {
@@ -38,6 +33,7 @@ const { t } = useI18n({
             games: 'Games',
             create: 'Create',
             go: 'Go',
+            edit: 'Edit',
             deleteGameTitle: 'Delete Game',
             deleteGameMessage: 'Delete game "{gameName}"?',
             noGames: 'No Games',
@@ -47,6 +43,7 @@ const { t } = useI18n({
             games: 'Игры',
             create: 'Создать',
             go: 'Перейти',
+            edit: 'Редактировать',
             deleteGameTitle: 'Удалить игру',
             deleteGameMessage: 'Удалить игру "{gameName}"?',
             noGames: 'Нет игр',
@@ -54,20 +51,6 @@ const { t } = useI18n({
         }
     }
 })
-
-const createGameDialog = useTemplateRef('createGameDialog')
-
-async function loadGames() {
-    wsService.getAllGames()
-}
-
-async function createGame() {
-    if (createGameDialog.value) {
-        const createGameProps = await createGameDialog.value.open()
-        wsService.createGame(createGameProps)
-    }
-}
-
 async function deleteGame(game: Game) {
     const result = await oruga.dialog.open({
         title: t('deleteGameTitle'),
@@ -83,8 +66,11 @@ async function deleteGame(game: Game) {
     }
 }
 
+async function loadGames() {
+    wsService.getAllGames()
+}
+
 onMounted(async () => {
     loadGames();
 })
-
 </script>

@@ -14,6 +14,7 @@
     "@oruga-ui/oruga-next": "^0.13.5",
     "@oruga-ui/theme-oruga": "^0.9.1",
     "boardgame-web-common": "file:../common",
+    "json-editor-vue": "^0.19.2",
     "pinia": "^3.0.4",
     "pinia-plugin-persistedstate": "^4.7.1",
     "qrcode.vue": "^3.9.1",

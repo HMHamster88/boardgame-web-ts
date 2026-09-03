@@ -1,9 +1,9 @@
-import { WebSocketServer, WebSocket } from 'ws';
-import { IncomingMessage, Server } from 'node:http';
 import {
     GameStatusEnum,
     handleMessage,
     removeElement,
+    UserRole,
+    type AdminGameMessageResponse,
     type AllGamesResponse,
     type ConnectToGameMessage,
     type CreateGameRequest,
@@ -12,15 +12,20 @@ import {
     type GameCreatedMessage,
     type GameDeletedMessage,
     type GameType,
+    type GetAdminGameMessage,
     type GetAllGamesRequest,
     type HandshakeResponse,
     type MesasgeHandlers,
     type TypedMessage,
+    type UpdateFullGameDataMessage,
+    type UpdateFullGameDataResponse,
     type UpdateUserRequest,
     type User
 } from 'boardgame-web-common';
-import { db } from './db/db.ts';
+import { IncomingMessage, Server } from 'node:http';
 import { v4 as uuidv4 } from 'uuid';
+import { WebSocket, WebSocketServer } from 'ws';
+import { db } from './db/db.ts';
 import { getAllGameServices, loadServices } from './gameServiceSelector.ts';
 import { GameSession } from './gameSession.ts';
 
@@ -57,7 +62,9 @@ export class WsConnection {
             | CreateGameRequest
             | UpdateUserRequest
             | ConnectToGameMessage
-            | DeleteGameRequest;
+            | DeleteGameRequest
+            | GetAdminGameMessage
+            | UpdateFullGameDataMessage;
 
         const handlers: MesasgeHandlers<messageTypes> = {
             DeleteGameRequest: async (message: DeleteGameRequest) => {
@@ -102,6 +109,37 @@ export class WsConnection {
                 const session = getGameSession(message.gameId);
                 this.game = session.game
                 session.addConnection(this);
+            },
+            GetAdminGameMessage: async (message: GetAdminGameMessage) => {
+                const session = getGameSession(message.gameId);
+                this.send<AdminGameMessageResponse>({
+                    id: message.id!,
+                    type: 'AdminGameMessageResponse',
+                    fullGameData: {
+                        game: session.game,
+                        settings: session.gameSettings,
+                        gameState: session.gameState
+                    }
+                })
+            },
+            UpdateFullGameDataMessage: async (message: UpdateFullGameDataMessage) => {
+                let error = undefined
+                try {
+                    if (!this.user?.roles.includes(UserRole.ADMIN)) {
+                        throw new Error(`User ${this.userId} doesnot have role ADMIN`)
+                    }
+                    const session = getGameSession(message.fullGameData.game.id)
+                    session.updateFullGameData(message.fullGameData)
+                } catch (er) {
+                    if (er instanceof Error) {
+                        error = er.message
+                    }
+                }
+                this.send<UpdateFullGameDataResponse>({
+                    id: message.id!,
+                    type: 'UpdateFullGameDataResponse',
+                    error: error as string
+                })
             }
         };
         let actionBlocker = false

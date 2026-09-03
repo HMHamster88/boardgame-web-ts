@@ -1,22 +1,28 @@
 import {
-    ConnectStatus,
-    type GetAllGamesRequest,
-    handleMessage,
+    type AdminGameMessageResponse,
     type AllGamesResponse,
+    ConnectStatus,
+    type CrateGameBackupMessage,
+    type CreateGameProps,
+    type CreateGameRequest,
+    type DeleteGameRequest,
+    type FullGameData,
+    type GameCreatedMessage,
+    type GameDeletedMessage,
+    type GameMessage,
+    type GetAdminGameMessage,
+    type GetAllGamesRequest,
     type HandshakeResponse,
     type MesasgeHandlers,
     type TypedMessage,
-    type CreateGameProps,
-    type CreateGameRequest,
-    type User,
+    type UpdateFullGameDataMessage,
+    type UpdateFullGameDataResponse,
     type UpdateUserRequest,
-    type DeleteGameRequest,
-    type CrateGameBackupMessage,
-    type GameCreatedMessage,
-    type GameDeletedMessage,
-    findAndRemoveElement
+    type User,
+    findAndRemoveElement,
+    handleMessage
 } from "boardgame-web-common/back";
-import { useLocalStore, useMemoryLocalStore } from "./localStore";
+import { v4 as uuidv4 } from 'uuid';
 import {
     ArrayQueue,
     ConstantBackoff,
@@ -24,12 +30,14 @@ import {
     WebsocketBuilder,
     WebsocketEvent,
 } from "websocket-ts";
+import { useLocalStore, useMemoryLocalStore } from "./localStore";
 
 
 class WsService {
     socket: Websocket | undefined
     gameId: string | undefined
     handshakePromise: Promise<void> | undefined
+    adminGamePromiseResolve: ((gameData: FullGameData) => void) | undefined
 
     start() {
 
@@ -66,7 +74,7 @@ class WsService {
             handshakeResolved = resolve
         })
 
-        type messageTypes = HandshakeResponse | AllGamesResponse | GameCreatedMessage | GameDeletedMessage
+        type messageTypes = HandshakeResponse | AllGamesResponse | GameCreatedMessage | GameDeletedMessage | AdminGameMessageResponse
         const handlers: MesasgeHandlers<messageTypes> = {
             HandshakeResponse: async (message: HandshakeResponse) => {
                 localStore.user = message.user
@@ -81,6 +89,12 @@ class WsService {
             },
             GameDeletedMessage: async (message: GameDeletedMessage) => {
                 findAndRemoveElement(memoryLocalStore.games, game => game.id == message.gameId)
+            },
+            AdminGameMessageResponse: async (message: AdminGameMessageResponse) => {
+                if (this.adminGamePromiseResolve) {
+                    this.adminGamePromiseResolve(message.fullGameData)
+                    this.adminGamePromiseResolve = undefined
+                }
             }
         }
 
@@ -95,6 +109,23 @@ class WsService {
     sendMessage<T extends TypedMessage>(message: T) {
         console.log('Send message', message.type)
         this.socket?.send(JSON.stringify(message))
+    }
+
+    async sendMessageWithResponse<M extends GameMessage, R extends GameMessage>(message: M): Promise<R> {
+        return new Promise(resolve => {
+            const messageId = uuidv4()
+            const listener = (_: Websocket, ev: MessageEvent) => {
+                const stringData = ev.data as string
+                const message = JSON.parse(stringData) as GameMessage
+                if (message.id) {
+                    this.socket?.removeEventListener(WebsocketEvent.message, listener)
+                    resolve(message as R)
+                }
+            }
+            this.socket?.addEventListener(WebsocketEvent.message, listener)
+            message.id = messageId
+            this.sendMessage(message)
+        })
     }
 
     updateUser(user: User) {
@@ -126,6 +157,15 @@ class WsService {
 
     getAllGames() {
         this.sendMessage<GetAllGamesRequest>({ type: 'GetAllGamesRequest' })
+    }
+
+    async getAdminGame(gameId: string): Promise<FullGameData> {
+        return (await this.sendMessageWithResponse<GetAdminGameMessage, AdminGameMessageResponse>({ type: 'GetAdminGameMessage', gameId: gameId })).fullGameData
+    }
+
+    async updateFullGameData(gameData: FullGameData): Promise<string | undefined> {
+        return (await this.sendMessageWithResponse<UpdateFullGameDataMessage, UpdateFullGameDataResponse>(
+            { type: 'UpdateFullGameDataMessage', fullGameData: gameData })).error
     }
 }
 

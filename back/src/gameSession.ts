@@ -3,6 +3,7 @@ import type {
     Connection,
     CrateGameBackupMessage,
     DataMessageListener,
+    FullGameData,
     Game,
     GameAction,
     GameActionMessage,
@@ -21,7 +22,6 @@ import type {
     TypedMessage,
     UpdateBotGameMessage,
     UpdateUserRequest,
-
 } from 'boardgame-web-common';
 
 import {
@@ -32,10 +32,10 @@ import {
     removeElement,
     watchChagesList
 } from 'boardgame-web-common';
-import { WsConnection } from './backWs.ts';
-import { getGameSerivce } from './gameServiceSelector.ts';
-import { db } from './db/db.ts';
 import { v4 as uuidv4 } from 'uuid';
+import { WsConnection } from './backWs.ts';
+import { db } from './db/db.ts';
+import { getGameSerivce } from './gameServiceSelector.ts';
 
 
 export class GameSession implements Connection {
@@ -94,6 +94,30 @@ export class GameSession implements Connection {
                 })
             }
         }, 100)
+    }
+
+    updateFullGameData(fullGameData: FullGameData) {
+        this.game = fullGameData.game
+        db.updateGame(this.game)
+        this.gameSync.value = this.game
+        this.gameSync.sendUpdate()
+        this.gameSettings = fullGameData.settings
+        db.updateGameSettings(this.gameSettings)
+        this.gameSettingsSync.value = this.gameSettings
+        this.gameSettingsSync.sendUpdate()
+        if (this.gamePublicStateSync && fullGameData.gameState) {
+            this.gameState = fullGameData.gameState
+            db.updateGameState(this.gameState)
+            this.gamePublicStateSync.value = this.gameState.publicState
+            this.gamePublicStateSync.sendUpdate()
+            this.playerPrivateStateSync.entries().forEach(([id, playerSync]) => {
+                const privatePlayerState = this.gameState?.privateState?.playersStates?.find(pl => pl.playerId == id)
+                if (privatePlayerState) {
+                    playerSync.value = privatePlayerState
+                    playerSync.sendUpdate()
+                }
+            })
+        }
     }
 
     sendNotify(peerId: string | undefined, message: string, messageParams: any | undefined) {

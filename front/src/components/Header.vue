@@ -1,6 +1,14 @@
 <template>
     <div style="padding: 1rem; display: flex; gap: 0.5rem;">
-        <o-button :label="t('games')" tag="router-link" to="/" as="router-link" />
+        <o-dropdown>
+            <template #trigger>
+                <o-button icon-left="menu"></o-button>
+            </template>
+
+            <o-dropdown-item :label="t('games')" tag="router-link" to="/" />
+            <o-dropdown-item v-if="isAdmin" :label="t('adminGames')" tag="router-link" to="/admin/games" />
+        </o-dropdown>
+
         <div style="flex-grow: 1;"></div>
         <o-tag :variant="connectStatusSeverity">
             {{ connectStatusText }}
@@ -16,21 +24,24 @@
 </template>
 
 <script setup lang="ts">
-import { useRoute } from 'vue-router';
-import { computed, useTemplateRef, ref } from "vue";
+import { OButton, ODropdown, ODropdownItem } from '@oruga-ui/oruga-next';
+import { ConnectStatus, UserRole } from 'boardgame-web-common/back';
+import QrcodeVue from 'qrcode.vue';
+import { computed, ref, useTemplateRef } from "vue";
 import { useI18n } from 'vue-i18n';
-import { useMemoryLocalStore } from '../services/localStore';
-import { ConnectStatus } from 'boardgame-web-common/back';
+import { useRoute } from 'vue-router';
+import { useLocalStore, useMemoryLocalStore } from '../services/localStore';
 import SettingsDialog from './SettingsDialog.vue';
-import QrcodeVue from 'qrcode.vue'
 
 const memoryLocalStore = useMemoryLocalStore();
+const localStore = useLocalStore()
 
 const { t } = useI18n({
     locale: 'en',
     messages: {
         en: {
             games: 'Games',
+            adminGames: 'Admin Games',
             connectStatus: {
                 [ConnectStatus.CONNECTED]: 'Connected',
                 [ConnectStatus.CONNECTING]: 'Connecting',
@@ -39,6 +50,7 @@ const { t } = useI18n({
         },
         ru: {
             games: 'Игры',
+            adminGames: 'Админка Игры',
             connectStatus: {
                 [ConnectStatus.CONNECTED]: 'Подключено',
                 [ConnectStatus.CONNECTING]: 'Подключение',
@@ -47,6 +59,8 @@ const { t } = useI18n({
         }
     }
 })
+
+const isAdmin = computed(() => localStore.user.roles.includes(UserRole.ADMIN))
 
 const qrCodeActive = ref(false)
 
