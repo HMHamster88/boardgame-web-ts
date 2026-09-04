@@ -3,7 +3,8 @@ import { defineStore } from 'pinia'
 
 export interface Settings {
     locale: string,
-    soundsVolume: number
+    soundsVolume: number,
+    vibration: boolean
 }
 
 interface LocalStore {
@@ -23,7 +24,8 @@ export const useLocalStore = defineStore(
             },
             settings: {
                 locale: 'en',
-                soundsVolume: 0.5
+                soundsVolume: 0.5,
+                vibration: true
             }
         }),
         persist: true

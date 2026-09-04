@@ -13,6 +13,9 @@
             <o-field :label="t('soundVolume')">
                 <o-slider :min="0" :max="1" :step="0.01" v-model="settingsCopy.soundsVolume"></o-slider>
             </o-field>
+            <o-field>
+                <o-switch :label="t('vibration')" v-model="settingsCopy.vibration" />
+            </o-field>
             <o-button @click="createBackup" v-if="gameId">{{ t('createGameStateBackup') }}</o-button>
         </template>
         <template #footer>
@@ -23,12 +26,13 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue';
-import { type Settings, useLocalStore } from '../services/localStore'
-import { useI18n } from 'vue-i18n'
+import { OButton, OField, OInput, OSelect, OSwitch } from '@oruga-ui/oruga-next';
 import type { User } from 'boardgame-web-common';
-import { wsService } from '../services/wsService';
+import { computed, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
+import { type Settings, useLocalStore } from '../services/localStore';
+import { wsService } from '../services/wsService';
 
 const route = useRoute()
 const gameId = computed(() => route.params['id'] as string)
@@ -43,6 +47,7 @@ const i18n = useI18n({
             defaultPlayerColor: 'Default Player Color',
             language: 'Language',
             soundVolume: 'Sound Volume',
+            vibration: 'Vibration',
             createGameStateBackup: 'Create Game State Backup'
         },
         ru: {
@@ -51,6 +56,7 @@ const i18n = useI18n({
             defaultPlayerColor: 'Цвет игрока по умолчанию',
             language: 'Язык',
             soundVolume: 'Громкость звуков',
+            vibration: 'Вибрация',
             createGameStateBackup: 'Создать Бэкап Состояния Игры'
         }
     }
@@ -87,7 +93,7 @@ const language = computed<string>({
 const localStore = useLocalStore();
 
 const userCopy = ref<User>({ id: '', color: '', name: '', roles: [] })
-const settingsCopy = ref<Settings>({ locale: 'en', soundsVolume: 0.5 })
+const settingsCopy = ref<Settings>({ locale: 'en', soundsVolume: 0.5, vibration: true })
 
 const userColor = computed({
     get: () => {

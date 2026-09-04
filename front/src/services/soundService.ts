@@ -1,5 +1,5 @@
-import { useLocalStore } from '../services/localStore'
-import notificationSound from '../assets/sounds/notification.mp3'
+import notificationSound from '../assets/sounds/notification.mp3';
+import { useLocalStore } from '../services/localStore';
 
 
 
@@ -10,6 +10,15 @@ export const soundService = {
             const audio = new Audio(src)
             audio.volume = localStore.settings.soundsVolume
             audio.play()
+        }
+    },
+
+    vibrate(vibrationPattern: VibratePattern = 200) {
+        if ("vibrate" in navigator) {
+            const localStore = useLocalStore();
+            if (localStore.settings.vibration) {
+                navigator.vibrate(vibrationPattern);
+            }
         }
     },
 

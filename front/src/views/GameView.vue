@@ -71,20 +71,20 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref, watch, useTemplateRef } from 'vue';
+import { computed, onMounted, ref, useTemplateRef, watch } from 'vue';
 
 import { useRoute } from 'vue-router';
 
-import { GameStatusEnum, type Game, type GamePublicState, type PlayerPrivateState, type Player, type GameAction, type GameSettings, createDeepProxy, deepMerge } from 'boardgame-web-common/back';
+import { createDeepProxy, deepMerge, GameStatusEnum, type Game, type GameAction, type GamePublicState, type GameSettings, type Player, type PlayerPrivateState } from 'boardgame-web-common/back';
 import { useLocalStore, useMemoryLocalStore } from '../services/localStore';
 
-import { useI18n } from 'vue-i18n';
-import { soundService } from '../services/soundService.ts';
-import GameClient from '../services/gameClient.ts';
-import type { GameFrontService } from 'boardgame-web-common/front';
-import { getGameService } from '../services/gameFrontServiceSelector.ts';
 import { useOruga } from '@oruga-ui/oruga-next';
+import type { GameFrontService } from 'boardgame-web-common/front';
+import { useI18n } from 'vue-i18n';
 import EditBotDialog from '../components/EditBotDialog.vue';
+import GameClient from '../services/gameClient.ts';
+import { getGameService } from '../services/gameFrontServiceSelector.ts';
+import { soundService } from '../services/soundService.ts';
 
 const oruga = useOruga();
 
@@ -217,6 +217,7 @@ watch(activePlayer, (newValue) => {
             message: t('yourTurn')
         });
         soundService.notification()
+        soundService.vibrate()
     }
 })
 
