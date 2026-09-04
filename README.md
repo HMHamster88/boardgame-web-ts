@@ -2,6 +2,8 @@
 
 Web based boardgames engine
 
+![example image](catan.png)
+
 To run:
 - Run nodejs SEA executable (no nodejs installed required). Download (sea-os-version.zip) from [releases](https://github.com/HMHamster88/boardgame-web-ts/releases), unzip and run "boardgame-web-ts-server" executable
 - Run with nodejs. Download (bundled-version.zip) from [releases](https://github.com/HMHamster88/boardgame-web-ts/releases), unzip and run 
