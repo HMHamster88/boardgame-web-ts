@@ -8,8 +8,40 @@ export interface Typed<T> {
     type: T
 }
 
+export interface WithStringId {
+    id: string
+}
+
 export function getByType<K, T extends Typed<K>>(array: Array<T>, type: K): T | undefined {
     return array.find(el => el.type == type)
+}
+
+export function getMaxElement<T>(array: Array<T>, keySelector: (el: T) => number) {
+    if (array.length == 0) {
+        return undefined
+    }
+    return array.reduce((prev, current) => keySelector(prev) > keySelector(current) ? prev : current)
+}
+
+export function getMaxElementWithDefault<T>(array: Array<T>, keySelector: (el: T) => number, defaultValue: T) {
+    if (array.length == 0) {
+        return defaultValue
+    }
+    return array.reduce((prev, current) => keySelector(prev) > keySelector(current) ? prev : current)
+}
+
+export function getMinElement<T>(array: Array<T>, keySelector: (el: T) => number) {
+    if (array.length == 0) {
+        return undefined
+    }
+    return array.reduce((prev, current) => keySelector(prev) < keySelector(current) ? prev : current)
+}
+
+export function getMinElementWithDefault<T>(array: Array<T>, keySelector: (el: T) => number, defaultValue: T) {
+    if (array.length == 0) {
+        return defaultValue
+    }
+    return array.reduce((prev, current) => keySelector(prev) < keySelector(current) ? prev : current)
 }
 
 export function randomElement<T>(array: Array<T>): T | undefined {
@@ -140,4 +172,41 @@ export function recordKeys<K extends keyof any, V>(record: Record<K, V>): K[] {
 
 export function recordForeach<K extends keyof any, V>(record: Record<K, V>, fun: (key: K, value: V) => void) {
     Object.entries(record).forEach(([k, v]) => fun(k as K, v as V))
+}
+
+export function toMap<K, A>(array: A[], keySelector: (el: A) => K) {
+    return new Map<K, A>(
+        array.map(element => [keySelector(element), element])
+    );
+}
+
+export function toSumMap<K, A>(array: A[], keySelector: (el: A) => K, numberSelector: (el: A) => number) {
+    const result = new Map<K, number>()
+    for (let el of array) {
+        const key = keySelector(el)
+        const value = numberSelector(el)
+        let mapValue = result.get(key)
+        if (!mapValue) {
+            mapValue = value
+        } else {
+            mapValue += value
+        }
+        result.set(key, mapValue)
+    }
+    return result
+}
+
+export function toStringIdMap<A extends WithStringId>(array: A[]) {
+    return new Map<string, A>(
+        array.map(element => [element.id, element])
+    )
+}
+
+export function addToMapArray<K, V>(key: K, value: V, map: Map<K, V[]>) {
+    let array = map.get(key)
+    if (!array) {
+        array = []
+        map.set(key, array)
+    }
+    array.push(value)
 }

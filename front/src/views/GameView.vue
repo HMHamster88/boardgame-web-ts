@@ -135,9 +135,7 @@ const gameSettings = ref<GameSettings>({ id: '' })
 const gameClient = new GameClient(gameId, localStore.user.id)
 const gameService = ref<GameFrontService>()
 
-const playerPrivateState = ref<PlayerPrivateState>({
-    playerId: localStore.user.id
-})
+const playerPrivateState = ref<PlayerPrivateState>()
 
 const playersPoints = computed(() => {
     if (!gameState.value) {
@@ -197,6 +195,9 @@ const settingsComponent = computed(() => {
 })
 
 const localPlayerIndex = computed(() => {
+    if (!localPlayer.value) {
+        return undefined
+    }
     return game.value.players.indexOf(localPlayer.value!)
 })
 
