@@ -47,7 +47,8 @@
         <span v-for="player in winners">{{ player.name }}</span>
         <div v-if="gameState?.statistics">
             <h4>{{ t('statistics') }}</h4>
-            <component :is="statisticsComponent" :statistics="gameState?.statistics">
+            <component :is="statisticsComponent" :statistics="gameState?.statistics" :game="game"
+                :settings="gameSettings">
             </component>
         </div>
     </div>
@@ -63,7 +64,8 @@
         <template #title>{{ t('statistics') }}</template>
 
         <template #content>
-            <component :is="statisticsComponent" :statistics="gameState?.statistics">
+            <component :is="statisticsComponent" :statistics="gameState?.statistics" :game="game"
+                :settings="gameSettings">
             </component>
         </template>
     </o-dialog>

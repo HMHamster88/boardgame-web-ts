@@ -1,4 +1,3 @@
-import type { TypedMessage } from "./messageHandler"
 import type { ObjectSync } from "./objectSync"
 import type { GameAction } from "./wsMessages"
 
@@ -103,7 +102,7 @@ export interface GameBackModule {
 
 export interface PlayerPublicState {
     playerId: string
-    points: number | null
+    points: number
 }
 
 export interface PlayerPrivateState {

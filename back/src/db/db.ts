@@ -7,6 +7,9 @@ import {
 import { DatabaseSync } from 'node:sqlite';
 import { v4 as uuidv4 } from 'uuid';
 
+import { homedir } from 'node:os';
+import path from 'node:path';
+
 const Tables = {
     USERS: 'users',
     GAMES: 'games',
@@ -44,11 +47,14 @@ const defaultGameModulesHomepages = [
     'https://github.com/HMHamster88/boardgame-web-catan'
 ]
 
+const defaultDbFileName = 'db.sqlite'
+
 export class DB {
     sqliteDb!: DatabaseSync
 
     async init() {
-        const sqliteDbUrl = process.env.DB_URL || 'db.sqlite'
+        const sqliteDbUrl = process.env.DB_URL || path.join(homedir(), defaultDbFileName)
+        console.log('DB url: ', sqliteDbUrl)
         this.sqliteDb = new DatabaseSync(sqliteDbUrl)
         Object.values(Tables).forEach(tableName => {
             this.sqliteDb.exec(`
