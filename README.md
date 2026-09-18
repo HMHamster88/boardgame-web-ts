@@ -16,8 +16,9 @@ npm install
 npm run build-all
 npm run start
 ```
-After start default games will be downloaded from github ([Catan](https://github.com/HMHamster88/boardgame-web-catan), [Cards against humanity](https://github.com/HMHamster88/boardgame-web-cah))
+After start default games will be downloaded from github ([Catan](https://github.com/HMHamster88/boardgame-web-catan), [Cards against humanity](https://github.com/HMHamster88/boardgame-web-cah), [Ticket to Ride](https://github.com/HMHamster88/boardgame-web-ticket-to-ride))
 
 ## Games
 - [Catan](https://github.com/HMHamster88/boardgame-web-catan)
 - [Cards against humanity](https://github.com/HMHamster88/boardgame-web-cah)
+- [Ticket to Ride](https://github.com/HMHamster88/boardgame-web-ticket-to-ride)
