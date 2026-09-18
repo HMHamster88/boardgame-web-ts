@@ -44,7 +44,8 @@ export interface GameModule {
 
 const defaultGameModulesHomepages = [
     'https://github.com/HMHamster88/boardgame-web-cah',
-    'https://github.com/HMHamster88/boardgame-web-catan'
+    'https://github.com/HMHamster88/boardgame-web-catan',
+    'https://github.com/HMHamster88/boardgame-web-ticket-to-ride'
 ]
 
 const defaultDbFileName = 'db.sqlite'

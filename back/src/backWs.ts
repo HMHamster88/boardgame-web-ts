@@ -161,7 +161,7 @@ export class WsConnection {
         if (!this.user) {
             this.user = await db.addUser({
                 id: this.userId,
-                name: 'User-' + this.userId,
+                name: 'Player',
                 color: '#FF0000',
                 roles: []
             });
