@@ -366,7 +366,7 @@ export class GameSession implements Connection {
                     });
 
                     if (this.gameState) {
-                        const playersUpdated = !Array.from(
+                        const playersUpdated = Array.from(
                             this.playerPrivateStateSync.values()
                         ).find((sync) => sync.updateSended);
                         if (
