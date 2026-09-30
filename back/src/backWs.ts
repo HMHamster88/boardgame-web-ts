@@ -190,10 +190,10 @@ export class WsConnection {
     }
 }
 
-export async function startWs(server: Server) {
-    db.init();
+export async function startWs(server: Server, dataDir: string) {
+    db.init(dataDir);
     const checkForUpdates = (process.env.CHECK_FOR_UPDATES === "true") || false
-    await loadServices(db, checkForUpdates);
+    await loadServices(db, checkForUpdates, dataDir);
 
     console.log('Game services loaded:')
     getAllGameServices().forEach(service => {

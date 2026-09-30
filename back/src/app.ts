@@ -5,8 +5,17 @@ import { startWs } from './backWs.ts';
 import os from 'os';
 import { startCli } from './cli.ts';
 import packageInfo from '../../package.json' with { type: 'json' };
+import { homedir } from 'node:os';
+import path from 'node:path';
+import fs from 'node:fs'
 
 configDotenv();
+
+const dataDir = process.env.DATA_DIR ||  path.join(homedir(), 'boardgame-web-ts')
+
+if (!fs.existsSync(dataDir)) {
+    fs.mkdirSync(dataDir)
+}
 
 const app = express();
 const port = process.env.PORT ?? 8000;
@@ -30,9 +39,11 @@ app.use(
 
 app.use(staticMw);
 
+app.use('/games-modules', express.static(path.join(dataDir, 'games-modules')))
+
 const server = app.listen(port);
 
-await startWs(server);
+await startWs(server, dataDir);
 
 Object.values(os.networkInterfaces()).forEach((interfaces) => {
     interfaces?.forEach((int) => {

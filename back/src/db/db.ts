@@ -7,7 +7,6 @@ import {
 import { DatabaseSync } from 'node:sqlite';
 import { v4 as uuidv4 } from 'uuid';
 
-import { homedir } from 'node:os';
 import path from 'node:path';
 
 const Tables = {
@@ -53,8 +52,8 @@ const defaultDbFileName = 'db.sqlite'
 export class DB {
     sqliteDb!: DatabaseSync
 
-    async init() {
-        const sqliteDbUrl = process.env.DB_URL || path.join(homedir(), defaultDbFileName)
+    async init(dataDir: string) {
+        const sqliteDbUrl = process.env.DB_URL || path.join(dataDir, defaultDbFileName)
         console.log('DB url: ', sqliteDbUrl)
         this.sqliteDb = new DatabaseSync(sqliteDbUrl)
         Object.values(Tables).forEach(tableName => {

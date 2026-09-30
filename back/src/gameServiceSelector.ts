@@ -7,8 +7,6 @@ import unzipper from 'unzipper';
 import type { DB, GameModule } from "./db/db.ts";
 import path from 'node:path';
 
-const gamesDir = './public/games-modules/'
-
 function getDirectories(source: string) {
     return fs.readdirSync(source, { withFileTypes: true })
         .filter(dirent => dirent.isDirectory())
@@ -28,23 +26,26 @@ function checkIfSEA() {
     }
 }
 
-async function loadModule(dirName: string): Promise<GameBackModule> {
-    const nodeEnv = process.env.NODE_ENV
+function getGamesDir(dataDir: string) {
+    return path.join(dataDir, 'games-modules')
+}
+
+async function loadModule(dirName: string, dataDir: string): Promise<GameBackModule> {
     const isSea = checkIfSEA()
     if (isSea) {
         const fileRequire = createRequire(process.execPath);
-        return fileRequire(gamesDir + dirName + "/back/index.mjs");
+        return fileRequire(path.join(getGamesDir(dataDir), dirName, "/back/index.mjs"));
     }
-    return import((nodeEnv == 'production' ? './' : '../') + gamesDir + dirName + '/back/index.mjs')
+    return import('file://' + path.join(getGamesDir(dataDir), dirName ,'/back/index.mjs'))
 }
 
 function getFileNameFromUrl(url: string) {
     const parsedUrl = new URL(url);
     const decodedPathname = decodeURIComponent(parsedUrl.pathname)
-    return path.posix.basename(decodedPathname, path.posix.extname(decodedPathname))
+    return path.posix.basename(decodedPathname, path.posix.extname(decodedPathname)).replaceAll('.', '_')
 }
 
-async function downloadModule(dbModule: GameModule): Promise<GameBackModule | undefined> {
+async function downloadModule(dbModule: GameModule, dataDir: string): Promise<GameBackModule | undefined> {
     console.log(`Downloading ${dbModule.homepage}`)
     const latestReleaseJson = await getLatestReleaseJson(dbModule.homepage)
     if (!latestReleaseJson) {
@@ -64,7 +65,7 @@ async function downloadModule(dbModule: GameModule): Promise<GameBackModule | un
 
     const directory = getFileNameFromUrl(downloadUrl)
 
-    const extractPath = gamesDir + directory
+    const extractPath = path.join(getGamesDir(dataDir), directory)
 
     await Readable.fromWeb(response.body as any)
         .pipe(unzipper.Extract({ path: extractPath }))
@@ -72,7 +73,7 @@ async function downloadModule(dbModule: GameModule): Promise<GameBackModule | un
 
     console.log(`${dbModule.homepage} Unzipped`)
 
-    const module = await loadModule(directory)
+    const module = await loadModule(directory, dataDir)
 
     dbModule.directory = directory
 
@@ -90,9 +91,9 @@ async function checkNeedUpdate(dbModule: GameModule) {
     return versionCompareResult == 1
 }
 
-export async function downloadNewModule(db: DB, homepageUrl: string) {
+export async function downloadNewModule(db: DB, homepageUrl: string, dataDir: string) {
     const dbModule: GameModule = db.gameModuleFromHomapage(homepageUrl)
-    const module = await downloadModule(dbModule)
+    const module = await downloadModule(dbModule, dataDir)
     if (!module) {
         throw new Error(`Failed to load module from "${homepageUrl}"`)
     }
@@ -105,7 +106,7 @@ export async function downloadNewModule(db: DB, homepageUrl: string) {
     console.log(`Module ${dbModule.type} ${dbModule.version} loaded`)
 }
 
-export async function loadServices(db: DB, checkForUpdates: boolean) {
+export async function loadServices(db: DB, checkForUpdates: boolean, dataDir: string) {
     const dbModules = db.getGameModuels()
 
     const modules: GameBackModule[] = []
@@ -118,13 +119,13 @@ export async function loadServices(db: DB, checkForUpdates: boolean) {
             if (moduleAlreadyDownloaded) {
                 if (checkForUpdates && await checkNeedUpdate(dbModule)) {
                     console.log(`Updated needed for ${dbModule.type}`)
-                    module = await downloadModule(dbModule)
+                    module = await downloadModule(dbModule, dataDir)
                     needUpdateDbModule = true
                 } else {
-                    module = await loadModule(dbModule.directory!)
+                    module = await loadModule(dbModule.directory!, dataDir)
                 }
             } else {
-                module = await downloadModule(dbModule)
+                module = await downloadModule(dbModule, dataDir)
                 needUpdateDbModule = true
             }
 
