@@ -56,7 +56,7 @@
     <div v-if="showGameView" class="card flex-col">
         <component v-if="gameState" :is="gameViewComponent" :gameSettings="gameSettings" :game="game"
             :gameState="gameState" :playerPrivateState="playerPrivateState" :localPlayerIndex="localPlayerIndex"
-            ref="gameView" @performAction="peformGameAction">
+            ref="gameView" @performAction="peformGameAction" :performActionWithResponse="performActionWithResponse">
 
         </component>
     </div>
@@ -254,6 +254,11 @@ function playerColorStyle(player: Player) {
 
 function peformGameAction(message: GameAction) {
     gameClient.performGameAction(message)
+}
+
+async function performActionWithResponse(action: GameAction): Promise<any> {
+    const response = await gameClient.performGameActionWithResponse(action)
+    return response
 }
 
 function startGame() {

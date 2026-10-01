@@ -70,7 +70,7 @@ export interface GameBackService {
     localizedName: any
     gameStaticSettings: GameStaticSettings
     getDefaultSettings(): GameSettings
-    performAction(gameContext: GameContext, gameAction: GameAction, playerId: string): Promise<void>
+    performAction(gameContext: GameContext, gameAction: GameAction, playerId: string): Promise<any>
     startGame(game: Game, gameSettings: GameSettings): GameState
     runBotsActions(botGameContext: BotGameContext): Promise<void>
     version: string

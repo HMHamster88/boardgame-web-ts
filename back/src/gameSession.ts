@@ -8,6 +8,7 @@ import type {
     GameAction,
     GameActionMessage,
     GameBackService,
+    GameMessageResponse,
     GamePublicState,
     GameSettings,
     GameState,
@@ -309,7 +310,7 @@ export class GameSession implements Connection {
                     ? watchChagesList(this.gameState, gameStateChanges)
                     : undefined;
 
-                await this.gameService.performAction(
+                const response = await this.gameService.performAction(
                     {
                         game: gameProxy,
                         gameSync: this.gameSync,
@@ -327,6 +328,16 @@ export class GameSession implements Connection {
                     message.action,
                     playerId
                 );
+
+                if (response && message.id) {
+                    const responseMessage: GameMessageResponse = {
+                        id: message.id,
+                        type: 'GameMessageResponse',
+                        response: response
+                    }
+                    console.log('Action response:', response)
+                    this.send(playerId, JSON.stringify(responseMessage))
+                }
 
                 if (this.gameState) {
                     const publicStateChanges = getSubObjectChanges(gameStateChanges, [

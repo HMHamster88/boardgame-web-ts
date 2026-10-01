@@ -24,3 +24,17 @@ export async function handleMessage<T extends TypedMessage>(handlers: MesasgeHan
     }
     return false
 }
+
+export async function handleMessageWithResult<T extends TypedMessage>(handlers: MesasgeHandlers<T>, message: TypedMessage): Promise<any> {
+    const handler = (handlers as any)[message.type]
+    if (handler) {
+        try {
+            return await handler(message)
+        } catch (error) {
+            console.error('Handle message error', error)
+            return undefined
+        }
+
+    }
+    return undefined
+}

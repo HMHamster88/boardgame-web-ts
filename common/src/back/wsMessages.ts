@@ -66,6 +66,11 @@ export interface GameMessage {
     type: string
 }
 
+export interface GameMessageResponse extends GameMessage {
+    type: 'GameMessageResponse'
+    response: any
+}
+
 export interface GameInfoMessage extends GameMessage {
     type: 'GameInfoMessage',
     game: Game
