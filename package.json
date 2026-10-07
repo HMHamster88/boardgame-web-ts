@@ -27,7 +27,7 @@
     "build-back": "npm run build -w back",
     "build-front": "npm run build -w front",
     "build-launcher": "npm run build -w launcher && npm run build-sea -w launcher",
-    "start": "npm run start --prefix ./back",
+    "start": "npm run start --prefix ./launcher",
     "create-zip": "node create-zip.js",
     "create-release": "npm run build-all && npm run create-zip"
   },
