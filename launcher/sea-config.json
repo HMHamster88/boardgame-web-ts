@@ -1,0 +1,6 @@
+{
+    "main": "./dist/bundled/launcher.mjs",
+    "output": "./dist/sea/boardgame-web-ts-launcher.exe",
+    "mainFormat": "module",
+    "disableExperimentalSEAWarning": true
+}

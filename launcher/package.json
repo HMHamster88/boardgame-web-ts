@@ -1,0 +1,31 @@
+{
+  "name": "boardgame-web-launcher",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node src/launcher.ts",
+    "build": "npm run clean && tsdown && npm run cp-env-to-bubdled",
+    "build-sea": "npm run build && shx mkdir -p dist/sea && node --build-sea sea-config.json && npm run cp-env-to-sea",
+    "clean": "shx rm -rf dist",
+    "cp-env-to-bubdled": "shx cp .env.prod ./dist/bundled/.env",
+    "cp-env-to-sea": "shx cp .env.prod ./dist/sea/.env",
+    "dev": "nodemon"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "dotenv": "^17.4.2",
+    "semver": "^7.6.3"
+  },
+  "devDependencies": {
+    "@types/node": "^25.9.1",
+    "nodemon": "^3.1.14",
+    "shx": "^0.4.0",
+    "ts-node": "^10.9.2",
+    "tsdown": "^0.22.3",
+    "typescript": "^6.0.3"
+  }
+}

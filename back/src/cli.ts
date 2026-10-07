@@ -169,6 +169,9 @@ export async function startCli() {
                 }
             }
         } catch (error) {
+            if ((error as any).code == 'ABORT_ERR') {
+                process.exit();
+            }
             console.log('Error: ', error)
         }
     }

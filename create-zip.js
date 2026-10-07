@@ -18,15 +18,29 @@ const copyOpts = {
     }
 }
 
+// bundle
+
 fs.cpSync('./back/dist/bundled', './dist/bundled', copyOpts)
 
 const bundledZip = new AdmZip();
 bundledZip.addLocalFolder('./dist/bundled', './')
-bundledZip.writeZip(`./dist/bundled-${packageInfo.version}.zip`);
+bundledZip.writeZip(`./dist/${packageInfo.name}-core-module-${packageInfo.version}.zip`);
 
 fs.rmSync('./dist/bundled', { recursive: true, force: true });
 
-fs.cpSync('./back/dist/sea', './dist/sea', copyOpts)
+// bundle
+
+fs.cpSync('./launcher/dist/bundled', './dist/launcher-bundled', copyOpts)
+
+const launcherBundledZip = new AdmZip();
+launcherBundledZip.addLocalFolder('./dist/launcher-bundled', './')
+launcherBundledZip.writeZip(`./dist/${packageInfo.name}-launcher-bundled-${packageInfo.version}.zip`);
+
+fs.rmSync('./dist/launcher-bundled', { recursive: true, force: true });
+
+// launcher sea
+
+fs.cpSync('./launcher/dist/sea', './dist/sea', copyOpts)
 
 const sea = new AdmZip();
 bundledZip.addLocalFolder('./dist/sea', './')
@@ -35,6 +49,6 @@ const osTypes = {
     'Darwin': 'macos',
     'Linux': 'linux'
 }
-bundledZip.writeZip(`./dist/sea-${osTypes[os.type()]}-${os.arch()}-${packageInfo.version}.zip`);
+bundledZip.writeZip(`./dist/${packageInfo.name}-launcher-sea-${osTypes[os.type()]}-${os.arch()}-${packageInfo.version}.zip`);
 
 fs.rmSync('./dist/sea', { recursive: true, force: true });
