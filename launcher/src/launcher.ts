@@ -4,6 +4,11 @@ import fs from 'node:fs'
 import { homedir } from 'node:os';
 import { createRequire } from "module";
 import packageInfo from '../../package.json' with { type: 'json' };
+import semver from 'semver'
+import { Readable } from 'stream';
+import unzipper from 'unzipper';
+
+
 configDotenv();
 
 function checkIfSEA() {
@@ -32,6 +37,104 @@ async function loadAndStartCoreModule(modulePath: string) {
     module.start(publicDir)
 }
 
+const versionRegex = /(\d+\.\d+.\d+)/;
+
+function getVersionFromFileName(fileName: string) {
+    const match = versionRegex.exec(fileName)
+    if (!match) {
+        return undefined
+    }
+    return match[1]
+}
+
+function getLatestReleaseJsonUrl(homepage: string): string | undefined {
+    const match = homepage.match('https:\/\/github.com\/(.*)')
+    if (!match) {
+        return undefined
+    }
+    return `https://api.github.com/repos/${match[1]}/releases/latest`
+}
+
+interface Asset {
+    name: string
+    browser_download_url: string
+}
+
+interface LatestRelease {
+    tag_name: string
+    assets: Asset[]
+}
+
+async function getLatestReleaseJson(homepage: string): Promise<LatestRelease> {
+    const latestReleaseUrl = getLatestReleaseJsonUrl(homepage)
+    if (!latestReleaseUrl) {
+        throw new Error("Failed to fetch latest release url")
+    }
+    const response = await fetch(latestReleaseUrl);
+
+    if (!response.ok) {
+        throw new Error('Failed to get latest release json for ' + homepage)
+    }
+
+    return await response.json() as LatestRelease;
+}
+
+function getFileNameFromUrl(url: string) {
+    const parsedUrl = new URL(url);
+    const decodedPathname = decodeURIComponent(parsedUrl.pathname)
+    return path.posix.basename(decodedPathname, path.posix.extname(decodedPathname))
+}
+
+async function downloadModule(latestRelease: LatestRelease): Promise<any> {
+    const coreModuleAsset = latestRelease.assets.find(asset => asset.name.startsWith('boardgame-web-ts-core-module'))
+    if (!coreModuleAsset) {
+        throw new Error('Failed to find latest asset')
+    }
+
+    const downloadUrl = coreModuleAsset.browser_download_url
+
+    const response = await fetch(downloadUrl);
+    if (!response.ok) {
+        throw new Error(`Failed to download core module`)
+    }
+
+    if (!response.body) {
+        throw new Error(`Failed to download core module. No respnse body`)
+    }
+
+    const directory = getFileNameFromUrl(downloadUrl)
+
+    const extractPath = path.join(coreModulesDir, directory)
+
+    await Readable.fromWeb(response.body as any)
+        .pipe(unzipper.Extract({ path: extractPath }))
+        .promise();
+}
+
+interface ModuleDir {
+    name: string
+    version: string
+}
+
+function getExistingModulesDirs() {
+    return fs.readdirSync(coreModulesDir, { withFileTypes: true })
+        .filter(file => file.isDirectory())
+        .map(dir => {
+            const version = getVersionFromFileName(dir.name)
+            if (!version) {
+                return undefined
+            }
+            return {
+                name: dir.name,
+                version: version
+            } as ModuleDir
+        })
+        .filter(dir => dir != undefined)
+        .sort((a, b) => {
+            return semver.compare(b.version, a.version)
+        })
+}
+
 console.log(`Starting launcher`)
 console.log(`Version ${packageInfo.version}`)
 
@@ -46,7 +149,29 @@ if (process.env.CORE_MODULE_DIR) {
     console.log('Received CORE_MODULE_DIR from .env')
     loadAndStartCoreModule(process.env.CORE_MODULE_DIR)
 } else {
-    loadAndStartCoreModule(path.join(coreModulesDir, 'bundled'))
+    let existingModulesDirs = getExistingModulesDirs()
+    console.log('Existing core modules', existingModulesDirs)
+    try {
+        if (existingModulesDirs.length == 0 || process.env.CHECK_FOR_UPDATES) {
+            const latestReleaseJson = await getLatestReleaseJson(packageInfo.homepage)
+            const tagName = latestReleaseJson.tag_name as string
+            const latestExistiongVersion = existingModulesDirs[0]?.version
+            if (!latestExistiongVersion || (latestExistiongVersion && semver.compare(tagName, latestExistiongVersion!) == 1)) {
+                console.log(`Downloading core module...`)
+                await downloadModule(latestReleaseJson)
+                console.log(`Downloading core module finished`)
+            }
+        }
+    } catch (error) {
+        console.error(error)
+    }
+    existingModulesDirs = getExistingModulesDirs()
+    if (existingModulesDirs.length > 0) {
+        const latestModule = existingModulesDirs[0]!
+        loadAndStartCoreModule(path.join(coreModulesDir, latestModule.name))
+    } else {
+        console.error('No core modules to load')
+    }
 }
 
 

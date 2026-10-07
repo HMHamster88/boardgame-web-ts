@@ -5,10 +5,10 @@
   "main": "index.js",
   "scripts": {
     "start": "node src/launcher.ts",
-    "build": "npm run clean && tsdown && npm run cp-env-to-bubdled",
+    "build": "npm run clean && tsdown && npm run cp-env-to-bundled",
     "build-sea": "npm run build && shx mkdir -p dist/sea && node --build-sea sea-config.json && npm run cp-env-to-sea",
     "clean": "shx rm -rf dist",
-    "cp-env-to-bubdled": "shx cp .env.prod ./dist/bundled/.env",
+    "cp-env-to-bundled": "shx cp .env.prod ./dist/bundled/.env",
     "cp-env-to-sea": "shx cp .env.prod ./dist/sea/.env",
     "dev": "nodemon"
   },
