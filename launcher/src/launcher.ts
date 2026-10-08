@@ -145,6 +145,10 @@ if (!fs.existsSync(dataDir)) {
     fs.mkdirSync(dataDir)
 }
 
+if (!fs.existsSync(coreModulesDir)) {
+    fs.mkdirSync(coreModulesDir)
+}
+
 if (process.env.CORE_MODULE_DIR) {
     console.log('Received CORE_MODULE_DIR from .env')
     loadAndStartCoreModule(process.env.CORE_MODULE_DIR)
