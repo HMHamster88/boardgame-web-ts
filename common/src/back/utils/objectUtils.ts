@@ -54,3 +54,29 @@ export function deepMerge(target: any, source: any) {
 
     return merge(target, source);
 }
+
+export interface VersionedObject {
+    version: number
+}
+
+export interface ObjectMigration<T extends VersionedObject> {
+    version: number
+    migrate: (obj: T) => T
+}
+
+export function migrateObject<T extends VersionedObject>(obj: T, migrations: ObjectMigration<T>[]): T {
+    for (let migration of migrations) {
+        if (obj.version < migration.version) {
+            obj = migration.migrate(obj)
+            obj.version = migration.version
+        }
+    }
+    return obj
+}
+
+export function createOrMigrateObject<T extends VersionedObject>(obj: T | undefined, migrations: ObjectMigration<T>[], initalizer: () => T): T {
+    if (!obj) {
+        return initalizer()
+    }
+    return migrateObject(obj, migrations)
+}

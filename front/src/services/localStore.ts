@@ -1,5 +1,7 @@
 import { ConnectStatus, type Game, type GameType, type User } from 'boardgame-web-common/back'
+import type { GameFrontService, PlayerGameSettings } from 'boardgame-web-common/front'
 import { defineStore } from 'pinia'
+
 
 export interface Settings {
     locale: string,
@@ -7,9 +9,14 @@ export interface Settings {
     vibration: boolean
 }
 
+type PlayerGameSettingsMap = {
+    [key: string]: PlayerGameSettings
+}
+
 interface LocalStore {
     user: User,
-    settings: Settings
+    settings: Settings,
+    playerGameSettings: PlayerGameSettingsMap
 }
 
 export const useLocalStore = defineStore(
@@ -26,7 +33,8 @@ export const useLocalStore = defineStore(
                 locale: 'en',
                 soundsVolume: 0.5,
                 vibration: true
-            }
+            },
+            playerGameSettings: {}
         }),
         persist: true
     }
@@ -36,7 +44,8 @@ interface MemoryLocalStore {
     connectStatus: ConnectStatus,
     gameTypes: GameType[],
     games: Game[],
-    showStatistics: boolean
+    showStatistics: boolean,
+    gameService: GameFrontService | undefined
 }
 
 export const useMemoryLocalStore = defineStore(
@@ -46,7 +55,8 @@ export const useMemoryLocalStore = defineStore(
             connectStatus: ConnectStatus.DISCONNECTED,
             gameTypes: [],
             games: [],
-            showStatistics: false
+            showStatistics: false,
+            gameService: undefined
         }),
     }
 )

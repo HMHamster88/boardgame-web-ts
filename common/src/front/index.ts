@@ -4,12 +4,18 @@ import type { GameStaticSettings } from "../back/dto"
 export * from "./utils/colorUtils"
 export { default as SelectPlayersDialog } from './components/SelectPlayersDialog.vue'
 
+export interface PlayerGameSettings {
+    version: number
+}
+
 export interface GameFrontService {
     type: string
     readonly settingsComponent: Component
     readonly gameViewComponent: Component
     readonly playerComponent: Component | undefined
     readonly statisticsComponent: Component | undefined
+    readonly playerSettingsComponent: Component | undefined
+    createOrMigratePlayerGameSettings: ((settings: PlayerGameSettings | undefined) => PlayerGameSettings) | undefined
     readonly localization: any
     gameStaticSettings: GameStaticSettings
     readonly canAddBot: boolean

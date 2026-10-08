@@ -56,7 +56,8 @@
     <div v-if="showGameView" class="card flex-col">
         <component v-if="gameState" :is="gameViewComponent" :gameSettings="gameSettings" :game="game"
             :gameState="gameState" :playerPrivateState="playerPrivateState" :localPlayerIndex="localPlayerIndex"
-            ref="gameView" @performAction="peformGameAction" :performActionWithResponse="performActionWithResponse">
+            ref="gameView" @performAction="peformGameAction" :performActionWithResponse="performActionWithResponse" 
+            :playerGameSettings="playerGameSettings">
 
         </component>
     </div>
@@ -73,7 +74,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref, useTemplateRef, watch } from 'vue';
+import { computed, onMounted, onUnmounted, ref, useTemplateRef, watch } from 'vue';
 
 import { useRoute } from 'vue-router';
 
@@ -148,7 +149,12 @@ const playersPoints = computed(() => {
     })
 })
 
-
+const playerGameSettings = computed(() => {
+    if (!gameService.value) {
+        return undefined
+    }
+    return localStore.playerGameSettings[gameService.value.type]
+})
 
 function playerClassStyle(player: Player) {
     return {
@@ -343,6 +349,10 @@ onMounted(async () => {
         const gameType = memoryLocalStore.gameTypes.find(type => type.type == game.value.type)!
         getGameService(gameType).then(loadedGameService => {
             gameService.value = loadedGameService
+            memoryLocalStore.gameService = loadedGameService
+            if (loadedGameService.createOrMigratePlayerGameSettings) {
+                localStore.playerGameSettings[loadedGameService.type] = loadedGameService.createOrMigratePlayerGameSettings(localStore.playerGameSettings[loadedGameService.type])
+            }
             deepMerge(messages.value, gameService.value.localization)
         })
         return game.value
@@ -369,6 +379,10 @@ onMounted(async () => {
     }
 
     await gameClient.start()
+})
+
+onUnmounted(() => {
+    memoryLocalStore.gameService = undefined
 })
 
 async function editBot(player: Player) {

@@ -16,7 +16,11 @@
             <o-field>
                 <o-switch :label="t('vibration')" v-model="settingsCopy.vibration" />
             </o-field>
-            <o-button @click="createBackup" v-if="gameId">{{ t('createGameStateBackup') }}</o-button>
+            <div v-if="playerGameSettingsCopy">
+                    <h3 v-if="memoryLocalStore.gameService">{{ localizedGameName }}</h3>
+                    <component :is="memoryLocalStore.gameService?.playerSettingsComponent" :settings="playerGameSettingsCopy"></component>
+            </div>
+            <o-button @click="createBackup" v-if="gameId && localStore.user.roles.includes(UserRole.ADMIN)">{{ t('createGameStateBackup') }}</o-button>
         </template>
         <template #footer>
             <o-button :label="$t('cancel')" @click="close(false)" />
@@ -27,12 +31,24 @@
 
 <script setup lang="ts">
 import { OButton, OField, OInput, OSelect, OSwitch } from '@oruga-ui/oruga-next';
-import type { User } from 'boardgame-web-common';
+import { UserRole, type User } from 'boardgame-web-common';
+import type { PlayerGameSettings } from 'boardgame-web-common/front'
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
-import { type Settings, useLocalStore } from '../services/localStore';
+import { type Settings, useLocalStore, useMemoryLocalStore } from '../services/localStore';
 import { wsService } from '../services/wsService';
+
+const localStore = useLocalStore();
+const memoryLocalStore = useMemoryLocalStore()
+
+const playerGameSettings = computed(() => {
+    const service = memoryLocalStore.gameService
+    if (!service) {
+        return undefined
+    }
+    return localStore.playerGameSettings[service.type]
+})
 
 const route = useRoute()
 const gameId = computed(() => route.params['id'] as string)
@@ -64,6 +80,14 @@ const i18n = useI18n({
 
 const t = i18n.t
 
+const localizedGameName = computed(() => {
+    const service = memoryLocalStore.gameService
+    if (!service) {
+        return undefined
+    }
+    return service.localization[i18n.locale.value][service.type]
+})
+
 interface Language {
     label: string
     value: string
@@ -90,10 +114,9 @@ const language = computed<string>({
     }
 })
 
-const localStore = useLocalStore();
-
 const userCopy = ref<User>({ id: '', color: '', name: '', roles: [] })
 const settingsCopy = ref<Settings>({ locale: 'en', soundsVolume: 0.5, vibration: true })
+const playerGameSettingsCopy = ref<PlayerGameSettings>()
 
 const userColor = computed({
     get: () => {
@@ -115,6 +138,7 @@ async function createBackup() {
 function open() {
     userCopy.value = Object.assign({}, localStore.user)
     settingsCopy.value = Object.assign({}, localStore.settings)
+    playerGameSettingsCopy.value = Object.assign({}, playerGameSettings.value)
     showDialog.value = true;
 }
 
@@ -123,6 +147,9 @@ function close(save: boolean) {
         localStore.user = userCopy.value!
         localStore.settings = settingsCopy.value!
         wsService.updateUser(localStore.user)
+        if (memoryLocalStore.gameService && playerGameSettingsCopy.value) {
+            localStore.playerGameSettings[memoryLocalStore.gameService.type] = playerGameSettingsCopy.value
+        } 
     }
     showDialog.value = false
 }
