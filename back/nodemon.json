@@ -1,7 +1,7 @@
 {
     "watch": [
         "src/**/*.ts",
-        "public/games-modules/**/*.mjs"
+        "dev-data/games-modules/**/*.mjs"
     ],
     "exec": "ts-node src/app.ts",
     "ext": "js json ts mjs"

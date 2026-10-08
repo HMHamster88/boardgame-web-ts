@@ -1,5 +1,4 @@
 import express from 'express';
-import { configDotenv } from 'dotenv';
 import history from 'connect-history-api-fallback';
 import { startWs } from './backWs.ts';
 import os from 'os';
@@ -11,9 +10,7 @@ import fs from 'node:fs'
 
 export async function start(publicDir: string) {
 
-    configDotenv();
-
-    const dataDir = process.env.DATA_DIR || path.join(homedir(), 'boardgame-web-ts')
+    const dataDir = path.resolve(process.env.DATA_DIR || path.join(homedir(), 'boardgame-web-ts'))
 
     if (!fs.existsSync(dataDir)) {
         fs.mkdirSync(dataDir)
