@@ -2,8 +2,13 @@ import packageInfo from './package.json' with { type: 'json' };
 import os from 'node:os';
 import AdmZip from 'adm-zip'
 import fs from 'node:fs'
+import path from 'path'
 
-fs.mkdirSync('./dist', { recursive: true });
+const version = packageInfo.version
+
+const outputDir = path.join('./dist', version)
+
+fs.mkdirSync(outputDir, { recursive: true });
 
 const copyOpts = {
     recursive: true,
@@ -24,7 +29,7 @@ fs.cpSync('./back/dist/bundled', './dist/bundled', copyOpts)
 
 const bundledZip = new AdmZip();
 bundledZip.addLocalFolder('./dist/bundled', './')
-bundledZip.writeZip(`./dist/${packageInfo.name}-core-module-${packageInfo.version}.zip`);
+bundledZip.writeZip(path.join(outputDir, `${packageInfo.name}-core-module-${version}.zip`))
 
 fs.rmSync('./dist/bundled', { recursive: true, force: true });
 
@@ -34,7 +39,7 @@ fs.cpSync('./launcher/dist/bundled', './dist/launcher-bundled', copyOpts)
 
 const launcherBundledZip = new AdmZip();
 launcherBundledZip.addLocalFolder('./dist/launcher-bundled', './')
-launcherBundledZip.writeZip(`./dist/${packageInfo.name}-launcher-bundled-${packageInfo.version}.zip`);
+launcherBundledZip.writeZip(path.join(outputDir, `${packageInfo.name}-launcher-bundled-${version}.zip`))
 
 fs.rmSync('./dist/launcher-bundled', { recursive: true, force: true });
 
@@ -49,6 +54,6 @@ const osTypes = {
     'Darwin': 'macos',
     'Linux': 'linux'
 }
-seaZip.writeZip(`./dist/${packageInfo.name}-launcher-sea-${osTypes[os.type()]}-${os.arch()}-${packageInfo.version}.zip`);
+seaZip.writeZip(path.join(outputDir, `${packageInfo.name}-launcher-sea-${osTypes[os.type()]}-${os.arch()}-${packageInfo.version}.zip`))
 
 fs.rmSync('./dist/sea', { recursive: true, force: true });
