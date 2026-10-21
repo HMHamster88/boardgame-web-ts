@@ -57,7 +57,7 @@
         <component v-if="gameState" :is="gameViewComponent" :gameSettings="gameSettings" :game="game"
             :gameState="gameState" :playerPrivateState="playerPrivateState" :localPlayerIndex="localPlayerIndex"
             ref="gameView" @performAction="peformGameAction" :performActionWithResponse="performActionWithResponse" 
-            :playerGameSettings="playerGameSettings">
+            :playerGameSettings="playerGameSettings" :debug="localStore.settings.debugFront">
 
         </component>
     </div>

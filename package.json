@@ -29,7 +29,8 @@
     "build-launcher": "npm run build -w launcher && npm run build-sea -w launcher",
     "start": "npm run start --prefix ./launcher",
     "create-zip": "node create-zip.js",
-    "create-release": "npm run build-all && npm run create-zip"
+    "create-release": "npm run build-all && npm run create-zip",
+    "dev": "npm run dev -w back"
   },
   "dependencies": {
     "@types/unzipper": "^0.10.11",

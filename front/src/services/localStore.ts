@@ -6,7 +6,8 @@ import { defineStore } from 'pinia'
 export interface Settings {
     locale: string,
     soundsVolume: number,
-    vibration: boolean
+    vibration: boolean,
+    debugFront: boolean
 }
 
 type PlayerGameSettingsMap = {
@@ -32,7 +33,8 @@ export const useLocalStore = defineStore(
             settings: {
                 locale: 'en',
                 soundsVolume: 0.5,
-                vibration: true
+                vibration: true,
+                debugFront: false
             },
             playerGameSettings: {}
         }),

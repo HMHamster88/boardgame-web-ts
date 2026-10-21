@@ -115,7 +115,7 @@ const language = computed<string>({
 })
 
 const userCopy = ref<User>({ id: '', color: '', name: '', roles: [] })
-const settingsCopy = ref<Settings>({ locale: 'en', soundsVolume: 0.5, vibration: true })
+const settingsCopy = ref<Settings>({ locale: 'en', soundsVolume: 0.5, vibration: true, debugFront: false })
 const playerGameSettingsCopy = ref<PlayerGameSettings>()
 
 const userColor = computed({
