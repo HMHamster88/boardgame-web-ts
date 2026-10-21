@@ -8,6 +8,10 @@ export interface PlayerGameSettings {
     version: number
 }
 
+export interface PlayerGameInstanceSettings {
+    version: number
+}
+
 export interface GameFrontService {
     type: string
     readonly settingsComponent: Component
@@ -16,6 +20,7 @@ export interface GameFrontService {
     readonly statisticsComponent: Component | undefined
     readonly playerSettingsComponent: Component | undefined
     createOrMigratePlayerGameSettings: ((settings: PlayerGameSettings | undefined) => PlayerGameSettings) | undefined
+    createOrMigratePlayerGameInstanceSettings: ((settings: PlayerGameInstanceSettings | undefined) => PlayerGameInstanceSettings) | undefined
     readonly localization: any
     gameStaticSettings: GameStaticSettings
     readonly canAddBot: boolean

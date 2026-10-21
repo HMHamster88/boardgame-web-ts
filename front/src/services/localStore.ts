@@ -1,5 +1,5 @@
 import { ConnectStatus, type Game, type GameType, type User } from 'boardgame-web-common/back'
-import type { GameFrontService, PlayerGameSettings } from 'boardgame-web-common/front'
+import type { GameFrontService, PlayerGameInstanceSettings, PlayerGameSettings } from 'boardgame-web-common/front'
 import { defineStore } from 'pinia'
 
 
@@ -14,10 +14,15 @@ type PlayerGameSettingsMap = {
     [key: string]: PlayerGameSettings
 }
 
+type PlayerGameInstanceSettingsMap = {
+    [key: string]: PlayerGameInstanceSettings
+}
+
 interface LocalStore {
     user: User,
     settings: Settings,
     playerGameSettings: PlayerGameSettingsMap
+    playerGameInstaceSettings: PlayerGameInstanceSettingsMap
 }
 
 export const useLocalStore = defineStore(
@@ -36,7 +41,8 @@ export const useLocalStore = defineStore(
                 vibration: true,
                 debugFront: false
             },
-            playerGameSettings: {}
+            playerGameSettings: {},
+            playerGameInstaceSettings: {}
         }),
         persist: true
     }

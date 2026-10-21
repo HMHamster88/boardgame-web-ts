@@ -57,7 +57,8 @@
         <component v-if="gameState" :is="gameViewComponent" :gameSettings="gameSettings" :game="game"
             :gameState="gameState" :playerPrivateState="playerPrivateState" :localPlayerIndex="localPlayerIndex"
             ref="gameView" @performAction="peformGameAction" :performActionWithResponse="performActionWithResponse" 
-            :playerGameSettings="playerGameSettings" :debug="localStore.settings.debugFront">
+            :playerGameSettings="playerGameSettings" :playerGameInstaceSettings="playerGameInstaceSettings" 
+            :debug="localStore.settings.debugFront">
 
         </component>
     </div>
@@ -154,6 +155,13 @@ const playerGameSettings = computed(() => {
         return undefined
     }
     return localStore.playerGameSettings[gameService.value.type]
+})
+
+const playerGameInstaceSettings = computed(() => {
+    if (!gameId) {
+        return undefined
+    }
+    return localStore.playerGameInstaceSettings[gameId]
 })
 
 function playerClassStyle(player: Player) {
@@ -352,6 +360,9 @@ onMounted(async () => {
             memoryLocalStore.gameService = loadedGameService
             if (loadedGameService.createOrMigratePlayerGameSettings) {
                 localStore.playerGameSettings[loadedGameService.type] = loadedGameService.createOrMigratePlayerGameSettings(localStore.playerGameSettings[loadedGameService.type])
+            }
+            if (loadedGameService.createOrMigratePlayerGameInstanceSettings) {
+                localStore.playerGameInstaceSettings[gameId] = loadedGameService.createOrMigratePlayerGameInstanceSettings(localStore.playerGameInstaceSettings[gameId])
             }
             deepMerge(messages.value, gameService.value.localization)
         })
