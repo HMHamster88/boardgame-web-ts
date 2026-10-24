@@ -19,7 +19,8 @@ import {
     type AddBotGameMessage,
     type Player,
     type UpdateBotGameMessage,
-    type GameMessageResponse
+    type GameMessageResponse,
+    type ForceUpdateGameData
 } from "boardgame-web-common/back";
 
 import { wsService } from "./wsService.ts";
@@ -153,6 +154,10 @@ export default class GameClient {
 
     startGame() {
         this.send<StartGameMessage>({ type: 'StartGameMessage' })
+    }
+
+    forceUpdateGameData() {
+        this.send<ForceUpdateGameData>({ type: 'ForceUpdateGameData' })
     }
 
     updatePlayer(name: string, color: string) {

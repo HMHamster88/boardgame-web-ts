@@ -3,6 +3,7 @@ import type {
     Connection,
     CrateGameBackupMessage,
     DataMessageListener,
+    ForceUpdateGameData,
     FullGameData,
     Game,
     GameAction,
@@ -214,7 +215,8 @@ export class GameSession implements Connection {
             | UpdateBotGameMessage
             | UpdateUserRequest
             | StartGameMessage
-            | KickPlayerMessage;
+            | KickPlayerMessage
+            | ForceUpdateGameData;
 
         const gameChanges: PropChange[] = [];
         const gameProxy = watchChagesList(this.game, gameChanges);
@@ -386,6 +388,15 @@ export class GameSession implements Connection {
                         ) {
                             db.updateGameState(this.gameState);
                         }
+                    }
+                }
+            },
+            ForceUpdateGameData: (message: ForceUpdateGameData) => {
+                if (this.gamePublicStateSync) {
+                    this.gamePublicStateSync.sendUpdate(null, playerId)
+                    const privatePlayerSync = this.playerPrivateStateSync.get(playerId)
+                    if (privatePlayerSync) {
+                        privatePlayerSync.sendUpdate(null, playerId)
                     }
                 }
             }

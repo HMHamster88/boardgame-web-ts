@@ -150,3 +150,7 @@ export interface UpdateFullGameDataResponse extends GameMessage {
     error: string | undefined
 }
 
+export interface ForceUpdateGameData extends GameMessage {
+    type: 'ForceUpdateGameData'
+}
+

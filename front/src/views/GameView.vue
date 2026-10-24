@@ -335,8 +335,14 @@ function translateMessageParams(messageParams: any) {
     return result
 }
 
-onMounted(async () => {
+const handleVisibilityChange = () => {
+    if (!document.hidden) {
+        gameClient.forceUpdateGameData()
+    }
+}
 
+onMounted(async () => {
+    window.addEventListener('visibilitychange', handleVisibilityChange)
     gameClient.ErorrGameMessage = (message) => {
         oruga.notification.open({
             variant: 'danger',
@@ -393,6 +399,7 @@ onMounted(async () => {
 })
 
 onUnmounted(() => {
+    window.removeEventListener('visibilitychange', handleVisibilityChange)
     memoryLocalStore.gameService = undefined
 })
 
