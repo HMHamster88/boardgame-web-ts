@@ -16,7 +16,10 @@
         <o-button v-if="isGameRoute" icon-right="chart-box" @click="memoryLocalStore.showStatistics = true"></o-button>
         <o-button icon-right="share-variant-outline" @click="showHideQrCode()" />
         <o-dialog v-model:active="qrCodeActive" bodyClass="qr-dialog-body-class" fullscreen>
-            <qrcode-vue :value="fullUrl" class="qr-code" render-as="svg" @click="showHideQrCode()"></qrcode-vue>
+            <div class="qr-content">
+                <div class="qr-url">{{ fullUrl }}</div>
+                <qrcode-vue :value="fullUrl" class="qr-code" render-as="svg" @click="showHideQrCode()"></qrcode-vue>
+            </div>
         </o-dialog>
         <o-button icon-left="cog" @click="settingsDialog?.open()"></o-button>
     </div>
@@ -31,6 +34,7 @@ import { computed, ref, useTemplateRef } from "vue";
 import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
 import { useLocalStore, useMemoryLocalStore } from '../services/localStore';
+import { buildShareUrl, resolveShareBaseUrl } from '../services/shareUrl';
 import SettingsDialog from './SettingsDialog.vue';
 
 const memoryLocalStore = useMemoryLocalStore();
@@ -63,9 +67,15 @@ const { t } = useI18n({
 const isAdmin = computed(() => localStore.user.roles.includes(UserRole.ADMIN))
 
 const qrCodeActive = ref(false)
+const shareBaseUrl = ref(window.location.origin)
 
-function showHideQrCode() {
-    qrCodeActive.value = !qrCodeActive.value
+async function showHideQrCode() {
+    if (qrCodeActive.value) {
+        qrCodeActive.value = false
+        return
+    }
+    shareBaseUrl.value = await resolveShareBaseUrl()
+    qrCodeActive.value = true
 }
 
 const settingsDialog = useTemplateRef('settingsDialog')
@@ -75,7 +85,7 @@ const route = useRoute();
 const isGameRoute = computed(() => route.name === 'game')
 
 const fullUrl = computed(() => {
-    return window.location.origin + route.fullPath;
+    return buildShareUrl(shareBaseUrl.value, route.fullPath);
 });
 
 const connectStatusText = computed(() => {
@@ -99,8 +109,34 @@ const connectStatusSeverity = computed(() => {
     height: 100%;
 }
 
-.qr-code {
-    width: 100%;
+.qr-content {
+    display: flex;
+    flex-direction: column;
     height: 100%;
+    padding: 1rem;
+    gap: 0.75rem;
+    box-sizing: border-box;
+    background: #fff;
+}
+
+.qr-url {
+    flex: none;
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+    background: #f6f1e7;
+    color: #1f2a1f;
+    font-family: monospace;
+    font-size: 0.95rem;
+    line-height: 1.4;
+    text-align: center;
+    word-break: break-all;
+    user-select: all;
+}
+
+.qr-code {
+    flex: 1 1 auto;
+    width: 100%;
+    height: 0;
+    min-height: 0;
 }
 </style>

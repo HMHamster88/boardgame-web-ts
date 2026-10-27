@@ -12,6 +12,7 @@ export * from './types/hex-grid/hexData'
 export * from './objectSync'
 export * from './proxyObject'
 export * from './connection'
+export * from './serverInfo'
 
 
 export interface GameBackModule {

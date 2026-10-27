@@ -1,6 +1,7 @@
 import express from 'express';
 import history from 'connect-history-api-fallback';
 import { startWs } from './backWs.ts';
+import { getServerInfo } from './serverInfo.ts';
 import os from 'os';
 import { startCli } from './cli.ts';
 import packageInfo from '../../package.json' with { type: 'json' };
@@ -26,6 +27,16 @@ export async function start(publicDir: string) {
     app.use(express.urlencoded({ extended: false }));
 
     console.log('Public:', publicDir)
+
+    const serverInfo = getServerInfo(port)
+
+    console.log('Public URL:', serverInfo.publicUrl ?? 'not configured')
+    console.log('LAN URLs:', serverInfo.lanUrls.length > 0 ? serverInfo.lanUrls.join(', ') : 'none')
+
+    app.get('/server-info', (_request, response) => {
+        response.set('Cache-Control', 'no-store')
+        response.json(serverInfo)
+    })
 
     const staticMw = express.static(publicDir);
 
