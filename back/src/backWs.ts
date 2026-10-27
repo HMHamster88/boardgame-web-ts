@@ -147,9 +147,14 @@ export class WsConnection {
             console.log(`Received: ${messageString} from ${this.id()}`);
             if (!actionBlocker) {
                 actionBlocker = true
-                const message = JSON.parse(messageString) as TypedMessage;
-                await handleMessage(handlers, message);
-                actionBlocker = false
+                try {
+                    const message = JSON.parse(messageString) as TypedMessage;
+                    await handleMessage(handlers, message);
+                } catch (error) {
+                    console.error('Handle ws message error', error)
+                } finally {
+                    actionBlocker = false
+                }
             } else {
                 console.log('Message blocked')
             }

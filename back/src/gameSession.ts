@@ -194,11 +194,12 @@ export class GameSession implements Connection {
         connection.webSocket.send(message);
     }
     sendToAll(message: string, peerFiler: PeerFilter | undefined): void {
-        let connections = this.connections.values();
-        if (peerFiler) {
-            connections = connections.filter((connection) => connection.user?.id);
+        for (const [peerId, connection] of this.connections) {
+            if (peerFiler && !peerFiler(peerId)) {
+                continue;
+            }
+            connection.webSocket.send(message);
         }
-        connections.forEach((connection) => connection.webSocket.send(message));
     }
 
     async handleGameMessage(message: TypedMessage, connection: WsConnection | undefined, playerId: string) {
@@ -402,19 +403,24 @@ export class GameSession implements Connection {
             }
         };
 
-        await handleMessage(handlers, message);
+        try {
+            await handleMessage(handlers, message);
 
-        this.gameSync.sendPropChanges(gameChanges);
-        this.gameSettingsSync.sendPropChanges(gameSettingsChanges);
+            this.gameSync.sendPropChanges(gameChanges);
+            this.gameSettingsSync.sendPropChanges(gameSettingsChanges);
 
-        if (this.gameSync.updateSended || gameChanges.length > 0) {
-            db.updateGame(this.game);
+            if (this.gameSync.updateSended || gameChanges.length > 0) {
+                db.updateGame(this.game);
+            }
+
+            if (this.gameSettingsSync.updateSended || gameSettingsChanges.length > 0) {
+                db.updateGameSettings(this.gameSettings);
+            }
+        } catch (error) {
+            console.error('Handle game message error', error);
+        } finally {
+            this.actionBlocker = false;
         }
-
-        if (this.gameSettingsSync.updateSended || gameSettingsChanges.length > 0) {
-            db.updateGameSettings(this.gameSettings);
-        }
-        this.actionBlocker = false;
     }
 
     addConnection(connection: WsConnection) {
